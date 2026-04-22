@@ -1,0 +1,419 @@
+/* ================================================= */
+/* CORPORATE DARK DASHBOARD - FINAL SYSTEM           */
+/* ================================================= */
+
+/* 1. Contenedor Principal */
+.home-dashboard-wrapper.corporate-dark {
+    background-color: #0d0f11; /* Gris casi negro */
+    min-height: 100vh;
+    /* Padding superior generoso para evitar que el Navbar tape el Header */
+    padding-top: 130px; 
+    padding-bottom: 50px;
+    color: #e2e8f0;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Fondo con resplandor celeste sutil */
+.corporate-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 500px;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 168, 232, 0.12) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.home-content-z {
+    position: relative;
+    z-index: 10;
+}
+
+/* 2. Header de Bienvenida (Título e Info) */
+.home-welcome-header {
+    margin-bottom: 60px;
+    animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.system-status-corp {
+    color: #00a8e8 !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dot-online {
+    font-size: 10px;
+    color: #00a8e8;
+    text-shadow: 0 0 8px #00a8e8;
+    animation: pulse 2s infinite;
+}
+
+.welcome-title-corp {
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -1.5px;
+    margin-top: 15px;
+    padding-left: 25px;
+    border-left: 6px solid #00a8e8;
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* 3. Tarjetas de Opciones (Corporate Cards) */
+.corporate-option-card {
+    background: linear-gradient(145deg, #16191d, #111316);
+    border: 1px solid #2d3238;
+    padding: 45px 30px;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+}
+
+/* Efecto de barra azul en hover */
+.corp-card-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: #00a8e8;
+    box-shadow: 0 0 15px #00a8e8;
+    transition: width 0.4s ease;
+}
+
+.corporate-option-card:hover .corp-card-accent {
+    width: 100%;
+}
+
+.corporate-option-card:hover {
+    background: #1c2025;
+    transform: translateY(-12px);
+    border-color: #00a8e8;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 
+                inset 0 0 20px rgba(0, 168, 232, 0.05);
+}
+
+/* 4. Iconos (Glow Effect) */
+.icon-wrapper-corp {
+    font-size: 3rem;
+    color: #4dc3ff; /* Celeste brillante */
+    margin-bottom: 25px;
+    filter: drop-shadow(0 0 5px rgba(0, 168, 232, 0.2));
+    transition: all 0.4s ease;
+}
+
+.desc{
+  color: #87899a !important;
+}
+
+.corporate-option-card:hover .icon-wrapper-corp {
+    color: #00a8e8;
+    transform: scale(1.1) rotate(-3deg);
+    filter: drop-shadow(0 0 15px rgba(0, 168, 232, 0.7));
+}
+
+/* 5. Textos de Tarjeta */
+.card-info-corp h3 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    transition: color 0.3s ease;
+}
+
+.corporate-option-card:hover .card-info-corp h3 {
+    color: #00a8e8;
+}
+
+.card-info-corp p {
+    font-size: 0.95rem;
+    color: #818cf8; /* Gris azulado */
+    line-height: 1.6;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/* Decoración Técnica en Esquina */
+.card-corner-fx-corp {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border-right: 2px solid rgba(0, 168, 232, 0.2);
+    border-bottom: 2px solid rgba(0, 168, 232, 0.2);
+    transition: 0.3s;
+}
+
+.corporate-option-card:hover .card-corner-fx-corp {
+    border-color: #00a8e8;
+    width: 30px;
+    height: 30px;
+}
+
+/* 6. Animaciones */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Respetar el grid de Bootstrap si se usa */
+.row.g-4 {
+    --bs-gutter-y: 1.5rem;
+    --bs-gutter-x: 1.5rem;
+}
+
+/* ================================================= */
+/* TODO PC - GLOBAL CORPORATE DARK SYSTEM            */
+/* ================================================= */
+
+:root {
+    --bg-primary: #0d0f11;
+    --bg-secondary: #16191d;
+    --accent-blue: #00a8e8;
+    --accent-blue-glow: rgba(0, 168, 232, 0.3);
+    --text-main: #e2e8f0;
+    --text-dim: #8a8f98;
+    --border-color: #2d3238;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* 1. Contenedores Base */
+.home-dashboard-wrapper.corporate-dark {
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    padding-top: 120px;
+    padding-bottom: 50px;
+    color: var(--text-main);
+    position: relative;
+}
+
+.corporate-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 500px;
+    background: radial-gradient(circle at 50% -10%, rgba(0, 168, 232, 0.1) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 2. Tipografía y Headers */
+.welcome-title-corp {
+    font-size: 3.2rem;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    border-left: 6px solid var(--accent-blue);
+    padding-left: 25px;
+    margin-bottom: 10px;
+}
+
+.text-highlight {
+    color: var(--accent-blue);
+    text-shadow: 0 0 15px var(--accent-blue-glow);
+}
+
+.system-status-corp {
+    font-family: var(--font-mono);
+    color: var(--accent-blue) !important;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 3. Tarjetas de Acción (Grid) */
+.corporate-option-card {
+    background: linear-gradient(145deg, #16191d, #111316);
+    border: 1px solid var(--border-color);
+    padding: 35px;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.corporate-option-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.corp-card-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--accent-blue);
+    transition: width 0.4s ease;
+}
+
+.corporate-option-card:hover .corp-card-accent {
+    width: 100%;
+}
+
+.icon-wrapper-corp {
+    font-size: 2.8rem;
+    color: #4dc3ff;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 8px rgba(0, 168, 232, 0.2));
+}
+
+/* 4. Tablas de Gestión (Staff) */
+.staff-table-wrapper-corp {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 30px;
+}
+
+.staff-table-corp {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.staff-table-corp th {
+    background: #1c2025;
+    padding: 18px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+.staff-table-corp td {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.staff-row-corp:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* 5. Badges de Roles */
+.role-badge-corp {
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 900;
+    font-family: var(--font-mono);
+    border-radius: 3px;
+    border: 1px solid transparent;
+}
+
+.role-badge-corp.administrador {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #fff;
+}
+
+<<<<<<< HEAD
+.role-badge-corp.recepcionista, .role-badge-corp.tecnico {
+=======
+.role-badge-corp.vendedor, .role-badge-corp.tecnico {
+>>>>>>> ebe38a9ea323c718cded69ed873759fb6a62b80a
+    color: var(--accent-blue);
+    background: rgba(0, 168, 232, 0.1);
+    border-color: var(--accent-blue);
+}
+
+/* 6. Modales (StaffFormModal) */
+.modal-corp-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 550px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--accent-blue);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    border-radius: 4px;
+    padding: 40px;
+}
+
+/* 7. Inputs Industriales (MUI Override) */
+.industrial-input-corp .MuiOutlinedInput-root {
+    background: #0d0f11 !important;
+    color: white !important;
+}
+
+.industrial-input-corp .MuiOutlinedInput-notchedOutline {
+    border-color: var(--border-color) !important;
+}
+
+.industrial-input-corp:hover .MuiOutlinedInput-notchedOutline {
+    border-color: var(--accent-blue) !important;
+}
+
+.industrial-input-corp .MuiInputLabel-root {
+    color: var(--text-dim) !important;
+}
+
+/* 8. Botones Corporativos */
+.btn-corp-add, .btn-corp-submit {
+    background: var(--accent-blue) !important;
+    color: #0d0f11 !important;
+    font-weight: 800 !important;
+    padding: 10px 20px !important;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.btn-corp-add:hover, .btn-corp-submit:hover {
+    background: #00d2ff !important;
+    box-shadow: 0 0 15px var(--accent-blue-glow);
+}
+
+/* 9. Utilidades */
+.dot-online {
+    color: var(--accent-blue);
+    text-shadow: 0 0 8px var(--accent-blue);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes pulse-blue {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}

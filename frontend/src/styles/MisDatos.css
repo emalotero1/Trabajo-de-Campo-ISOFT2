@@ -1,0 +1,55 @@
+.mis-datos-root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #000;
+  font-family: 'Orbitron', sans-serif;
+  color: #fff;
+  padding: 2rem;
+}
+
+.mis-datos-container {
+  width: 100%;
+  max-width: 500px;
+  background-color: #111;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.mis-datos-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.mis-datos-avatar {
+  width: 80px;
+  height: 80px;
+  background-color: black;
+  margin-bottom: 0.5rem;
+}
+
+.header-username {
+  font-family: 'Orbitron', sans-serif !important;
+  font-size: 1.8rem;
+}
+
+.email {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.divider {
+    margin-top: 2 0 2 0 rem;
+    background-color: #555;
+    margin: 1.5rem 0;
+}
+
+.boton {
+  font-family: 'Orbitron', sans-serif;
+  margin-top: 2rem;
+  text-transform: none;
+}

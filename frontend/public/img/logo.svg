@@ -1,0 +1,36 @@
+<svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definición de gradiente -->
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+  </defs>
+
+  <!-- Isotipo: Monitor + Llave + Circuito -->
+  <g transform="translate(10, 10)">
+    <!-- Marco del monitor estilizado -->
+    <rect x="0" y="0" width="80" height="60" rx="8" fill="#1e293b" stroke="url(#blueGrad)" stroke-width="4"/>
+    <path d="M20 75 L60 75 M40 60 L40 75" stroke="url(#blueGrad)" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Llave inglesa integrada como 'trazo' de circuito -->
+    <path d="M25 30 C25 21.7 31.7 15 40 15 C48.3 15 55 21.7 55 30 C55 35.8 51.7 40.8 46.8 43.3 L46.8 55 H33.2 V43.3 C28.3 40.8 25 35.8 25 30Z" fill="url(#blueGrad)"/>
+    <circle cx="40" cy="30" r="8" fill="#1e293b"/>
+    <rect x="38" y="22" width="4" height="16" rx="2" fill="url(#blueGrad)"/>
+
+    <!-- Puntos de circuito -->
+    <circle cx="10" cy="10" r="3" fill="#3b82f6"/>
+    <circle cx="70" cy="50" r="3" fill="#3b82f6"/>
+    <path d="M10 10 L25 25 M70 50 L55 35" stroke="#3b82f6" stroke-width="1" opacity="0.5"/>
+  </g>
+
+  <!-- Texto: TodoPC -->
+  <text x="110" y="75" font-family="Arial, sans-serif" font-weight="800" font-size="64" fill="#f8fafc">
+    Todo<tspan fill="#3b82f6">PC</tspan>
+  </text>
+  
+  <!-- Subtexto sutil -->
+  <text x="112" y="100" font-family="Arial, sans-serif" font-weight="400" font-size="14" fill="#94a3b8" letter-spacing="4">
+    SERVICE TECHNOLOGY
+  </text>
+</svg>

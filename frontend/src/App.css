@@ -1,0 +1,124 @@
+/* --- CONFIGURACIÓN GLOBAL TODOPC --- */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  background: #0d0f11 !important; /* Fondo oscuro TodoPC */
+  color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff #0d0f11;
+}
+
+/* Chrome, Edge y Safari */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0f11; /* Fondo del scroll igual al body */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ffffff; /* BARRA BLANCA */
+  border-radius: 10px;
+  border: 2px solid #0d0f11; /* Crea un efecto de separación */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e2e8f0; /* Blanco ligeramente grisáceo al pasar el mouse */
+}
+
+/* --- ESTILOS COMPONENTES PUBLICOS --- */
+
+.hero-section {
+  text-align: center;
+  padding: 100px 20px;
+  position: relative;
+}
+
+/* Logo Box Central */
+.hero-logo-box {
+  background: #00a8e8;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  margin: 0 auto 20px;
+  box-shadow: 0 0 30px rgba(0, 168, 232, 0.4);
+}
+
+.hero-title {
+  font-size: 5rem !important;
+  font-weight: 900 !important;
+  color: #ffffff;
+  margin: 0 !important;
+  letter-spacing: -3px !important;
+  text-transform: uppercase;
+}
+
+.blue-text {
+  color: #00a8e8;
+}
+
+.hero-slogan {
+  color: #94a3b8;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 4px;
+  margin-top: 10px !important;
+  text-transform: uppercase;
+}
+
+.hero-description {
+  color: #64748b;
+  max-width: 600px;
+  margin: 20px auto !important;
+  font-size: 1.1rem;
+}
+
+/* Botón Principal TodoPC */
+.btn-primary-corp {
+  background-color: #00a8e8 !important;
+  color: #0d0f11 !important;
+  font-weight: 800 !important;
+  padding: 12px 40px !important;
+  border-radius: 4px !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary-corp:hover {
+  background-color: #00d2ff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 168, 232, 0.4) !important;
+}
+
+/* Inputs de Login / Formularios */
+.industrial-input-corp .MuiOutlinedInput-root {
+  background-color: rgba(13, 15, 17, 0.8) !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+}
+
+.industrial-input-corp .MuiOutlinedInput-notchedOutline {
+  border-color: #2d3238 !important;
+}
+
+.industrial-input-corp:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #00a8e8 !important;
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+  .hero-title { font-size: 3rem !important; }
+  .hero-slogan { font-size: 1rem !important; letter-spacing: 2px; }
+  .hero-logo-box { width: 60px; height: 60px; }
+}
