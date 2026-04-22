@@ -1,0 +1,180 @@
+.login-night-wrapper {
+    background-color: #090b0d;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Resplandor Azul */
+.bg-glow-blue {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 168, 232, 0.1) 0%, transparent 70%);
+    z-index: 0;
+}
+
+/* Tarjeta Glassmorphism */
+.glass-login-card-corp {
+    background: rgba(22, 25, 29, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 4px; /* Industrial: Menos redondeado */
+    z-index: 10;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    border-top: 3px solid #00a8e8; /* Línea de acento superior */
+}
+
+/* Logo Section */
+.login-logo-wrapper-corp {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo-square-corp {
+    background: #00a8e8;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 0 auto 15px;
+    box-shadow: 0 0 20px rgba(0, 168, 232, 0.3);
+}
+
+.login-brand-name {
+    font-weight: 900 !important;
+    color: #fff;
+    letter-spacing: -1px;
+}
+
+.accent-blue {
+    color: #00a8e8;
+}
+
+.login-subtitle {
+    color: #5a5f68;
+    font-size: 0.7rem !important;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin-top: 5px !important;
+}
+
+/* Inputs */
+.custom-input-group-corp {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-icon-corp {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00a8e8;
+    font-size: 1.2rem;
+}
+
+.custom-input-group-corp input {
+    width: 100%;
+    background: #0d0f11;
+    border: 1px solid #2d3238;
+    padding: 15px 15px 15px 50px;
+    color: #fff;
+    border-radius: 4px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.custom-input-group-corp input:focus {
+    border-color: #00a8e8;
+    box-shadow: 0 0 10px rgba(0, 168, 232, 0.1);
+}
+
+.password-toggle-corp {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #5a5f68;
+    cursor: pointer;
+}
+
+/* Botón Login */
+.btn-corp-login {
+    width: 100%;
+    background-color: #00a8e8 !important;
+    color: #0d0f11 !important;
+    font-weight: 900 !important;
+    padding: 15px !important;
+    margin-top: 10px !important;
+    letter-spacing: 1px;
+    transition: 0.3s !important;
+}
+
+.btn-corp-login:hover {
+    background-color: #00d2ff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 232, 0.4);
+}
+
+.btn-corp-login:disabled {
+    background-color: #1a1d21 !important;
+    color: #5a5f68 !important;
+}
+
+/* Footer Info */
+.login-footer-info {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.login-footer-info p {
+    font-size: 0.7rem;
+    color: #5a5f68;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.blue-text {
+    color: #00a8e8;
+}
+
+.btn-back-home {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    color: #8a8f98 !important;
+    font-weight: 700 !important;
+}
+
+.btn-back-home:hover {
+    color: #fff !important;
+}
+/* Asegúrate de que el wrapper no tenga problemas con el Navbar fixed */
+.login-night-wrapper {
+    background-color: #090b0d;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    /* Un pequeño padding superior por si el teclado móvil empuja el contenido */
+    padding-top: 80px; 
+}
+
+/* Borramos el estilo del botón back anterior para limpiar el código */
+.btn-back-home {
+    display: none;
+}

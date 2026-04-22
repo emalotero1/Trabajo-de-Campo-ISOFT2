@@ -1,0 +1,205 @@
+/* ================================================= */
+/* TODO PC - MODAL SYSTEM STYLES                     */
+/* ================================================= */
+
+/* Contenedor Principal con Glassmorphism */
+.modal-corp-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    max-width: 600px;
+    max-height: 90vh; /* Evita que se salga de la pantalla en móviles */
+    background: rgba(17, 19, 22, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-top: 4px solid #00a8e8 !important; /* Acento celeste TodoPC */
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8);
+    padding: 40px;
+    outline: none;
+    border-radius: 4px;
+    overflow-y: auto; /* Scroll interno si el contenido es largo */
+}
+
+/* Scrollbar Personalizada Estilo Industrial */
+.modal-corp-container::-webkit-scrollbar {
+    width: 5px;
+}
+.modal-corp-container::-webkit-scrollbar-thumb {
+    background: #2d3238;
+    border-radius: 10px;
+}
+.modal-corp-container::-webkit-scrollbar-thumb:hover {
+    background: #00a8e8;
+}
+
+/* Header del Modal */
+.modal-corp-header {
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+}
+
+.modal-corp-title {
+    color: #ffffff;
+    font-weight: 900 !important;
+    font-size: 1.8rem !important;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    margin-top: 5px !important;
+}
+
+/* Etiquetas de Sección (Data Grouping) */
+.form-section-title-corp {
+    color: #5a5f68;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px !important;
+    margin-bottom: 15px !important;
+}
+
+/* Inputs de MUI - Overrides Industriales */
+.industrial-input-corp {
+    margin-bottom: 5px !important;
+}
+
+.industrial-input-corp .MuiOutlinedInput-root {
+    background-color: rgba(13, 15, 17, 0.8) !important;
+    color: #fff !important;
+    border-radius: 2px !important;
+}
+
+.industrial-input-corp .MuiOutlinedInput-notchedOutline {
+    border-color: #2d3238 !important;
+}
+
+.industrial-input-corp:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #00a8e8 !important;
+}
+
+.industrial-input-corp .Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #00a8e8 !important;
+    border-width: 1px !important;
+}
+
+.industrial-input-corp .MuiInputLabel-root {
+    color: #8a8f98 !important;
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.industrial-input-corp .Mui-focused.MuiInputLabel-root {
+    color: #00a8e8 !important;
+}
+
+/* Acciones y Botones */
+.modal-corp-actions {
+    margin-top: 35px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-corp-cancel {
+    color: #8a8f98 !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px;
+    transition: all 0.3s ease !important;
+}
+
+.btn-corp-cancel:hover {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.btn-corp-submit {
+    background: #00a8e8 !important;
+    color: #0d0f11 !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(0, 168, 232, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-corp-submit:hover {
+    background: #00d2ff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 25px rgba(0, 168, 232, 0.4) !important;
+}
+
+/* Contenedor de Feedback (Alertas) */
+.feedback-container-corp {
+    min-height: 55px;
+    margin-top: 15px;
+}
+
+.feedback-success-corp {
+    background: rgba(59, 202, 19, 0.1);
+    border-left: 4px solid #3bca13;
+    color: #3bca13;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.feedback-error-corp {
+    background: rgba(255, 49, 49, 0.1);
+    border-left: 4px solid #ff3131;
+    color: #ff3131;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Botón Cerrar (X) */
+.modal-close-btn-corp {
+    position: absolute !important;
+    right: 15px;
+    top: 15px;
+    color: #5a5f68 !important;
+    transition: all 0.3s ease !important;
+}
+
+.modal-close-btn-corp:hover {
+    color: #00a8e8 !important;
+    transform: rotate(90deg);
+}
+
+/* Responsividad para móviles */
+@media (max-width: 600px) {
+    .modal-corp-container {
+        padding: 25px 20px;
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        top: 0;
+        left: 0;
+        transform: none;
+    }
+    
+    .modal-corp-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .modal-corp-actions {
+        position: sticky;
+        bottom: 0;
+        background: #111316;
+        margin-bottom: -20px;
+        padding-bottom: 20px;
+    }
+}

@@ -1,0 +1,191 @@
+/* Navbar General */
+.nav-main-container {
+    background-color: #0d0f11 !important; /* Fondo Dark */
+    border-bottom: 1px solid #2d3238 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Botón Login Corporativo */
+.btn-login-nav-corp {
+    background: transparent !important;
+    border: 1px solid #00a8e8 !important;
+    color: #00a8e8 !important;
+    font-weight: 700 !important;
+    padding: 6px 15px !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-login-nav-corp:hover {
+    background: rgba(0, 168, 232, 0.1) !important;
+    box-shadow: 0 0 15px rgba(0, 168, 232, 0.3);
+}
+
+/* Links públicos */
+.nav-link-btn {
+    color: #8a8f98 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+}
+
+.nav-link-btn:hover {
+    color: #00a8e8 !important;
+}
+
+/* Dropdown Personalizado */
+.nav-dropdown-paper-corp {
+    background-color: #1a1d21 !important;
+    color: white !important;
+    border: 1px solid #2d3238 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+.nav-menu-item {
+    font-size: 0.9rem !important;
+    gap: 10px;
+}
+
+.nav-menu-item:hover {
+    background-color: rgba(0, 168, 232, 0.1) !important;
+    color: #00a8e8 !important;
+}
+
+/* Avatar Glow */
+.nav-avatar-glow {
+    transition: all 0.3s ease;
+}
+
+.nav-profile-wrapper:hover .nav-avatar-glow {
+    box-shadow: 0 0 15px #00a8e8 !important;
+    transform: scale(1.05);
+}
+
+/* Asegura que el contenedor de texto alinee bien las etiquetas */
+.nav-profile-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alinea el texto a la derecha */
+    margin-right: 10px;
+}
+
+.nav-user-name {
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+/* El toolbar debe ocupar todo el ancho */
+.nav-toolbar {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Efecto hover para la sección del perfil */
+.nav-profile-wrapper {
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.nav-profile-wrapper:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Contenedor del Perfil (Derecha) */
+.nav-profile-wrapper-corp {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.nav-profile-wrapper-corp:hover {
+    background: rgba(0, 168, 232, 0.05);
+    border-color: rgba(0, 168, 232, 0.2);
+}
+
+.nav-profile-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alineado a la derecha */
+}
+
+.nav-user-name {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.nav-user-role-label {
+    color: #00a8e8;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+/* Modal / Dropdown Corporativo */
+.nav-dropdown-paper-corp {
+    background-color: #16191d !important;
+    border: 1px solid #2d3238 !important;
+    color: white !important;
+    min-width: 220px !important;
+    margin-top: 10px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+}
+
+.nav-menu-header-corp {
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu-header-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.menu-header-email {
+    font-size: 0.75rem;
+    color: #8a8f98;
+    margin-bottom: 5px;
+}
+
+.menu-chip-corp {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 900 !important;
+    font-size: 10px !important;
+    height: 20px !important;
+    background-color: #00a8e8 !important;
+    color: #000 !important;
+}
+
+/* Items del Menú */
+.nav-menu-item-corp {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    padding: 12px 20px !important;
+    gap: 12px;
+    transition: all 0.2s ease !important;
+}
+
+.nav-menu-item-corp:hover {
+    background-color: rgba(0, 168, 232, 0.1) !important;
+    color: #00a8e8 !important;
+}
+
+.menu-icon-corp {
+    font-size: 1.1rem;
+}
+
+.logout-item:hover {
+    color: #ff4d4d !important;
+    background-color: rgba(255, 77, 77, 0.1) !important;
+}

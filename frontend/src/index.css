@@ -1,0 +1,118 @@
+/* --- CONFIGURACIÓN DE IDENTIDAD TODOPC --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+
+:root {
+  --primary-blue: #00a8e8;       /* Azul Eléctrico TodoPC */
+  --primary-blue-glow: rgba(0, 168, 232, 0.4);
+  --dark-bg: #0d0f11;            /* Fondo Industrial Oscuro */
+  --surface-bg: #16191d;         /* Fondo de Tarjetas/Modales */
+  --text-white: #ffffff;
+  --text-dim: #8a8f98;           /* Gris para subtítulos */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--dark-bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-white);
+  overflow-x: hidden;
+}
+
+/* --- SOLUCIÓN BARRA DE DESPLAZAMIENTO BLANCA --- */
+/* Firefox */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #ffffff var(--dark-bg) !important;
+}
+
+/* Chrome, Edge y Safari */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ffffff !important; /* CAMBIO A BLANCO */
+  border-radius: 20px !important;
+  border: 2px solid var(--dark-bg) !important; /* Efecto fino */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* --- ESTILOS DE COMPONENTES --- */
+
+/* Contenedor Principal con glow azul tecnológico */
+.index-container {
+  background: radial-gradient(circle at top center, #0f1c2e 0%, #0d0f11 70%);
+  min-height: 100vh;
+}
+
+/* Títulos con estilo de Ingeniería */
+.index-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  color: var(--text-white);
+}
+
+.index-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* Botones con estilo Corporativo */
+.btn-primary-corp {
+  background-color: var(--primary-blue) !important;
+  color: #0d0f11 !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  border-radius: 4px !important; /* Más cuadrado = más industrial */
+  transition: 0.3s all ease-in-out !important;
+}
+
+.btn-primary-corp:hover {
+  background-color: #00d2ff !important;
+  box-shadow: 0 0 20px var(--primary-blue-glow);
+  transform: translateY(-2px);
+}
+
+/* Iconos de Contacto */
+.contact-icons .MuiIconButton-root {
+  color: var(--text-dim);
+  transition: 0.3s;
+}
+
+.contact-icons .MuiIconButton-root:hover {
+  color: var(--primary-blue);
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 5px var(--primary-blue));
+}
+
+/* Etiquetas Monoespaciadas para IDs y Versiones */
+.mono-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--primary-blue);
+}
+
+/* Footer */
+.index-author {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  letter-spacing: 1px;
+}
+
+.index-author strong {
+  color: var(--primary-blue);
+  font-weight: 700;
+}
