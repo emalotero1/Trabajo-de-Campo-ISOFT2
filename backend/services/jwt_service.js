@@ -15,13 +15,6 @@ const createToken = (user) => {
     username: user.username,  // corregido
     email: user.email,
     rol: user.rol,
-<<<<<<< HEAD
-=======
-    empresa: {
-      _id: user.empresa?._id,
-      nombre: user.empresa?.nombre,
-    },
->>>>>>> ebe38a9ea323c718cded69ed873759fb6a62b80a
     fecha_creacion: user.created_at,
     iat: moment().unix(),
     exp: moment().add(30, "days").unix(),

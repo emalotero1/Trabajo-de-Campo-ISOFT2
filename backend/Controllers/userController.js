@@ -28,7 +28,7 @@ const register = async (req, res) => {
 
         // 4. EL TRUCO: Sacar el creador del token decodificado (inyectado por tu middleware)
         // Si por alguna razón no hay token (desarrollo), usamos 'SYSTEM_ROOT'
-        //const adminLogueado = req.user ? req.user.username : 'SYSTEM_ROOT';
+        const adminLogueado = req.user ? req.user.username : 'SYSTEM_ROOT';
 
 
         // 5. Crear usuario
