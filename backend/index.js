@@ -7,6 +7,7 @@ const connectDB = require('./Config/db');
 // Rutas
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const clientsRoutes = require('./routes/clientsRoutes');
 
 
 const app = express();
@@ -44,6 +45,7 @@ connectDB(); // Asegurate que use process.env.MONGODB_URI
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/clients', clientsRoutes);
 
 
 

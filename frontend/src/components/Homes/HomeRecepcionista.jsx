@@ -15,10 +15,10 @@ const HomeRecepcionista = () => {
 
 
   const actions = [
-    { title: "GESTIÓN DE CLIENTES", desc: "Registro de nuevos clientes", icon: <FaUsers />, path: "/ventas" },
-    { title: "CONSULTAR ESTADO EQUIPOS", desc: "Ver estado de los equipos", icon: <FaBarsProgress />, path: "/escaner" },
-    { title: "COMPROBANTE DE REGISTRO", desc: "Emitir comprobante de registro del equipo", icon: <FaFilePdf />, path: "/trabajos" },
-    { title: "REGISTRAR EQUIPOS", desc: "Registro de nuevos equipos", icon: <FaComputer />, path: "/mis-reportes" },
+    { title: "GESTIÓN DE CLIENTES", desc: "Registro de nuevos clientes", icon: <FaUsers />, path: "/clients" },
+    { title: "TRABAJOS", desc: "Registro de nuevos equipos", icon: <FaComputer />, path: "/trabajos" },
+    { title: "REPORTES", desc: "Emitir comprobante de registro del equipo", icon: <FaFilePdf />, path: "/mis-reportes" },
+
   ];
 
   return (

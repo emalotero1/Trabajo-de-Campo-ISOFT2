@@ -1,0 +1,308 @@
+/* --- VARIABLES Y FONDOS --- */
+.corporate-dark {
+  background-color: #0b0f19; /* Fondo oscuro industrial */
+  color: #e2e8f0;
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+.corporate-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 168, 232, 0.05) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home-content-z {
+  position: relative;
+  z-index: 1;
+  padding-top: 2rem;
+}
+
+/* --- HEADERS Y BOTONES --- */
+.home-welcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+.welcome-title-corp {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.btn-corp-add {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #00a8e8; /* Azul corporativo */
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-corp-add:hover {
+  background-color: #008ecc;
+  box-shadow: 0 0 10px rgba(0, 168, 232, 0.4);
+}
+
+/* --- INPUTS INDUSTRIALES (MUI Overrides) --- */
+.staff-filter-bar-corp {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.industrial-input-corp .MuiOutlinedInput-root {
+  background-color: rgba(15, 23, 42, 0.6);
+  border-radius: 4px;
+  color: #e2e8f0;
+}
+
+.industrial-input-corp .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.industrial-input-corp .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+.industrial-input-corp .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #00a8e8;
+}
+
+.industrial-input-corp .MuiInputLabel-root {
+  color: #8a8f98;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+.industrial-input-corp .MuiInputLabel-root.Mui-focused {
+  color: #00a8e8;
+}
+
+/* --- TABLA CORPORATIVA --- */
+.staff-table-wrapper-corp {
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.staff-table-corp {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.staff-table-corp th {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #8a8f98;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.staff-row-corp {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s;
+}
+
+.staff-row-corp:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.staff-row-corp td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.staff-name-cell-corp {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.staff-id-tag-corp {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+  letter-spacing: 1px;
+}
+
+.staff-email-sub-corp {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.staff-phone-tag-corp {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.staff-actions-corp {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.no-data-msg-corp {
+  text-align: center;
+  padding: 2rem !important;
+  color: #64748b;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+}
+
+/* --- MODAL CORPORATIVO --- */
+.modal-corp-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 600px;
+  background-color: #0f172a;
+  border: 1px solid rgba(0, 168, 232, 0.3);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  outline: none;
+}
+
+.modal-close-btn-corp {
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+  color: #64748b !important;
+}
+
+.modal-close-btn-corp:hover {
+  color: #fff !important;
+  background-color: rgba(255,255,255,0.1) !important;
+}
+
+.modal-corp-body {
+  padding: 2rem;
+}
+
+.modal-corp-header {
+  margin-bottom: 2rem;
+}
+
+.system-status-corp {
+  font-size: 0.7rem;
+  color: #00a8e8;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dot-online {
+  color: #10b981; /* Verde esmeralda */
+}
+
+.blink {
+  animation: blinker 1s linear infinite;
+  color: #f59e0b; /* Naranja/amarillo alerta */
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}
+
+.modal-corp-title {
+  color: #fff;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+}
+
+.modal-corp-actions {
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
+}
+
+.btn-corp-cancel {
+  color: #94a3b8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.btn-corp-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #fff !important;
+}
+
+.btn-corp-submit {
+  background-color: #00a8e8 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+}
+
+.btn-corp-submit:hover {
+  background-color: #008ecc !important;
+}
+
+.btn-corp-submit:disabled {
+  background-color: rgba(0, 168, 232, 0.3) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* --- FEEDBACK (EXITO Y ERROR) --- */
+.feedback-container-corp {
+  margin-top: 1rem;
+  min-height: 24px;
+}
+
+.feedback-success-corp {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #10b981;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  background-color: rgba(16, 185, 129, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border-left: 3px solid #10b981;
+}
+
+.feedback-error-corp {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ef4444;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border-left: 3px solid #ef4444;
+}
