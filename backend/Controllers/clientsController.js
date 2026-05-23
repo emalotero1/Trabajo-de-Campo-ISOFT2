@@ -20,7 +20,7 @@ const register = async (req, res) => {
             }
         }
 
-        const adminLogueado = req.user && req.user.username ? req.user.username : 'SYSTEM_ROOT';
+        const userLogueado = req.user && req.user.username ? req.user.username : 'SYSTEM ROOT';
 
         // Crear cliente (los campos vacíos se guardarán como manda tu Schema relajado)
         const newClient = new Client({
@@ -29,7 +29,7 @@ const register = async (req, res) => {
             email: emailLower, 
             domicilio: domicilio ? domicilio.trim() : "",
             cel: cel || null,
-            createdBy: adminLogueado,
+            createdBy: userLogueado,
             active: true
         });
 
@@ -37,13 +37,13 @@ const register = async (req, res) => {
 
         return res.status(201).json({
             status: "success",
-            message: "CLIENTE REGISTRADO CON ÉXITO",
+            message: "CLIENTE REGISTRADO OK",
             client: newClient
         });
 
     } catch (error) {
         console.error("ERROR EN REGISTRO DE CLIENTE:", error);
-        return res.status(500).json({ status: "error", message: "ERROR_INTERNO_SERVIDOR" });
+        return res.status(500).json({ status: "error", message: "ERROR INTERNO DEL SERVIDOR" });
     }
 };
 
@@ -60,7 +60,7 @@ const list = async (req, res) => {
         });
     } catch (error) {
         console.error("ERROR AL LISTAR CLIENTES:", error);
-        return res.status(500).json({ status: "error", message: "ERROR_AL_LISTAR" });
+        return res.status(500).json({ status: "error", message: "ERROR AL LISTAR" });
     }
 };
 
@@ -71,7 +71,7 @@ const update = async (req, res) => {
 
     try {
         const clientToEdit = await Client.findById(clientId);
-        if (!clientToEdit) return res.status(404).json({ status: "error", message: "CLIENTE_NO_ENCONTRADO" });
+        if (!clientToEdit) return res.status(404).json({ status: "error", message: "CLIENTE NO ENCONTRADO" });
 
         // Si se actualiza el email, nos aseguramos de guardarlo en minúsculas y sin espacios
         if (dataToUpdate.email && dataToUpdate.email.trim() !== "") {
@@ -93,7 +93,7 @@ const update = async (req, res) => {
         if (error.code === 11000) {
             return res.status(409).json({ status: "error", message: "EL EMAIL YA ESTÁ EN USO POR OTRO CLIENTE" });
         }
-        return res.status(500).json({ status: "error", message: "ERROR_ACTUALIZACION" });
+        return res.status(500).json({ status: "error", message: "ERROR ACTUALIZACION" });
     }
 };
 
@@ -108,12 +108,12 @@ const removeLogical = async (req, res) => {
             { new: true }
         );
 
-        if (!clientDeleted) return res.status(404).json({ status: "error", message: "CLIENTE_INEXISTENTE" });
+        if (!clientDeleted) return res.status(404).json({ status: "error", message: "CLIENTE INEXISTENTE" });
 
-        return res.status(200).json({ status: "success", message: "CLIENTE_DESACTIVADO" });
+        return res.status(200).json({ status: "success", message: "CLIENTE DESACTIVADO" });
     } catch (error) {
         console.error("ERROR ELIMINANDO CLIENTE:", error);
-        return res.status(500).json({ status: "error", message: "ERROR_ELIMINACION" });
+        return res.status(500).json({ status: "error", message: "ERROR ELIMINACION" });
     }
 };
 

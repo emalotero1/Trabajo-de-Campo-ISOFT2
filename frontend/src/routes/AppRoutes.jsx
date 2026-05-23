@@ -15,7 +15,7 @@ import HomeTecnico from '../components/Homes/HomeTecnico';
 // Importamos los ABMs
 import StaffManagement from '../components/Staff/StaffManagment';
 import ClientManagement from '../components/Clients/ClientManagement';
-
+import AltaEquipo from '../components/Equipos/AltaEquipo';
 // Componente Selector de Home según Rol
 const HomeRouter = () => {
   const { user } = useAuth();
@@ -52,6 +52,7 @@ const AppRoutes = () => {
         {/* Un administrador usualmente también debería poder gestionar clientes */}
         <Route element={<RoleRoute allowedRoles={['administrador', 'recepcionista']} />}>
           <Route path="/clients" element={<ClientManagement />} />
+          <Route path="/equipos" element={<AltaEquipo />} />
         </Route>
 
       </Route> {/* <-- AQUÍ CIERRA EL PrivateRoute CORRECTAMENTE */}

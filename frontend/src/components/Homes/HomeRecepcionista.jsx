@@ -16,7 +16,7 @@ const HomeRecepcionista = () => {
 
   const actions = [
     { title: "GESTIÓN DE CLIENTES", desc: "Registro de nuevos clientes", icon: <FaUsers />, path: "/clients" },
-    { title: "TRABAJOS", desc: "Registro de nuevos equipos", icon: <FaComputer />, path: "/trabajos" },
+    { title: "GESTIÓN DE EQUIPOS", desc: "Registro de nuevos equipos", icon: <FaComputer />, path: "/equipos" },
     { title: "REPORTES", desc: "Emitir comprobante de registro del equipo", icon: <FaFilePdf />, path: "/mis-reportes" },
 
   ];

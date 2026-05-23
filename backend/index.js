@@ -8,7 +8,7 @@ const connectDB = require('./Config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const clientsRoutes = require('./routes/clientsRoutes');
-
+const equiposRoutes = require('./routes/equiposRoutes');
 
 const app = express();
 
@@ -46,7 +46,7 @@ connectDB(); // Asegurate que use process.env.MONGODB_URI
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/clients', clientsRoutes);
-
+app.use('/api/equipos', equiposRoutes);
 
 
 // Health check para cronjob (Railway o similares)
