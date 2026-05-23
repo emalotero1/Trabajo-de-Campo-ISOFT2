@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  FaUserPlus, FaEdit, FaTrashAlt, FaArrowLeft, FaSearch, FaFilter, FaEnvelope 
+  FaUserPlus, FaEdit, FaTrashAlt, FaSearch, FaFilter, FaEnvelope 
 } from 'react-icons/fa';
+// Importamos los mismos iconos que usas en el Modal para mantener la estética
+import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { 
   Typography, IconButton, TextField, MenuItem, 
   InputAdornment, CircularProgress, Box, Fade 
@@ -17,16 +19,31 @@ import '../../styles/Staff.css';
 
 const StaffManagement = () => {
   const navigate = useNavigate();
-  const { users, getUsers, deleteUser, loading } = useUsers();
+  // Extraemos también error y setError del hook para sincronizar con el backend
+  const { users, getUsers, deleteUser, loading, error, setError } = useUsers();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("todos");
+  
+  // Estado local para mensajes de éxito (igual que en el modal)
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     getUsers();
   }, []);
+
+  // Limpiar mensajes después de unos segundos (opcional, mejora la UX)
+  useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        if (setError) setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, error, setError]);
 
   const filteredStaff = useMemo(() => {
     if (!users) return [];
@@ -48,13 +65,22 @@ const StaffManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿ESTÁ SEGURO DE ELIMINAR ESTE ACCESO? ESTA ACCIÓN ES IRREVERSIBLE.")) {
-      try {
-        await deleteUser(id);
-        getUsers(); 
-      } catch (err) {
-        console.error("Error:", err);
-      }
+    // 1. Limpiar estados previos
+    if (setError) setError(null);
+    setSuccess(null);
+    
+    // 2. Confirmación simple (puedes usar el confirm nativo para no instalar librerías extra)
+    if (window.confirm("¿ESTÁ SEGURO DE DESACTIVAR ESTE ACCESO?")) {
+        try {
+            await deleteUser(id);
+            setSuccess('USUARIO_DESACTIVADO_CON_ÉXITO');
+            getUsers(); // Recargar la lista
+        } catch (err) {
+            // El error ya se setea automáticamente si el hook useUsers maneja el setError
+            // Pero lo aseguramos aquí por si acaso:
+            const msg = err.response?.data?.message || 'ERROR_AL_ELIMINAR, NO PUEDES ELIMINARTE A TI MISMO';
+            if (setError) setError(msg);
+        }
     }
   };
 
@@ -69,18 +95,32 @@ const StaffManagement = () => {
       <div className="corporate-glow"></div>
 
       <div className="container home-content-z">
-        
-       
-
         <div className="home-welcome-header">
           <div className="welcome-text-box">
-            
             <h1 className="welcome-title-corp">GESTIÓN DE PERSONAL</h1>
           </div>
           <button className="btn-corp-add" onClick={handleOpenCreate}>
               <FaUserPlus /> <span>NUEVO_USUARIO</span>
           </button>
         </div>
+
+        {/* --- NUEVA ÁREA DE FEEDBACK (IGUAL AL MODAL) --- */}
+        <Box className="feedback-container-management" sx={{ mb: 2, minHeight: '50px' }}>
+            {success && (
+                <Fade in={!!success}>
+                    <Box className="feedback-success-corp">
+                        <FiCheckCircle /> {success}
+                    </Box>
+                </Fade>
+            )}
+            {error && (
+                <Fade in={!!error}>
+                    <Box className="feedback-error-corp">
+                        <FiAlertTriangle /> ERROR: {error.toUpperCase()}
+                    </Box>
+                </Fade>
+            )}
+        </Box>
 
         <div className="staff-filter-bar-corp">
           <TextField
@@ -113,7 +153,7 @@ const StaffManagement = () => {
           >
             <MenuItem value="todos">TODOS LOS ROLES</MenuItem>
             <MenuItem value="administrador">ADMINISTRADORES</MenuItem>
-            <MenuItem value="vendedor">VENDEDORES</MenuItem>
+            <MenuItem value="recepcionista">RECEPCIONISTAS</MenuItem>
             <MenuItem value="tecnico">TÉCNICOS</MenuItem>
           </TextField>
         </div>
@@ -157,10 +197,10 @@ const StaffManagement = () => {
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           <div className="staff-actions-corp">
-                            <IconButton className="btn-staff-edit" onClick={() => handleEdit(staff)}>
+                            <IconButton className="btn-staff-edit" sx={{ color: '#fff' }} onClick={() => handleEdit(staff)}>
                               <FaEdit />
                             </IconButton>
-                            <IconButton className="btn-staff-delete" onClick={() => handleDelete(staff._id)}>
+                            <IconButton className="btn-staff-delete" sx={{ color: '#00a8e8' }} onClick={() => handleDelete(staff._id)}>
                               <FaTrashAlt />
                             </IconButton>
                           </div>
@@ -170,7 +210,7 @@ const StaffManagement = () => {
                   ) : (
                     <tr>
                       <td colSpan="5" className="no-data-msg-corp">
-                        NO_RECORDS_FOUND // SIN RESULTADOS EN LA BASE DE DATOS
+                        NO_RECORDS_FOUND
                       </td>
                     </tr>
                   )}

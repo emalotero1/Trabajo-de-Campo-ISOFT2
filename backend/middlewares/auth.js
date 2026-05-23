@@ -33,7 +33,9 @@ exports.isAdmin = (req, res, next) => {
 };
 
 exports.isStaff = (req, res, next) => {
-  if (req.user && (req.user.rol === 'administrador' || req.user.rol === 'vendedor')) {
+
+  if (req.user && (req.user.rol === 'administrador' || req.user.rol === 'recepcionista')) {
+
     next();
   } else {
     return res.status(403).json({ message: "Acceso denegado: No tienes permisos de staff" });
@@ -50,16 +52,9 @@ exports.createToken = (user) => {
     username: user.username,
     rol: user.rol,
     active: user.active,
-    cel: user.cel,
-    empresa: {
-      _id: user.empresa._id,
-      nombre: user.empresa.nombre,
-      direccion: user.empresa.direccion,
-      telefono: user.empresa.telefono,
-      email: user.empresa.email,
-      estado: user.empresa.estado,
-      fechaCreacion: user.empresa.fechaCreacion
-    }
+    cel: user.cel
+    
+
   };
 
   return jwt.sign(payload, secret, { expiresIn: '30d' }); // Token válido 30 días

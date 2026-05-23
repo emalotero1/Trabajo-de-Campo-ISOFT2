@@ -10,8 +10,10 @@ const userSchema = new mongoose.Schema({
   // ACTUALIZADO: Agregamos "control" al enum
   rol: { 
     type: String, 
-    enum: ["administrador", "tecnico", "cliente", "vendedor"], 
-    default: "vendedor",
+
+    enum: ["administrador", "tecnico", "recepcionista"], 
+    default: "recepcionista",
+
     lowercase: true 
   },
   created_at: { type: Date, default: Date.now },

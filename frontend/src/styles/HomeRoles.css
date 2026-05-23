@@ -337,6 +337,7 @@
 }
 
 .role-badge-corp.vendedor, .role-badge-corp.tecnico {
+
     color: var(--accent-blue);
     background: rgba(0, 168, 232, 0.1);
     border-color: var(--accent-blue);

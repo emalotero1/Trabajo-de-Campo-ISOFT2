@@ -16,7 +16,7 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
   
   const [formData, setFormData] = useState({
     name: '', lastname: '', username: '', email: '', 
-    password: '', rol: 'vendedor', cel: '', active: true
+    password: '', rol: 'recepcionista', cel: '', active: true
   });
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
       } else {
         setFormData({ 
           name: '', lastname: '', username: '', email: '', 
-          password: '', rol: 'vendedor', cel: '', active: true 
+          password: '', rol: 'recepcionista', cel: '', active: true 
         });
       }
     }
@@ -92,6 +92,9 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
                 <Grid item xs={12} sm={6}>
                   <TextField fullWidth label="APELLIDO" name="lastname" value={formData.lastname} onChange={handleChange} required className="industrial-input-corp" />
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="CELULAR" name="cel" value={formData.cel} onChange={handleChange} required className="industrial-input-corp" />
+                </Grid>
                 
                 {/* SECCIÓN SEGURIDAD */}
                 
@@ -104,7 +107,7 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
                 <Grid item xs={12} sm={6}>
                   <TextField select fullWidth label="NIVEL_ACCESO" name="rol" value={formData.rol} onChange={handleChange} className="industrial-input-corp">
                       <MenuItem value="administrador">ADMINISTRADOR</MenuItem>
-                      <MenuItem value="vendedor">VENDEDOR</MenuItem>
+                      <MenuItem value="recepcionista">RECEPCIONISTA</MenuItem>
                       <MenuItem value="tecnico">TÉCNICO</MenuItem>
                   </TextField>
                 </Grid>

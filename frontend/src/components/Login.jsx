@@ -4,7 +4,7 @@ import { useAuth } from '../../context/authProvider';
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { FiEye, FiEyeOff, FiUser, FiLock } from 'react-icons/fi';
 import { FaLaptopCode } from "react-icons/fa6"; 
-import Navbar from '../components/Layout/Navbar'; 
+import Navbar from '../components/Layout/Navbar'; // Importamos el Navbar
 import ErrorAlert from '../components/Alerts/ErrorAlert';
 import '../styles/Login.css';
 
@@ -16,7 +16,6 @@ const Login = () => {
   const [error, setError] = useState('');
   const [openError, setOpenError] = useState(false);
 
-  //Evitamos que el usuario logueado vuelva a la página de login
   useEffect(() => {
     if (user) navigate('/home');
   }, [user, navigate]);

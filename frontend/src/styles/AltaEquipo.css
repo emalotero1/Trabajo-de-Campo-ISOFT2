@@ -1,0 +1,147 @@
+/* --- ALTA EQUIPO CORPORATIVO --- */
+.alta-equipo-wrapper {
+  background-color: #0b0f19; /* Fondo oscuro industrial */
+  min-height: 100vh;
+  padding-bottom: 3rem;
+  color: #e2e8f0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  position: relative;
+}
+
+.alta-equipo-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.alta-equipo-title {
+  color: #ffffff;
+  font-weight: 700 !important;
+  letter-spacing: 2px;
+  font-size: 1.5rem;
+}
+
+.alta-equipo-subtitle {
+  color: #8a8f98;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  margin-top: 0.5rem;
+}
+
+/* Tarjetas (Paneles) */
+.corp-panel {
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.corp-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.corp-panel-title {
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+
+/* Lista de clientes (Búsqueda) */
+.client-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+
+/* Scrollbar personalizado para lista */
+.client-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+.client-list-container::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+}
+.client-list-container::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.client-list-item {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.client-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.client-list-item.selected {
+  background-color: rgba(0, 168, 232, 0.1);
+  border: 1px solid rgba(0, 168, 232, 0.3);
+  border-left: 4px solid #00a8e8;
+}
+
+.client-item-name {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.client-item-name.selected {
+  color: #00a8e8;
+}
+
+.client-item-dni {
+  color: #64748b;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.status-footer-corp {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-label {
+  color: #8a8f98;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status-badge.pending {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-badge.linked {
+  background-color: rgba(0, 168, 232, 0.1);
+  color: #00a8e8;
+  border: 1px solid rgba(0, 168, 232, 0.3);
+}

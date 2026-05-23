@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid } from '@mui/material';
 import { 
-  FaToolbox, FaMicrochip, FaClipboardCheck, FaClock, FaArrowRight, FaTemperatureHigh 
+  FaReceipt, FaMicrochip, FaFilePen, FaClock, FaArrowRight, FaTemperatureHigh 
 } from 'react-icons/fa6';
 import { useAuth } from '../../../context/authProvider';
 import Navbar from '../../components/Layout/Navbar';
@@ -29,9 +29,9 @@ const HomeTecnico = () => {
       count: labStats.pendientes 
     },
     { 
-      title: "LABORATORIO ACTIVO", 
-      desc: "Gestión de reparaciones en mesa de trabajo.", 
-      icon: <FaToolbox />, 
+      title: "Cargar Presupuestos", 
+      desc: "Asignar presupuestos a diagnósticos realizados.", 
+      icon: <FaReceipt />, 
       path: "/reparaciones-activas" 
     },
     { 
@@ -41,9 +41,9 @@ const HomeTecnico = () => {
       path: "/nuevo-diagnostico" 
     },
     { 
-      title: "HISTORIAL TÉCNICO", 
-      desc: "Consulta de órdenes finalizadas y logs.", 
-      icon: <FaClipboardCheck />, 
+      title: "MODIFICAR ESTADO EQUIPO", 
+      desc: "Actualizar estado de reparación.", 
+      icon: <FaFilePen  />, 
       path: "/historial-tecnico" 
     },
   ];
