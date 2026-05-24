@@ -4,14 +4,14 @@ const equipoSchema = new mongoose.Schema({
   // Relación obligatoria con el cliente (guarda el _id del cliente)
   cliente: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: "Client", // Debe coincidir exactamente con el nombre del modelo de Cliente
+    ref: "Client",
     required: true 
   },
   
   // Especificaciones técnicas
   cpu: { type: String, trim: true, default: "" },
   ram: { type: String, trim: true, default: "" },
-  gpu: { type: String, trim: true, default: "" }, // Placa de video
+  gpu: { type: String, trim: true, default: "" }, 
   fuente: { type: String, trim: true, default: "" },
   gabinete: { type: String, trim: true, default: "" },
   

@@ -6,7 +6,7 @@ export const useUsers = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const BASE_URL = import.meta.env.VITE_API_URL;
+ const BASE_URL = import.meta.env.VITE_API_URL + '/api';
 
   const getHeaders = () => ({
     headers: {

@@ -14,18 +14,14 @@ import ClientFormModal from './ClientFormModal';
 import { useClients } from '../../hooks/useClients'; 
 import { useAuth } from '../../../context/authProvider';
 
-import '../../styles/HomeRoles.css'; 
-import '../../styles/Staff.css'; 
 
 const ClientManagement = () => {
   const navigate = useNavigate();
   const { clients, getClients, deleteClient, loading, error, setError } = useClients();
   
-  // SOLUCIÓN DEFINITIVA: Token desde el contexto o el almacenamiento local
   const { user, token } = useAuth();
   const authToken = token || user?.token || localStorage.getItem('token');
   
-  // CORRECCIÓN: Ahora validamos que el usuario sea exclusivamente "recepcionista"
   const isRecepcionista = user?.rol?.toLowerCase()?.trim() === 'recepcionista';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,14 +29,12 @@ const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [success, setSuccess] = useState(null);
 
-  // PASAMOS EL TOKEN AL CARGAR LOS DATOS
   useEffect(() => {
     if (authToken) {
       getClients(authToken);
     }
   }, [authToken, getClients]);
 
-  // Limpiar mensajes después de unos segundos
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -51,7 +45,6 @@ const ClientManagement = () => {
     }
   }, [success, error, setError]);
 
-  // Filtro
   const filteredClients = useMemo(() => {
     if (!clients) return [];
     return clients.filter(client => {
@@ -77,8 +70,8 @@ const ClientManagement = () => {
     if (window.confirm("¿ESTÁ SEGURO DE DESACTIVAR A ESTE CLIENTE?")) {
         try {
             await deleteClient(id, authToken);
-            setSuccess('CLIENTE_DESACTIVADO_CON_ÉXITO');
-            getClients(authToken); // Recargar la lista
+            setSuccess('CLIENTE DESACTIVADO CON ÉXITO');
+            getClients(authToken);
         } catch (err) {
             const msg = err.response?.data?.message || 'ERROR_AL_ELIMINAR_CLIENTE';
             if (setError) setError(msg);
@@ -92,25 +85,27 @@ const ClientManagement = () => {
   };
 
   return (
-    <div className="home-dashboard-wrapper corporate-dark staff-container">
+    <Box className="corp-wrapper" style={{ paddingTop: '140px' }}>
       <Navbar />
       <div className="corporate-glow"></div>
 
-      <div className="container home-content-z">
-        <div className="home-welcome-header">
-          <div className="welcome-text-box">
-            <h1 className="welcome-title-corp">PORTAFOLIO DE CLIENTES</h1>
-            <span style={{ color: '#00a8e8', fontSize: '0.8rem', letterSpacing: '1px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }} className="home-content-z">
+        
+        {/* CABECERA PRINCIPAL */}
+        <header className="corp-header" style={{ paddingBottom: '0.5rem', marginBottom: '1rem' }}>
+          <Box>
+            <h1 className="corp-title" style={{ margin: 0 }}>PORTAFOLIO DE CLIENTES</h1>
+            <Typography className="corp-subtitle" style={{ marginTop: '4px' }}>
               OPERADOR ACTIVO: {user?.username?.toUpperCase() || 'SISTEMA'}
-            </span>
-          </div>
-          <button className="btn-corp-add" onClick={handleOpenCreate}>
-              <FaUserPlus /> <span>NUEVO_CLIENTE</span>
+            </Typography>
+          </Box>
+          <button className="btn-corp-submit" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>
+              <FaUserPlus /> <span style={{ fontWeight: 700 }}>NUEVO CLIENTE</span>
           </button>
-        </div>
+        </header>
 
-        {/* ÁREA DE FEEDBACK */}
-        <Box className="feedback-container-management" sx={{ mb: 2, minHeight: '50px' }}>
+        {/* ÁREA DE FEEDBACK ALERTAS */}
+        <Box sx={{ mb: 1, minHeight: success || error ? '50px' : '0px' }}>
             {success && (
                 <Fade in={!!success}>
                     <Box className="feedback-success-corp">
@@ -127,7 +122,8 @@ const ClientManagement = () => {
             )}
         </Box>
 
-        <div className="staff-filter-bar-corp">
+        {/* BARRA DE BÚSQUEDA */}
+        <Box sx={{ mb: 2 }}>
           <TextField
             placeholder="BUSCAR POR NOMBRE, EMAIL O DOMICILIO..."
             variant="outlined"
@@ -143,73 +139,78 @@ const ClientManagement = () => {
               ),
             }}
           />
-        </div>
+        </Box>
 
-        <div className="staff-table-wrapper-corp mb-5">
+        {/* TABLA PRINCIPAL RESPONSIVE */}
+        <Box className="corp-panel" sx={{ p: { xs: 1.5, sm: 2.5 }, overflow: 'hidden' }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}>
               <CircularProgress sx={{ color: '#00a8e8' }} />
             </Box>
           ) : (
             <Fade in={!loading}>
-              <table className="staff-table-corp">
-                <thead>
-                  <tr>
-                    <th>NOMBRE Y APELLIDO</th>
-                    <th>CONTACTO</th>
-                    <th>DOMICILIO</th>
-                    <th style={{ textAlign: 'right' }}>ACCIONES</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredClients.length > 0 ? (
-                    filteredClients.map((client) => (
-                      <tr key={client._id} className="staff-row-corp">
-                        <td>
-                          <div className="staff-name-cell-corp">
-                            {client.name?.toUpperCase()} {client.lastname?.toUpperCase()}
-                          </div>
-                          <div className="staff-id-tag-corp">CID_{client._id?.slice(-6).toUpperCase()}</div>
-                        </td>
-                        <td>
-                          <div className="staff-email-sub-corp"><FaEnvelope /> {client.email}</div>
-                          <div className="staff-phone-tag-corp" style={{ display: 'inline-block', marginTop: '4px' }}>
-                            {client.cel || '---'}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="staff-email-sub-corp">
-                            <FaMapMarkerAlt style={{ color: '#8a8f98' }}/> {client.domicilio?.toUpperCase()}
-                          </div>
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          <div className="staff-actions-corp">
-                            <IconButton className="btn-staff-edit" sx={{ color: '#fff' }} onClick={() => handleEdit(client)}>
-                              <FaEdit />
-                            </IconButton>
-                            
-                            {/* SOLO EL RECEPCIONISTA PUEDE ELIMINAR */}
-                            {isRecepcionista && (
-                              <IconButton className="btn-staff-delete" sx={{ color: '#00a8e8' }} onClick={() => handleDelete(client._id)}>
-                                <FaTrashAlt />
+              <Box className="corp-table-container" sx={{ width: '100%', overflowX: 'auto' }}>
+                <table className="corp-table" style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ padding: '1rem' }}>NOMBRE Y APELLIDO</th>
+                      <th style={{ padding: '1rem' }}>CONTACTO</th>
+                      <th style={{ padding: '1rem' }}>DOMICILIO</th>
+                      <th style={{ padding: '1rem', textAlign: 'right' }}>ACCIONES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredClients.length > 0 ? (
+                      filteredClients.map((client) => (
+                        <tr key={client._id}>
+                          <td style={{ padding: '1.2rem 1rem' }}>
+                            <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.95rem' }}>
+                              {client.name?.toUpperCase()} {client.lastname?.toUpperCase()}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', fontFamily: 'JetBrains Mono', letterSpacing: '1px' }}>
+                              CID_{client._id?.slice(-6).toUpperCase()}
+                            </div>
+                          </td>
+                          <td style={{ padding: '1.2rem 1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#cbd5e1', fontSize: '0.85rem' }}>
+                              <FaEnvelope style={{ color: '#64748b' }} /> {client.email}
+                            </div>
+                            <div className="corp-status-badge active" style={{ marginTop: '8px', fontSize: '0.75rem', padding: '3px 8px' }}>
+                              {client.cel || '---'}
+                            </div>
+                          </td>
+                          <td style={{ padding: '1.2rem 1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', fontSize: '0.85rem' }}>
+                              <FaMapMarkerAlt style={{ color: '#64748b' }} /> {client.domicilio?.toUpperCase()}
+                            </div>
+                          </td>
+                          <td style={{ padding: '1.2rem 1rem', textAlign: 'right' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                              <IconButton sx={{ color: '#ffffff', '&:hover': { color: '#f59e0b' } }} onClick={() => handleEdit(client)}>
+                                <FaEdit size={16} />
                               </IconButton>
-                            )}
-                          </div>
+                              {isRecepcionista && (
+                                <IconButton sx={{ color: '#ef4444', '&:hover': { color: '#ff6b6b' } }} onClick={() => handleDelete(client._id)}>
+                                  <FaTrashAlt size={14} />
+                                </IconButton>
+                              )}
+                            </Box>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: '#64748b', fontFamily: 'JetBrains Mono', fontSize: '0.85rem' }}>
+                          NO_RECORDS_FOUND
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="no-data-msg-corp">
-                        NO_RECORDS_FOUND
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </Box>
             </Fade>
           )}
-        </div>
+        </Box>
       </div>
 
       <ClientFormModal 
@@ -218,7 +219,7 @@ const ClientManagement = () => {
         clientToEdit={selectedClient}
         onSave={() => getClients(authToken)} 
       />
-    </div>
+    </Box>
   );
 };
 

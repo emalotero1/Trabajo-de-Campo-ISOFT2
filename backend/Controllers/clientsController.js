@@ -50,7 +50,8 @@ const register = async (req, res) => {
 // --- 2. LISTAR ---
 const list = async (req, res) => {
     try {
-        const clients = await Client.find({ active: true })
+        // Quitamos el filtro { active: true } para verificar si aparecen
+        const clients = await Client.find({}) 
             .select("-__v") 
             .sort({ lastname: 1 }); 
 

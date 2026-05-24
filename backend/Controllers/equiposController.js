@@ -1,4 +1,4 @@
-const Equipo = require('../models/Equipo'); 
+const Equipo = require('../Models/Equipos');
 const Client = require('../models/Client'); // Importamos el modelo de cliente para validar su existencia
 const { validationResult } = require('express-validator');
 
