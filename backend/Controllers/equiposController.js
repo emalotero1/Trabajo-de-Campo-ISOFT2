@@ -1,4 +1,5 @@
 const Equipo = require('../Models/Equipos');
+const OrdenReparacion = require('../Models/OrdenReparacion');
 const Client = require('../models/Client'); // Importamos el modelo de cliente para validar su existencia
 const { validationResult } = require('express-validator');
 
@@ -49,19 +50,34 @@ const register = async (req, res) => {
 // --- 2. LISTAR ---
 const list = async (req, res) => {
     try {
-        // Usamos populate('cliente') para traer los datos del dueño del equipo
-        const equipos = await Equipo.find()
-            .populate('cliente', 'name lastname email dni cel') // Trae solo los datos útiles del cliente
-            .select("-__v") 
-            .sort({ _id: -1 }); // Ordenamos del más nuevo al más viejo
+        // 1. Buscamos todas las órdenes que NO estén cerradas (ni entregadas ni rechazadas)
+        // Esto nos da la lista de computadoras que hoy están físicamente en el taller
+        const ordenesActivas = await OrdenReparacion.find({
+            estado: { $nin: ['ENTREGADO', 'RECHAZADO'] }
+        }).select('id_equipo');
+
+        // 2. Extraemos solo los IDs de esos equipos que están ocupados
+        const idsEquiposOcupados = ordenesActivas.map(orden => orden.id_equipo);
+
+        // 3. Modificamos tu consulta original: 
+        // Agregamos el filtro { _id: { $nin: idsEquiposOcupados } }
+        // Esto le dice a Mongo: "Traeme todos los equipos CUYO _ID NO ESTÉ en la lista de ocupados"
+        const equipos = await Equipo.find({
+            _id: { $nin: idsEquiposOcupados }
+        })
+        .populate('cliente', 'name lastname email dni cel') 
+        .select("-__v") 
+        .sort({ _id: -1 }); 
 
         return res.status(200).json({
             status: "success",
+            count: equipos.length, // Un dato útil para saber cuántos quedan en mostrador
             equipos
         });
+
     } catch (error) {
-        console.error("ERROR AL LISTAR EQUIPOS:", error);
-        return res.status(500).json({ status: "error", message: "ERRORAL LISTAR" });
+        console.error("ERROR AL LISTAR EQUIPOS DISPONIBLES:", error);
+        return res.status(500).json({ status: "error", message: "ERROR AL LISTAR" });
     }
 };
 

@@ -8,12 +8,9 @@ const { auth } = require('../middlewares/authenticated');
 const { isAdmin, isStaff } = require('../middlewares/auth');
 
 // --- RUTAS PROTEGIDAS ---
-
 router.post('/register', [auth], clientsController.register);
 router.get('/list', [auth], clientsController.list);
 router.put('/update/:id', [auth], clientsController.update);
-
-
 router.delete('/remove/:id', [auth], clientsController.removeLogical);
 
 module.exports = router;

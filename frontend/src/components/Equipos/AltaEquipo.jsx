@@ -70,7 +70,7 @@ export default function AltaEquipo() {
   // 3. SELECCIONAR UN EQUIPO PARA EDITAR
   const handleSeleccionarEquipo = (equipo) => {
     setSelectedEquipoId(equipo._id);
-    setSelectedClientId(equipo.cliente?._id || null); // Seteamos el cliente dueño
+    setSelectedClientId(equipo.cliente?._id || null); 
     setFormData({
       cpu: equipo.cpu || '',
       ram: equipo.ram || '',
@@ -123,14 +123,14 @@ export default function AltaEquipo() {
       const headers = { 'Authorization': `Bearer ${token}` };
       
       if (selectedEquipoId) {
-        // MODO EDICIÓN: Pegamos a tu PUT /api/equipos/update/:id
+        //  PUT /api/equipos/update/:id
         console.log(`🔄 ACTUALIZANDO EQUIPO ID: ${selectedEquipoId}...`);
         const res = await axios.put(`http://localhost:5000/api/equipos/update/${selectedEquipoId}`, payload, { headers });
         if (res.data.status === "success") {
           alert("ÉXITO: Especificaciones del equipo actualizadas en el sistema.");
         }
       } else {
-        // MODO ALTA: Pegamos a tu POST /api/equipos/register
+        //  POST /api/equipos/register
         console.log("🚀 CREANDO NUEVO REGISTRO DE EQUIPO...");
         const res = await axios.post('http://localhost:5000/api/equipos/register', payload, { headers });
         if (res.data.status === "success") {
@@ -331,7 +331,6 @@ export default function AltaEquipo() {
               </Box>
             </Box>
           </Grid>
-
         </Grid>
       </Box>
     </Box>

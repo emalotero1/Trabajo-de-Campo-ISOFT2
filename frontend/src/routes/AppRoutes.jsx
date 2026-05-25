@@ -12,10 +12,13 @@ import HomeRecepcionista from '../components/Homes/HomeRecepcionista';
 import HomeTecnico from '../components/Homes/HomeTecnico';
 // import HomeConsumidor from '../components/Homes/HomeConsumidor'; // <-- Asegúrate de importar esto si lo usas abajo
 
-// Importamos los ABMs
+// Importamos las pantallas protegidas por rol
 import StaffManagement from '../components/Staff/StaffManagment';
 import ClientManagement from '../components/Clients/ClientManagement';
 import AltaEquipo from '../components/Equipos/AltaEquipo';
+import OrdenReparacion from '../components/OrdenReparacion/OrdenReparacion';
+import ListaComprobantes from '../components/Comprobantes/ListaComprobantes';
+
 // Componente Selector de Home según Rol
 const HomeRouter = () => {
   const { user } = useAuth();
@@ -53,6 +56,8 @@ const AppRoutes = () => {
         <Route element={<RoleRoute allowedRoles={['administrador', 'recepcionista']} />}>
           <Route path="/clients" element={<ClientManagement />} />
           <Route path="/equipos" element={<AltaEquipo />} />
+          <Route path="/ordenes" element={<OrdenReparacion />} />
+          <Route path="/comprobantes" element={<ListaComprobantes />} />
         </Route>
 
       </Route> {/* <-- AQUÍ CIERRA EL PrivateRoute CORRECTAMENTE */}

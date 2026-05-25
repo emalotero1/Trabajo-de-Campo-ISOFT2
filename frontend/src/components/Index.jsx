@@ -9,7 +9,6 @@ const Index = () => {
     <Box className="main-wrapper">
       <Navbar />
      <TodoPc></TodoPc>
-
     </Box>
   );
 };
