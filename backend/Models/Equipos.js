@@ -18,6 +18,9 @@ const equipoSchema = new mongoose.Schema({
   // Reporte del problema
   fallaReportada: { type: String, trim: true, default: "" },
   
+  // Bandera de disponibilidad lógica
+  asignadoAOrden: { type: Boolean, default: false },
+  
   // Datos de auditoría
   created_at: { type: Date, default: Date.now },
   createdBy: { type: String, default: 'SYSTEM_ROOT' }

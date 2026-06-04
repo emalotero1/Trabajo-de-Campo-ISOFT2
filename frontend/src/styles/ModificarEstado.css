@@ -1,0 +1,108 @@
+/* ==========================================================================
+   ESTILOS - MODIFICAR ESTADO DEL EQUIPO
+   ========================================================================== */
+
+.modificar-wrapper {
+  background-color: #0b0f19;
+  min-height: 100vh;
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  padding-bottom: 50px;
+}
+
+.modificar-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 168, 232, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.modificar-panel {
+  background: rgba(22, 25, 29, 0.8);
+  border: 1px solid #2d3238;
+  border-radius: 6px;
+  padding: 24px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Lista de Estados */
+.estado-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(13, 15, 17, 0.4);
+  border: 1px solid #2d3238;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.estado-item .icon-box {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #2d3238;
+  border-radius: 4px;
+  margin-right: 16px;
+  color: #64748b;
+}
+
+/* Modificadores de Estado */
+.estado-item.clickable {
+  cursor: pointer;
+}
+
+.estado-item.clickable:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #3e484f;
+}
+
+.estado-item.selected {
+  background: rgba(0, 168, 232, 0.05);
+  border-color: #00a8e8;
+}
+
+.estado-item.selected .icon-box {
+  background: #00a8e8;
+  border-color: #00a8e8;
+  color: #0b0f19;
+}
+
+.estado-item.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+.estado-item.completado {
+  border-color: rgba(0, 168, 232, 0.3);
+}
+
+.estado-item.completado .icon-box {
+  color: #00a8e8;
+  border-color: rgba(0, 168, 232, 0.3);
+}
+
+/* Inputs Industriales Override */
+.industrial-input .MuiOutlinedInput-root {
+  background-color: rgba(13, 15, 17, 0.6) !important;
+  color: #fff !important;
+}
+.industrial-input .MuiOutlinedInput-notchedOutline {
+  border-color: #2d3238 !important;
+}
+.industrial-input:hover .MuiOutlinedInput-notchedOutline,
+.industrial-input .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #00a8e8 !important;
+}

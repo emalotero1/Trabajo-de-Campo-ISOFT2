@@ -10,7 +10,7 @@ import RoleRoute from '../routes/RoleRoutes';
 import HomeAdministrador from '../components/Homes/HomeAdministrador';
 import HomeRecepcionista from '../components/Homes/HomeRecepcionista';
 import HomeTecnico from '../components/Homes/HomeTecnico';
-// import HomeConsumidor from '../components/Homes/HomeConsumidor'; // <-- Asegúrate de importar esto si lo usas abajo
+
 
 // Importamos las pantallas protegidas por rol
 import StaffManagement from '../components/Staff/StaffManagment';
@@ -18,8 +18,10 @@ import ClientManagement from '../components/Clients/ClientManagement';
 import AltaEquipo from '../components/Equipos/AltaEquipo';
 import OrdenReparacion from '../components/OrdenReparacion/OrdenReparacion';
 import ListaComprobantes from '../components/Comprobantes/ListaComprobantes';
+import TrabajosPendientes from '../components/TrabajosPendientes/TrabajosPendientes';
+import MesaTrabajo from '../components/MesaTrabajo/MesaTrabajo';
+import ModificarEstado from '../components/TrabajosPendientes/ModificarEstado';
 
-// Componente Selector de Home según Rol
 const HomeRouter = () => {
   const { user } = useAuth();
   const role = user?.rol?.toLowerCase()?.trim();
@@ -60,7 +62,16 @@ const AppRoutes = () => {
           <Route path="/comprobantes" element={<ListaComprobantes />} />
         </Route>
 
+
+        {/* NIVEL 2: PROTECCIÓN DE ROL (TÉCNICO) */}
+        <Route element={<RoleRoute allowedRoles={['tecnico']} />}>
+          <Route path="/trabajospendientes" element={<TrabajosPendientes />} />
+          <Route path="/mesatrabajo" element={<MesaTrabajo />} /> 
+          <Route path="/modificar-estado/:id" element={<ModificarEstado />} />
+        </Route>  
       </Route> {/* <-- AQUÍ CIERRA EL PrivateRoute CORRECTAMENTE */}
+
+    
 
       {/* REDIRECCIÓN GLOBAL (Cualquier ruta no definida va al index) */}
       <Route path="*" element={<Navigate to="/" replace />} />

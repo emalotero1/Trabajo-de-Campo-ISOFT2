@@ -23,29 +23,18 @@ const HomeTecnico = () => {
   const actions = [
     { 
       title: "TRABAJOS PENDIENTES", 
-      desc: "Equipos en cola esperando revisión inicial.", 
+      desc: "Equipos en proceso de reparación.", 
       icon: <FaClock />, 
-      path: "/trabajos-pendientes",
+      path: "/trabajospendientes",
       count: labStats.pendientes 
     },
     { 
-      title: "Cargar Presupuestos", 
-      desc: "Asignar presupuestos a diagnósticos realizados.", 
+      title: "GESTION DE TRABAJOS", 
+      desc: "Realizar diagnosticos y asignar presupuestos.", 
       icon: <FaReceipt />, 
-      path: "/reparaciones-activas" 
-    },
-    { 
-      title: "NUEVO DIAGNÓSTICO", 
-      desc: "Ingreso de fallas y presupuesto técnico.", 
-      icon: <FaMicrochip />, 
-      path: "/nuevo-diagnostico" 
-    },
-    { 
-      title: "MODIFICAR ESTADO EQUIPO", 
-      desc: "Actualizar estado de reparación.", 
-      icon: <FaFilePen  />, 
-      path: "/historial-tecnico" 
-    },
+      path: "/mesatrabajo",
+      count: labStats.enProceso  
+    },   
   ];
 
   return (

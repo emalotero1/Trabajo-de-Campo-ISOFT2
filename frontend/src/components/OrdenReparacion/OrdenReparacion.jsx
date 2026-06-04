@@ -270,7 +270,7 @@ export default function GenerarOrden() {
 
                     <Typography style={{ color: '#8a8f98', fontSize: '0.75rem', fontFamily: 'JetBrains Mono', marginBottom: '4px' }}>SÍNTOMAS / FALLA REPORTADA</Typography>
                     <Typography style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: 600, backgroundColor: 'rgba(245, 158, 11, 0.03)', padding: '10px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
-                      {equipoSeleccionado.fallo || 'No especifica'}
+                      {equipoSeleccionado.fallaReportada || 'No especifica'}
                     </Typography>
                   </Box>
                 ) : (

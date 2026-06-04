@@ -18,13 +18,50 @@ const OrdenReparacionSchema = new mongoose.Schema({
   },
   estado: {
     type: String,
-    enum: ['INGRESADO', 'EN REVISION', 'PRESUPUESTADO', 'EN REPARACION', 'ENTREGADO', 'RECHAZADO'],
+    enum: ['INGRESADO', 'PENDIENTE DE REVISION', 'EN DIAGNOSTICO' ,'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'],
     default: 'INGRESADO'
+  },
+  observaciones: {
+    type: String,
+    default: ''
   },
   fecha_alta: {
     type: Date,
     default: Date.now
+  },
+  diagnostico: {
+    informe: {
+      type: String,
+      default: ''
+    },
+    notasInternas: {
+      type: String,
+      default: ''
+    }
+  },
+presupuesto: {
+    repuestos: [{
+      descripcion: { type: String, default: '' },
+      cantidad: { type: Number, default: 1 },
+      precioUnitario: { type: Number, default: 0 } // Reemplaza 'costo' para calcular cantidad * precio unitario
+    }],
+    manoDeObra: {
+      descripcion: { type: String, default: 'Reparación electrónica nivel componente + Mantenimiento' },
+      precio: { type: Number, default: 0 }
+    },
+    notasCliente: {
+      type: String,
+      default: '' // Para el campo de texto inferior derecho de tu mockup ("Notas para el Cliente")
+    },
+    total: {
+      type: Number,
+      default: 0
+    }
   }
-}, { versionKey: false });
+
+}, { 
+  versionKey: false,
+  timestamps: true  // crea createdAt y updatedAt automáticamente para saber cuándo se editó por última vez.
+});
 
 module.exports = mongoose.model('OrdenReparacion', OrdenReparacionSchema, 'ordenes_reparacion');

@@ -47,23 +47,13 @@ const register = async (req, res) => {
     }
 };
 
-// --- 2. LISTAR ---
+// --- 2. LISTAR EQUIPOS EN ESPERA (ULTRA OPTIMIZADO) ---
 const list = async (req, res) => {
     try {
-        // 1. Buscamos todas las órdenes que NO estén cerradas (ni entregadas ni rechazadas)
-        // Esto nos da la lista de computadoras que hoy están físicamente en el taller
-        const ordenesActivas = await OrdenReparacion.find({
-            estado: { $nin: ['ENTREGADO', 'RECHAZADO'] }
-        }).select('id_equipo');
-
-        // 2. Extraemos solo los IDs de esos equipos que están ocupados
-        const idsEquiposOcupados = ordenesActivas.map(orden => orden.id_equipo);
-
-        // 3. Modificamos tu consulta original: 
-        // Agregamos el filtro { _id: { $nin: idsEquiposOcupados } }
-        // Esto le dice a Mongo: "Traeme todos los equipos CUYO _ID NO ESTÉ en la lista de ocupados"
+        // Traemos directamente los equipos que NO estén marcados como asignados.
+        // Usamos $ne: true para mantener compatibilidad con los documentos viejos.
         const equipos = await Equipo.find({
-            _id: { $nin: idsEquiposOcupados }
+            asignadoAOrden: { $ne: true }
         })
         .populate('cliente', 'name lastname email dni cel') 
         .select("-__v") 
@@ -71,7 +61,7 @@ const list = async (req, res) => {
 
         return res.status(200).json({
             status: "success",
-            count: equipos.length, // Un dato útil para saber cuántos quedan en mostrador
+            count: equipos.length,
             equipos
         });
 

@@ -7,5 +7,9 @@ const { auth } = require('../middlewares/authenticated');
 // --- RUTAS PROTEGIDAS DE ÓRDENES ---
 router.post('/', [auth], ordenesController.crearOrden);
 router.get('/', [auth], ordenesController.obtenerOrdenes);
+router.get('/pendientes', [auth], ordenesController.getTrabajosPendientes);
+router.get('/:id', [auth], ordenesController.obtenerOrdenPorId);
+router.put('/:id/trabajo', [auth], ordenesController.actualizarTrabajo);
+
 
 module.exports = router;

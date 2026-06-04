@@ -1,0 +1,64 @@
+/* ==========================================================================
+   ESTILOS - MESA DE TRABAJO (TÉCNICO)
+   ========================================================================== */
+
+.mesatrabajo-wrapper {
+  background-color: #0b0f19;
+  min-height: 100vh;
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+  padding-bottom: 50px;
+}
+
+.mesatrabajo-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 168, 232, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.mesatrabajo-panel {
+  background: rgba(22, 25, 29, 0.8);
+  border: 1px solid #2d3238;
+  border-radius: 6px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Inputs Industriales Override para Mesa de Trabajo */
+.industrial-input .MuiOutlinedInput-root,
+.industrial-input .MuiInputBase-root {
+  background-color: rgba(13, 15, 17, 0.6) !important;
+  color: #fff !important;
+}
+
+.industrial-input .MuiOutlinedInput-notchedOutline {
+  border-color: #2d3238 !important;
+}
+
+.industrial-input:hover .MuiOutlinedInput-notchedOutline,
+.industrial-input .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #00a8e8 !important;
+}
+
+/* Custom Scrollbar para el panel de Presupuesto */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(13, 15, 17, 0.6);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2d3238;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3e484f;
+}

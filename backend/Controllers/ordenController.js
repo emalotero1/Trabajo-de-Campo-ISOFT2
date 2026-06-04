@@ -22,10 +22,13 @@ exports.crearOrden = async (req, res) => {
       nro_orden,
       id_equipo,
       id_usuario: id_usuario_recepcionista,
-      estado: estado || 'INGRESADO'
+      estado: estado || 'INGRESADO',
+      observaciones: observaciones
+      
     });
 
     const ordenGuardada = await nuevaOrden.save();
+    await Equipo.findByIdAndUpdate(id_equipo, { asignadoAOrden: true });
 
     try {
       const primerHistorial = new EstadoHistorial({
@@ -58,11 +61,11 @@ exports.obtenerOrdenes = async (req, res) => {
   try {
     const ordenes = await OrdenReparacion.find()
       .populate({
-        path: 'id_equipo', // 1. Campo real en tu OrdenReparacionSchema
-        model: 'Equipo',   // 2. Nombre exacto con el que registraste el modelo en Equipo.js (singular)
+        path: 'id_equipo', 
+        model: 'Equipo',   
         populate: { 
-          path: 'cliente', // 3. Campo real que vimos en tu equipoSchema (en minúscula y singular)
-          model: 'Client'  // 4. Nombre exacto con el que registraste el modelo en Client.js
+          path: 'cliente', 
+          model: 'Client'  
         }
       })
       .sort({ nro_orden: -1 });
@@ -76,5 +79,113 @@ exports.obtenerOrdenes = async (req, res) => {
   } catch (error) {
     console.error("ERROR REAL EN LA TERMINAL:", error);
     return res.status(500).json({ ok: false, status: "error", msg: 'Error al obtener las órdenes.' });
+  }
+};
+
+// =========================================================================
+// 3. GET - Trabajos Pendientes (Para el Técnico)
+// =========================================================================
+exports.getTrabajosPendientes = async (req, res) => {
+  try {
+      const ordenes = await OrdenReparacion.find({
+          estado: { $nin: ['ENTREGADO', 'REPARADO'] } 
+      })
+      .populate({
+          path: 'id_equipo', 
+          model: 'Equipo',
+          populate: { path: 'cliente', model: 'Client' }
+      })
+      .sort({ nro_orden: 1 }); // Orden de llegada
+
+      return res.status(200).json({ 
+          ok: true,
+          status: "success", 
+          ordenes 
+      });
+  } catch (error) {
+      console.error("Error al obtener trabajos pendientes:", error);
+      return res.status(500).json({ 
+          ok: false,
+          status: "error", 
+          message: "Error interno del servidor" 
+      });
+  }
+};
+
+
+// =========================================================================
+// 4. PUT - Actualizar Diagnóstico, Presupuesto, Estado y Bitácora
+// =========================================================================
+exports.actualizarTrabajo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Agregamos "observaciones" para recibir la bitácora desde el ModificarEstado.jsx
+    const { estado, diagnostico, presupuesto, observaciones } = req.body;
+
+    const orden = await OrdenReparacion.findById(id);
+    if (!orden) return res.status(404).json({ ok: false, msg: 'Orden no encontrada' });
+
+    // --- REGISTRO DE HISTORIAL ---
+    if (estado && orden.estado !== estado) {
+      const nuevoHistorial = new EstadoHistorial({
+        id_orden: orden._id,
+        estado: estado, 
+        id_usuario: req.user.id 
+      });
+      await nuevoHistorial.save();
+    }
+
+    // --- ACTUALIZACIÓN DE DATOS DINÁMICA ---
+    if (estado) orden.estado = estado;
+    if (diagnostico) orden.diagnostico = diagnostico;
+    
+    // Verificamos undefined en lugar de true/false para permitir que se guarde un string vacío (borrar bitácora)
+    if (observaciones !== undefined) orden.observaciones = observaciones; 
+    
+    if (presupuesto) {
+      let totalRepuestos = 0;
+      if (presupuesto.repuestos && presupuesto.repuestos.length > 0) {
+        totalRepuestos = presupuesto.repuestos.reduce(
+          (sum, item) => sum + (item.cantidad * item.precioUnitario), 0
+        );
+      }
+      const totalManoObra = Number(presupuesto.manoDeObra?.precio) || 0;
+      presupuesto.total = totalRepuestos + totalManoObra;
+
+      orden.presupuesto = presupuesto;
+    }
+
+    await orden.save();
+
+    return res.status(200).json({ ok: true, msg: 'Trabajo actualizado correctamente', orden });
+  } catch (error) {
+    console.error("Error al actualizar trabajo:", error);
+    return res.status(500).json({ ok: false, msg: 'Error interno del servidor' });
+  }
+};
+
+// =========================================================================
+// 5. GET - Obtener Orden por ID (Para cargar la Mesa de Trabajo y Timeline)
+// =========================================================================
+exports.obtenerOrdenPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const orden = await OrdenReparacion.findById(id)
+      .populate({
+        path: 'id_equipo', 
+        model: 'Equipo',
+        populate: { path: 'cliente', model: 'Client' }
+      });
+
+    if (!orden) {
+      return res.status(404).json({ ok: false, msg: 'Orden no encontrada' });
+    }
+
+    return res.status(200).json({ ok: true, status: "success", orden });
+  } catch (error) {
+    console.error("Error al obtener orden por ID:", error);
+    return res.status(500).json({ ok: false, msg: 'Error interno del servidor' });
   }
 };

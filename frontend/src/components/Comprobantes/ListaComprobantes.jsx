@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, TextField, Snackbar, Alert } from '@mui/material';
-import { FiPrinter, FiSearch, FiRefreshCw, FiFileText } from 'react-icons/fi';
+import { 
+  Box, Typography, Button, TextField, Snackbar, Alert, 
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions 
+} from '@mui/material';
+import { FiPrinter, FiSearch, FiRefreshCw, FiCheckCircle } from 'react-icons/fi';
 import Navbar from '../../components/Layout/Navbar';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-import '../../styles/GenerarOrden.css'; // Reutilizamos tus estilos de paneles y tablas
+import '../../styles/GenerarOrden.css'; 
 
-export default function ListaComprobantes() {
+export default function GestionOrdenes() {
   const [ordenes, setOrdenes] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMsg, setAlertMsg] = useState('');
+  
+  // Alertas
+  const [alertConfig, setAlertConfig] = useState({ open: false, severity: 'success', msg: '' });
+
+  // Estado para el Modal de Confirmación de Entrega
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [ordenAEntregar, setOrdenAEntregar] = useState(null);
 
   const cargarOrdenes = async () => {
     try {
@@ -28,8 +36,7 @@ export default function ListaComprobantes() {
       }
     } catch (error) {
       console.error(error);
-      setAlertMsg('Error al conectar con el servidor');
-      setAlertOpen(true);
+      setAlertConfig({ open: true, severity: 'error', msg: 'Error al conectar con el servidor' });
     } finally {
       setLoading(false);
     }
@@ -39,53 +46,75 @@ export default function ListaComprobantes() {
     cargarOrdenes();
   }, []);
 
-  // 🔄 CORRECCIÓN: Filtro adaptado a la propiedad "equipo"
   const ordenesFiltradas = ordenes.filter(o => {
-  const termino = busqueda.toLowerCase();
-  const nroMatch = o.nro_orden ? o.nro_orden.toString().includes(termino) : false;
-  // Sincronizado con o.id_equipo.cliente 👇
-  const clienteName = o.id_equipo?.cliente ? `${o.id_equipo.cliente.name} ${o.id_equipo.cliente.lastname}`.toLowerCase() : '';
-  return nroMatch || clienteName.includes(termino);
-});
+    const termino = busqueda.toLowerCase();
+    const nroMatch = o.nro_orden ? o.nro_orden.toString().includes(termino) : false;
+    const clienteName = o.id_equipo?.cliente ? `${o.id_equipo.cliente.name} ${o.id_equipo.cliente.lastname}`.toLowerCase() : '';
+    return nroMatch || clienteName.includes(termino);
+  });
 
-  // 📄 FUNCIÓN DE GENERACIÓN DEL PDF CORREGIDA
+  // --- LÓGICA DE ENTREGA (RECEPCIONISTA) ---
+  const abrirDialogoEntrega = (orden) => {
+    setOrdenAEntregar(orden);
+    setDialogOpen(true);
+  };
+
+  const confirmarEntrega = async () => {
+    if (!ordenAEntregar) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/ordenes/${ordenAEntregar._id}/trabajo`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ estado: 'ENTREGADO' })
+      });
+      
+      const data = await response.json();
+      if (data.ok || data.status === 'success') {
+        setAlertConfig({ open: true, severity: 'success', msg: 'Equipo marcado como ENTREGADO exitosamente.' });
+        cargarOrdenes(); // Refrescamos la tabla
+      } else {
+        setAlertConfig({ open: true, severity: 'error', msg: 'No se pudo actualizar el estado.' });
+      }
+    } catch (error) {
+      console.error(error);
+      setAlertConfig({ open: true, severity: 'error', msg: 'Error de conexión.' });
+    } finally {
+      setDialogOpen(false);
+      setOrdenAEntregar(null);
+    }
+  };
+
+
+  // --- GENERACIÓN DE PDF ---
   const descargarPDF = (orden) => {
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-
-    // Apuntamos directo a las propiedades reales 👇
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const cliente = orden.id_equipo?.cliente || {};
     const equipo = orden.id_equipo || {};
 
-    // --- DISEÑO ESTÉTICO DEL PDF ---
-    doc.setFillColor(13, 15, 17); // #0d0f11
+    doc.setFillColor(13, 15, 17); 
     doc.rect(0, 0, 210, 40, 'F');
-
-    doc.setTextColor(0, 168, 232); // #00a8e8
+    doc.setTextColor(0, 168, 232); 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.text("TODO PC", 15, 18);
-
     doc.setFontSize(9);
     doc.setFont("courier", "normal");
     doc.setTextColor(138, 143, 152);
     doc.text("SERVICIO TÉCNICO TODO PC", 15, 24);
-
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text(`COMPROBANTE DE INGRESO`, 120, 16);
+    doc.text(`COMPROBANTE DE OPERACIÓN`, 120, 16);
     doc.setFontSize(12);
     doc.setTextColor(0, 168, 232);
     doc.text(`ORDEN NRO: #${orden.nro_orden}`, 120, 23);
     doc.setFontSize(9);
     doc.setTextColor(180, 180, 180);
-    // 🔄 CORRECCIÓN: Uso de fecha_alta en el PDF
     doc.text(`Fecha: ${orden.fecha_alta ? new Date(orden.fecha_alta).toLocaleDateString('es-AR') : 'N/A'}`, 120, 29);
-
     doc.setTextColor(40, 40, 40);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
@@ -108,14 +137,13 @@ export default function ListaComprobantes() {
     doc.setFontSize(12);
     doc.text("DETALLE DEL EQUIPO REGISTRADO", 15, doc.lastAutoTable.finalY + 12);
 
-    // 🔄 CORRECCIÓN EN LA TABLA DEL HARDWARE DEL PDF:
     doc.autoTable({
         startY: doc.lastAutoTable.finalY + 15,
         head: [['Componente / CPU', 'Gabinete / Modelo', 'Falla Inicial Reportada']],
         body: [[
         equipo.cpu || 'N/A',
         equipo.gabinete || 'N/A',
-        equipo.fallaReportada || 'No especifica' // 👈 Sincronizado con tu propiedad del Schema
+        equipo.fallaReportada || 'No especifica' 
         ]],
         theme: 'grid',
         headStyles: { fillColor: [0, 168, 232], textColor: [13, 15, 17] },
@@ -128,7 +156,7 @@ export default function ListaComprobantes() {
 
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 15,
-      head: [['Estado Inicial asignado', 'Observaciones Visuales del Recepcionista']],
+      head: [['Estado Actual', 'Observaciones Visuales del Recepcionista']],
       body: [[
         orden.estado,
         orden.observaciones || 'Sin observaciones adicionales registradas.'
@@ -159,10 +187,10 @@ export default function ListaComprobantes() {
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
           <Box>
             <Typography variant="h4" style={{ fontWeight: 900, color: '#fff', textTransform: 'uppercase' }}>
-              Comprobantes Emitidos
+              Gestión de Órdenes
             </Typography>
             <Typography style={{ marginTop: '6px', fontFamily: 'JetBrains Mono', fontSize: '0.75rem', color: '#8a8f98', letterSpacing: '1px' }}>
-              IMPRESIÓN Y AUDITORÍA DE ÓRDENES DADAS DE ALTA
+              IMPRESIÓN, AUDITORÍA Y ENTREGA DE EQUIPOS
             </Typography>
           </Box>
         </header>
@@ -199,63 +227,119 @@ export default function ListaComprobantes() {
                   <th style={{ textAlign: 'right' }}>Acción</th>
                 </tr>
               </thead>
-             <tbody>
-                {ordenesFiltradas.map((o) => (
+              <tbody>
+                {ordenesFiltradas.map((o) => {
+                  
+                  // Evaluamos si la orden está lista para entregar
+                  const listoParaEntregar = o.estado === 'REPARADO' || o.estado === 'PRESUPUESTO RECHAZADO';
+                  const yaEntregado = o.estado === 'ENTREGADO';
+
+                  return (
                     <tr key={o._id}>
-                    <td style={{ fontFamily: 'JetBrains Mono', fontWeight: 800, color: '#00a8e8' }}>
-                        #{o.nro_orden}
-                    </td>
-                    <td style={{ color: '#8a8f98', fontSize: '0.85rem' }}>
-                        {o.fecha_alta ? new Date(o.fecha_alta).toLocaleDateString('es-AR') : 'N/A'}
-                    </td>
-                    
-                    {/* Mapeo del Cliente Corregido 👇 */}
-                    <td>
-                        <div style={{ fontWeight: 700, color: '#fff' }}>
-                        {o.id_equipo?.cliente ? `${o.id_equipo.cliente.name} ${o.id_equipo.cliente.lastname}` : 'Sin dueño'}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Email: {o.id_equipo?.cliente?.email || 'N/A'}</div>
-                    </td>
-                    
-                    {/* Mapeo del Hardware Corregido 👇 */}
-                    <td>
-                        <div style={{ color: '#ffffff', fontWeight: 600 }}>{o.id_equipo?.cpu || 'N/A'}</div>
-                    </td>
-                    
-                    <td>
-                        <span style={{ 
-                        padding: '4px 8px', 
-                        borderRadius: '4px', 
-                        fontSize: '0.75rem', 
-                        fontWeight: 700,
-                        backgroundColor: o.estado === 'INGRESADO' ? 'rgba(0, 168, 232, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                        color: o.estado === 'INGRESADO' ? '#00a8e8' : '#f59e0b',
-                        border: `1px solid ${o.estado === 'INGRESADO' ? 'rgba(0,168,232,0.2)' : 'rgba(245,158,11,0.2)'}`
-                        }}>
-                        {o.estado}
-                        </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                        <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<FiPrinter />}
-                        onClick={() => descargarPDF(o)}
-                        style={{ backgroundColor: '#2d3238', color: '#00a8e8', fontWeight: 700, border: '1px solid rgba(0, 168, 232, 0.3)' }}
-                        >
-                        IMPRIMIR
-                        </Button>
-                    </td>
+                      <td style={{ fontFamily: 'JetBrains Mono', fontWeight: 800, color: '#00a8e8' }}>
+                          #{o.nro_orden}
+                      </td>
+                      <td style={{ color: '#8a8f98', fontSize: '0.85rem' }}>
+                          {o.fecha_alta ? new Date(o.fecha_alta).toLocaleDateString('es-AR') : 'N/A'}
+                      </td>
+                      <td>
+                          <div style={{ fontWeight: 700, color: '#fff' }}>
+                          {o.id_equipo?.cliente ? `${o.id_equipo.cliente.name} ${o.id_equipo.cliente.lastname}` : 'Sin dueño'}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Email: {o.id_equipo?.cliente?.email || 'N/A'}</div>
+                      </td>
+                      <td>
+                          <div style={{ color: '#ffffff', fontWeight: 600 }}>{o.id_equipo?.cpu || 'N/A'}</div>
+                      </td>
+                      <td>
+                          <span style={{ 
+                            padding: '6px 10px', 
+                            borderRadius: '4px', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 700,
+                            backgroundColor: yaEntregado ? 'rgba(16, 185, 129, 0.1)' : listoParaEntregar ? 'rgba(245, 158, 11, 0.1)' : 'rgba(0, 168, 232, 0.05)',
+                            color: yaEntregado ? '#10b981' : listoParaEntregar ? '#f59e0b' : '#64748b',
+                            border: `1px solid ${yaEntregado ? 'rgba(16, 185, 129, 0.2)' : listoParaEntregar ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.05)'}`
+                          }}>
+                            {o.estado}
+                          </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end', alignItems: 'center' }}>
+                            
+                            {/* BOTÓN IMPRIMIR (Siempre visible) */}
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<FiPrinter />}
+                              onClick={() => descargarPDF(o)}
+                              sx={{ 
+                                color: '#00a8e8', 
+                                borderColor: 'rgba(0, 168, 232, 0.3)', 
+                                fontWeight: 700, 
+                                '&:hover': { borderColor: '#00a8e8', bgcolor: 'rgba(0, 168, 232, 0.05)' } 
+                              }}
+                            >
+                              IMPRIMIR
+                            </Button>
+
+                            {/* BOTÓN ENTREGAR (Solo visible si cumple condiciones) */}
+                            {listoParaEntregar && (
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<FiCheckCircle />}
+                                onClick={() => abrirDialogoEntrega(o)}
+                                sx={{ 
+                                  bgcolor: '#38bdf8', 
+                                  color: '#0b0f19', 
+                                  fontWeight: 800, 
+                                  '&:hover': { bgcolor: '#0284c7', color: '#fff' } 
+                                }}
+                              >
+                                ENTREGAR
+                              </Button>
+                            )}
+
+                          </Box>
+                      </td>
                     </tr>
-                ))}
-        </tbody>
+                  );
+                })}
+              </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <Snackbar open={alertOpen} autoHideDuration={4000} onClose={() => setAlertOpen(false)}>
-        <Alert severity="error" sx={{ width: '100%' }}>{alertMsg}</Alert>
+      {/* MODAL DE CONFIRMACIÓN DE ENTREGA */}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)}
+        PaperProps={{ style: { backgroundColor: '#1a1d24', color: '#fff', border: '1px solid #2d3238' } }}
+      >
+        <DialogTitle sx={{ color: '#38bdf8', fontWeight: 800 }}>Confirmar Entrega de Equipo</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: '#9ca3af' }}>
+            ¿Estás seguro de que deseas registrar la entrega de la orden 
+            <strong style={{ color: '#fff' }}> #{ordenAEntregar?.nro_orden}</strong> perteneciente a 
+            <strong style={{ color: '#fff' }}> {ordenAEntregar?.id_equipo?.cliente?.name}</strong>?
+            <br/><br/>
+            Al confirmar, el estado cambiará a <strong>ENTREGADO</strong> y el circuito se cerrará permanentemente.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: '16px 24px' }}>
+          <Button onClick={() => setDialogOpen(false)} sx={{ color: '#9ca3af', fontWeight: 700 }}>
+            CANCELAR
+          </Button>
+          <Button onClick={confirmarEntrega} variant="contained" sx={{ bgcolor: '#38bdf8', color: '#000', fontWeight: 800, '&:hover': { bgcolor: '#0284c7', color: '#fff' } }}>
+            CONFIRMAR ENTREGA
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={alertConfig.open} autoHideDuration={4000} onClose={() => setAlertConfig({...alertConfig, open: false})}>
+        <Alert severity={alertConfig.severity} sx={{ width: '100%' }}>{alertConfig.msg}</Alert>
       </Snackbar>
     </Box>
   );
