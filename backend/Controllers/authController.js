@@ -2,6 +2,7 @@ const User = require("../Models/Usuario");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
+//cambiar el metodo a sincrono 
 exports.login = async (req, res) => {
   const { emailOrUser, password } = req.body;
 
@@ -14,7 +15,7 @@ exports.login = async (req, res) => {
       ],
     });
 
-    // --- DEBUG LOGS ---
+    // --- DEBUG ---
     console.log("-----------------------------------------");
     console.log("Buscando a:", emailOrUser);
     console.log("Usuario encontrado en DB:", user ? "SÍ" : "NO");

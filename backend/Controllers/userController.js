@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const User = require('../models/Usuario');
+const User = require('../Models/Usuario');
 const { validationResult } = require('express-validator'); // Recomendado usar express-validator
 
 // --- 1. REGISTRAR (ALTA DE STAFF) ---
@@ -104,6 +104,7 @@ const update = async (req, res) => {
 
         return res.status(200).json({ status: "success", user: userUpdated });
     } catch (error) {
+        console.error("DEBUG_ERROR:", error); // Esto te dirá qué línea falla
         return res.status(500).json({ status: "error", message: "ERROR_ACTUALIZACION" });
     }
 };

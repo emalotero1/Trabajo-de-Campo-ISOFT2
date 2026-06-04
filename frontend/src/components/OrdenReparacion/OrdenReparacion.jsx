@@ -11,7 +11,7 @@ import '../../styles/GenerarOrden.css';
 
 export default function GenerarOrden() {
   const [busqueda, setBusqueda] = useState('');
-  const [equiposDb, setEquiposDb] = useState([]); // 👈 Guardará los equipos reales de la BD
+  const [equiposDb, setEquiposDb] = useState([]); 
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +24,7 @@ export default function GenerarOrden() {
     observaciones: ''
   });
 
-  // 1. LLAMADO AL BACKEND: Traer equipos disponibles (Filtro inteligente de la función list)
+  // 1. LLAMADO AL BACKEND: Traer equipos disponibles
   const cargarEquiposDisponibles = async () => {
     try {
       setLoading(true);
@@ -33,7 +33,7 @@ export default function GenerarOrden() {
       const response = await fetch('http://localhost:5000/api/equipos/list', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}` // Portero de seguridad
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -62,14 +62,13 @@ export default function GenerarOrden() {
     const termino = busqueda.toLowerCase();
     const cpuMatch = eq.cpu ? eq.cpu.toLowerCase().includes(termino) : false;
     
-    // Como usamos populate('cliente'), accedemos a name y lastname de forma segura
     const nombreCliente = eq.cliente ? `${eq.cliente.name} ${eq.cliente.lastname}`.toLowerCase() : '';
     const clienteMatch = nombreCliente.includes(termino);
 
     return cpuMatch || clienteMatch;
   });
 
-  // 3. ENVÍO DE LA ORDEN AL BACKEND (POST REAL)
+  // 3. ENVÍO DE LA ORDEN AL BACKEND
   const handleGenerarOrden = async (e) => {
     e.preventDefault();
     if (!equipoSeleccionado) return;
@@ -84,9 +83,9 @@ export default function GenerarOrden() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          id_equipo: equipoSeleccionado._id, // ID relacional de Mongo
+          id_equipo: equipoSeleccionado._id, 
           estado: ordenData.estado,
-          observaciones: ordenData.observaciones // Viaja al historial
+          observaciones: ordenData.observaciones
         })
       });
 
@@ -95,7 +94,7 @@ export default function GenerarOrden() {
       if (data.ok) {
         mostrarAlerta('success', '¡Orden de reparación abierta en el pool exitosamente!');
         handleCancelar(); // Limpiamos selección
-        cargarEquiposDisponibles(); // 🔄 RE-EJECUTA LA LISTA: El equipo recién guardado ya no va a aparecer
+        cargarEquiposDisponibles();
       } else {
         mostrarAlerta('error', data.msg || 'Error al generar la orden.');
       }
@@ -301,8 +300,8 @@ export default function GenerarOrden() {
                     className="industrial-input"
                     size="small"
                   >
-                    <MenuItem value="INGRESADO">INGRESADO (EN ESPERA)</MenuItem>
-                    <MenuItem value="EN REVISION">INGRESADO (URGENTE)</MenuItem>
+                    <MenuItem value="INGRESADO">Pendiente de Revision (EN ESPERA)</MenuItem>
+                    <MenuItem value="EN REVISION">En Revision (URGENTE)</MenuItem>
                   </TextField>
 
                   <TextField 
