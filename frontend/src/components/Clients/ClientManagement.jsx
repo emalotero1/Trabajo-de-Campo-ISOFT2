@@ -11,7 +11,7 @@ import {
 
 import Navbar from '../../components/Layout/Navbar';
 import ClientFormModal from './ClientFormModal';
-import { useClients } from '../../hooks/useClients'; 
+import { useClients } from '../../hooks/useCliente'; 
 import { useAuth } from '../../../context/authProvider';
 
 
@@ -73,7 +73,7 @@ const ClientManagement = () => {
             setSuccess('CLIENTE DESACTIVADO CON ÉXITO');
             getClients(authToken);
         } catch (err) {
-            const msg = err.response?.data?.message || 'ERROR_AL_ELIMINAR_CLIENTE';
+            const msg = err.response?.data?.message || 'NO SE PUDO ELIMINAR EL CLIENTE';
             if (setError) setError(msg);
         }
     }
@@ -94,9 +94,9 @@ const ClientManagement = () => {
         {/* CABECERA PRINCIPAL */}
         <header className="corp-header" style={{ paddingBottom: '0.5rem', marginBottom: '1rem' }}>
           <Box>
-            <h1 className="corp-title" style={{ margin: 0 }}>PORTAFOLIO DE CLIENTES</h1>
+            <h1 className="corp-title" style={{ margin: 0 }}>GESTIÓN DE CLIENTES</h1>
             <Typography className="corp-subtitle" style={{ marginTop: '4px' }}>
-              OPERADOR ACTIVO: {user?.username?.toUpperCase() || 'SISTEMA'}
+              RECEPCIONISTA: {user?.username?.toUpperCase() || 'SISTEMA'}
             </Typography>
           </Box>
           <button className="btn-corp-submit" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>
@@ -201,7 +201,7 @@ const ClientManagement = () => {
                     ) : (
                       <tr>
                         <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: '#64748b', fontFamily: 'JetBrains Mono', fontSize: '0.85rem' }}>
-                          NO_RECORDS_FOUND
+                          NO SE ENCONTRARON CLIENTES
                         </td>
                       </tr>
                     )}

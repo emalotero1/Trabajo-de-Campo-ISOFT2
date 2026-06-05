@@ -4,7 +4,7 @@ import {
   IconButton, Fade, Backdrop, CircularProgress, Grid 
 } from '@mui/material';
 import { FiX, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
-import { useClients } from '../../hooks/useClients'; 
+import { useClients } from '../../hooks/useCliente'; 
 import { useAuth } from '../../../context/authProvider'; 
 import '../../styles/HomeRoles.css'; 
 import '../../styles/Staff.css'; 

@@ -1,10 +1,13 @@
+// src/components/Taller/TrabajosPendientes.jsx (o tu ruta actual)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Box, Typography, Grid, Button } from '@mui/material';
 import { FiSettings, FiSearch, FiClock, FiList } from 'react-icons/fi';
-import '../../styles/AltaEquipo.css'; // Ajusta la ruta a tu CSS
+import '../../styles/AltaEquipo.css'; 
 import Navbar from '../../components/Layout/Navbar';
+
+// Importamos el servicio modularizado
+import { obtenerOrdenesPendientes } from '../../Services/ordenServicio';
 
 const calcularTiempoTranscurrido = (fechaCreacion) => {
   if (!fechaCreacion) return '0h 0m';
@@ -26,19 +29,15 @@ export default function TrabajosPendientes() {
   const [busqueda, setBusqueda] = useState('');
   const [ordenes, setOrdenes] = useState([]);
 
+  // CONSUMO DE API: Cargar órdenes pendientes de la cola de servicio
   useEffect(() => {
     const cargarOrdenesBD = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-        
-        const res = await axios.get('http://localhost:5000/api/ordenes/pendientes', { headers });
+        const data = await obtenerOrdenesPendientes();
 
-        if (res.data.status === "success") {
-          const ordenesFormateadas = res.data.ordenes.map(orden => ({
-            // ID visual para la tarjeta
+        if (data.status === "success") {
+          const ordenesFormateadas = data.ordenes.map(orden => ({
             _id: orden.nro_orden ? `ORD-${orden.nro_orden}` : orden._id.slice(-8), 
-            // ID real de MongoDB para navegar a la otra vista
             _realId: orden._id,
             equipo: {
               cpu: orden.id_equipo?.cpu || 'PC Genérica', 
@@ -112,7 +111,6 @@ export default function TrabajosPendientes() {
         {/* GRILLA DE TARJETAS TÉCNICAS */}
         <Grid container spacing={3}>
           {ordenesFiltradas.map((orden) => {
-            // Lógica para habilitar/deshabilitar el botón
             const estadosBloqueados = ['INGRESADO', 'PENDIENTE DE REVISION', 'EN DIAGNOSTICO'];
             const botonHabilitado = !estadosBloqueados.includes(orden.estadoActual.toUpperCase());
 
@@ -122,7 +120,6 @@ export default function TrabajosPendientes() {
                   <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
                     
                     <Box sx={{ flexGrow: 1 }}>
-                      {/* Número de pedido destacado */}
                       <Box sx={{ display: 'inline-block', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid #3e484f', borderRadius: '4px', px: 1.5, py: 0.5, mb: 2 }}>
                         <Typography sx={{ color: '#87929a', fontSize: '0.7rem', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '1px' }}>
                           PEDIDO Nº: {orden._id} 
@@ -145,10 +142,7 @@ export default function TrabajosPendientes() {
                       </Box>
                     </Box>
 
-                    {/* FOOTER DE LA TARJETA */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', pt: 2, borderTop: '1px solid rgba(62, 72, 79, 0.5)' }}>
-                      
-                      {/* Tiempo y Etiqueta de Estado */}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8ed5ff' }}>
                           <FiClock size={14} />
@@ -169,7 +163,6 @@ export default function TrabajosPendientes() {
                         </Box>
                       </Box>
 
-                      {/* BOTON DE CAMBIO DE ESTADO */}
                       <Button 
                         variant="contained"
                         disabled={!botonHabilitado}

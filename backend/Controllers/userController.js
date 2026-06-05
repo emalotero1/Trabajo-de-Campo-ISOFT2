@@ -8,7 +8,7 @@ const register = async (req, res) => {
 
     // 1. Validación de datos obligatorios
     if (!email || !password || !username || !rol || !name || !lastname) {
-        return res.status(400).json({ status: "error", message: "FALTAN_DATOS_OBLIGATORIOS" });
+        return res.status(400).json({ status: "error", message: "FALTAN DATOS OBLIGATORIOS" });
     }
 
     try {
@@ -53,7 +53,7 @@ const register = async (req, res) => {
 
     } catch (error) {
         console.error("ERROR EN REGISTRO:", error);
-        return res.status(500).json({ status: "error", message: "ERROR_INTERNO_SERVIDOR" });
+        return res.status(500).json({ status: "error", message: "ERROR INTERNO DEL SERVIDOR" });
     }
 };
 
@@ -70,7 +70,7 @@ const list = async (req, res) => {
             users
         });
     } catch (error) {
-        return res.status(500).json({ status: "error", message: "ERROR_AL_LISTAR" });
+        return res.status(500).json({ status: "error", message: "ERROR AL LISTAR" });
     }
 };
 
@@ -82,11 +82,11 @@ const update = async (req, res) => {
     try {
         // SEGURIDAD: Buscar el usuario original antes de editar
         const userToEdit = await User.findById(userId);
-        if (!userToEdit) return res.status(404).json({ status: "error", message: "USUARIO_NO_ENCONTRADO" });
+        if (!userToEdit) return res.status(404).json({ status: "error", message: "USUARIO NO ENCONTRADO" });
 
         // PROTECCIÓN: No permitir que un admin cambie su propio rol a algo inferior por accidente
         if (req.user.id === userId && dataToUpdate.rol && dataToUpdate.rol !== 'administrador') {
-            return res.status(403).json({ status: "error", message: "NO_PUEDES_QUITARTE_EL_ROL_ADMIN" });
+            return res.status(403).json({ status: "error", message: "NO PUEDES QUITARTE EL ROL ADMIN" });
         }
 
         // Si hay password, se hashea. Si está vacío, se elimina del objeto para no pisar el anterior
@@ -105,7 +105,7 @@ const update = async (req, res) => {
         return res.status(200).json({ status: "success", user: userUpdated });
     } catch (error) {
         console.error("DEBUG_ERROR:", error); // Esto te dirá qué línea falla
-        return res.status(500).json({ status: "error", message: "ERROR_ACTUALIZACION" });
+        return res.status(500).json({ status: "error", message: "ERROR AL ACTUALIZAR" });
     }
 };
 
@@ -119,7 +119,7 @@ const removeLogical = async (req, res) => {
         if (userId === adminId) {
             return res.status(403).json({
                 status: "error",
-                message: "OPERACION_DENEGADA: No puedes eliminar tu propia cuenta administrativa."
+                message: "OPERACION DENEGADA: No puedes eliminar tu propia cuenta administrativa."
             });
         }
 
@@ -129,11 +129,11 @@ const removeLogical = async (req, res) => {
             { new: true }
         );
 
-        if (!userDeleted) return res.status(404).json({ status: "error", message: "USUARIO_INEXISTENTE" });
+        if (!userDeleted) return res.status(404).json({ status: "error", message: "USUARIO INEXISTENTE" });
 
-        return res.status(200).json({ status: "success", message: "USUARIO_DESACTIVADO" });
+        return res.status(200).json({ status: "success", message: "USUARIO DESACTIVADO" });
     } catch (error) {
-        return res.status(500).json({ status: "error", message: "ERROR_ELIMINACION" });
+        return res.status(500).json({ status: "error", message: "ERROR AL ELIMINAR" });
     }
 };
 

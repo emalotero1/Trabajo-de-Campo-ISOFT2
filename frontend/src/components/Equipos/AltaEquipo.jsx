@@ -1,8 +1,8 @@
+// src/components/AltaEquipo/AltaEquipo.jsx (o la ruta donde lo tengas)
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { 
   Box, Typography, Button, TextField, Grid, 
-  List, ListItem, ListItemButton, ListItemText, ListItemIcon, Fade, Divider
+  List, ListItem, ListItemButton, ListItemText, ListItemIcon, Fade
 } from '@mui/material';
 import { 
   FiCpu, FiAlertCircle, FiUser, FiCheckCircle, 
@@ -11,6 +11,9 @@ import {
 import '../../styles/AltaEquipo.css'; 
 import Navbar from '../../components/Layout/Navbar';
 
+// Importamos la lógica extraída
+import { obtenerClientes, obtenerEquiposDisponibles, guardarEquipo } from '../../Services/equipoServicio';
+
 export default function AltaEquipo() {
   // Estados para los datos lógicos
   const [clientes, setClientes] = useState([]);
@@ -18,35 +21,35 @@ export default function AltaEquipo() {
   
   // Estado para el formulario (Alta/Edición)
   const [formData, setFormData] = useState({
+    mother: '',
     cpu: '',
     ram: '',
     gpu: '',
     fuente: '',
     gabinete: '',
+    discos: '',
     fallaReportada: ''
   });
   
   // Estados de control y UI
   const [selectedClientId, setSelectedClientId] = useState(null);
-  const [selectedEquipoId, setSelectedEquipoId] = useState(null); // Controla si estamos editando
+  const [selectedEquipoId, setSelectedEquipoId] = useState(null); 
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [busquedaEquipo, setBusquedaEquipo] = useState('');
   const [errorForm, setErrorForm] = useState(null);
 
   const token = localStorage.getItem('token');
 
-  // 1. CARGA INICIAL: Traer clientes y equipos de la BD en paralelo
+  // 1. CARGA INICIAL DE DATOS (Delegada al servicio)
   const cargarDatosBD = async () => {
     try {
-      const headers = { 'Authorization': `Bearer ${token}` };
-      
-      const [resClientes, resEquipos] = await Promise.all([
-        axios.get('http://localhost:5000/api/clients/list', { headers }),
-        axios.get('http://localhost:5000/api/equipos/list', { headers })
+      const [dataClientes, dataEquipos] = await Promise.all([
+        obtenerClientes(token),
+        obtenerEquiposDisponibles(token)
       ]);
 
-      setClientes(resClientes.data.clients || []);
-      setEquipos(resEquipos.data.equipos || []);
+      setClientes(dataClientes.clients || []);
+      setEquipos(dataEquipos.equipos || []);
     } catch (err) {
       console.error("❌ ERROR AL CARGAR DATOS DESDE EL BACKEND:", err);
     }
@@ -56,7 +59,7 @@ export default function AltaEquipo() {
     cargarDatosBD();
   }, []);
 
-  // 2. Temporizador automático para limpiar carteles de error (5 segundos)
+  // 2. TEMPORIZADOR DE ERRORES
   useEffect(() => {
     if (!errorForm) return;
     const timer = setTimeout(() => setErrorForm(null), 5000);
@@ -77,68 +80,52 @@ export default function AltaEquipo() {
       gpu: equipo.gpu || '',
       fuente: equipo.fuente || '',
       gabinete: equipo.gabinete || '',
+      mother: equipo.mother || '',
+      discos: equipo.discos || '',
       fallaReportada: equipo.fallaReportada || ''
     });
     setErrorForm(null);
   };
 
-  // 4. LIMPIAR FORMULARIO (Volver a modo Alta)
+  // 4. LIMPIAR FORMULARIO 
   const handleLimpiarFormulario = () => {
     setSelectedEquipoId(null);
     setSelectedClientId(null);
-    setFormData({ cpu: '', ram: '', gpu: '', fuente: '', gabinete: '', fallaReportada: '' });
+    setFormData({ cpu: '', ram: '', gpu: '', fuente: '', gabinete: '', mother: '', discos: '', fallaReportada: '' });
     setBusquedaCliente('');
     setErrorForm(null);
   };
 
-  // 5. PROCESAR ACCIÓN (INSERT O UPDATE)
+  // 5. PROCESAR ACCIÓN (Delegada al servicio)
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
-    const cpuLimpio = formData.cpu.trim();
-    const fallaLimpia = formData.fallaReportada.trim();
-    const gabineteLimpio = formData.gabinete.trim();
-
-    // Validaciones de negocio
-    if (!selectedClientId) {
-      setErrorForm("DEBE VINCULAR UN CLIENTE AL EQUIPO OBLIGATORIAMENTE.");
-      return;
-    }
-    if (!fallaLimpia || fallaLimpia.length < 15) {
-      setErrorForm("EL REPORTE DE SERVICIO DEBE DETALLAR AL MENOS 15 CARACTERES.");
-      return;
-    }
-
     const payload = {
       clienteId: selectedClientId,
-      cpu: cpuLimpio,
+      mother: formData.mother?.trim(),
+      cpu: formData.cpu.trim(),
       ram: formData.ram.trim(),
       gpu: formData.gpu.trim(),
       fuente: formData.fuente.trim(),
-      gabinete: gabineteLimpio,
-      fallaReportada: fallaLimpia
+      gabinete: formData.gabinete.trim(),
+      discos: formData.discos?.trim(),
+      fallaReportada: formData.fallaReportada.trim()
     };
 
-    try {
-      const headers = { 'Authorization': `Bearer ${token}` };
-      
-      if (selectedEquipoId) {
-        //  PUT /api/equipos/update/:id
-        console.log(`🔄 ACTUALIZANDO EQUIPO ID: ${selectedEquipoId}...`);
-        const res = await axios.put(`http://localhost:5000/api/equipos/update/${selectedEquipoId}`, payload, { headers });
-        if (res.data.status === "success") {
-          alert("ÉXITO: Especificaciones del equipo actualizadas en el sistema.");
-        }
-      } else {
-        //  POST /api/equipos/register
-        console.log("🚀 CREANDO NUEVO REGISTRO DE EQUIPO...");
-        const res = await axios.post('http://localhost:5000/api/equipos/register', payload, { headers });
-        if (res.data.status === "success") {
-          alert("ÉXITO: Equipo registrado e ingresado al taller correctamente.");
-        }
-      }
+    // Validaciones de negocio
+    if (!payload.clienteId) {
+      return setErrorForm("DEBE VINCULAR UN CLIENTE AL EQUIPO OBLIGATORIAMENTE.");
+    }
+    if (!payload.fallaReportada || payload.fallaReportada.length < 15) {
+      return setErrorForm("EL REPORTE DE SERVICIO DEBE DETALLAR AL MENOS 15 CARACTERES.");
+    }
 
-      // Refrescamos listados y reseteamos UI
+    try {
+      // Delegamos la complejidad de Axios a nuestro archivo apiService
+      await guardarEquipo(payload, selectedEquipoId, token);
+      
+      alert(selectedEquipoId ? "ÉXITO: Especificaciones del equipo actualizadas." : "ÉXITO: Equipo registrado e ingresado al taller.");
+      
       handleLimpiarFormulario();
       cargarDatosBD();
 
@@ -183,7 +170,7 @@ export default function AltaEquipo() {
                 className="btn-corp-cancel" 
                 variant="outlined" 
                 onClick={handleLimpiarFormulario}
-                style={{ borderColor: '#ef4444', color: '#ef4444' }} // Borde y texto rojo de advertencia/cancelación
+                style={{ borderColor: '#ef4444', color: '#ef4444' }} 
               >
                 CANCELAR EDICIÓN
               </Button>
@@ -210,7 +197,7 @@ export default function AltaEquipo() {
 
         <Grid container spacing={3}>
           
-          {/* PANEL IZQUIERDO: LISTADO COMPLETO DE EQUIPOS (NUEVO) */}
+          {/* PANEL IZQUIERDO: LISTADO COMPLETO DE EQUIPOS */}
           <Grid item xs={12} lg={4}>
             <Box className="corp-panel" sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '600px' }}>
               <header className="corp-panel-header">
@@ -256,7 +243,7 @@ export default function AltaEquipo() {
             </Box>
           </Grid>
 
-          {/* PANEL CENTRAL: FORMULARIO DE ESPECIFICACIONES */}
+          {/* PANEL CENTRAL: FORMULARIO DE ESPECIFICACIONES CON MOTHER Y DISCOS */}
           <Grid item xs={12} md={7} lg={5}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <Box className={`corp-panel ${selectedEquipoId ? 'panel-mode-edit' : ''}`}>
@@ -265,11 +252,27 @@ export default function AltaEquipo() {
                   <Typography className="corp-panel-title">ESPECIFICACIONES DE HARDWARE</Typography>
                 </header>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}><TextField fullWidth label="CPU" name="cpu" value={formData.cpu} onChange={handleChange} className="industrial-input-corp" /></Grid>
-                  <Grid item xs={12} sm={6}><TextField fullWidth label="RAM" name="ram" value={formData.ram} onChange={handleChange} className="industrial-input-corp" /></Grid>
-                  <Grid item xs={12} sm={6}><TextField fullWidth label="GPU" name="gpu" value={formData.gpu} onChange={handleChange} className="industrial-input-corp" /></Grid>
-                  <Grid item xs={12} sm={6}><TextField fullWidth label="FUENTE" name="fuente" value={formData.fuente} onChange={handleChange} className="industrial-input-corp" /></Grid>
-                  <Grid item xs={12}><TextField fullWidth label="GABINETE" name="gabinete" value={formData.gabinete} onChange={handleChange} className="industrial-input-corp" /></Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="MOTHERBOARD" name="mother" value={formData.mother} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="CPU" name="cpu" value={formData.cpu} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="RAM" name="ram" value={formData.ram} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="GPU" name="gpu" value={formData.gpu} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="DISCOS / ALMACENAMIENTO" name="discos" value={formData.discos} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="FUENTE" name="fuente" value={formData.fuente} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField fullWidth label="GABINETE" name="gabinete" value={formData.gabinete} onChange={handleChange} className="industrial-input-corp" />
+                  </Grid>
                 </Grid>
               </Box>
 
@@ -291,7 +294,6 @@ export default function AltaEquipo() {
                 <Typography className="corp-panel-title">DUEÑO DEL EQUIPO</Typography>
               </header>
               
-              {/* Deshabilitamos cambiar el cliente si estamos editando, respetando la consistencia del negocio */}
               <TextField 
                 fullWidth 
                 label={selectedEquipoId ? "CLIENTE FIJADO (NO MODIFICABLE)" : "BUSCAR CLIENTE..."}

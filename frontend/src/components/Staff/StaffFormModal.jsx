@@ -5,13 +5,13 @@ import {
   CircularProgress 
 } from '@mui/material';
 import { FiX, FiUserPlus, FiLock, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
-import { useUsers } from '../../hooks/Users/useUsers';
+import { useUsuarios } from '../../hooks/useUsuario';
 import { useAuth } from '../../../context/authProvider'; 
 import '../../styles/HomeRoles.css'; 
 import '../../styles/Staff.css';
 
 const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
-  const { createUser, updateUser, loading, error, setError } = useUsers();
+  const { createUser, updateUser, loading, error, setError } = useUsuarios();
   const [success, setSuccess] = useState(null);
   
   const [formData, setFormData] = useState({

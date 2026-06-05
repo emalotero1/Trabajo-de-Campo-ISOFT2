@@ -9,12 +9,13 @@ const equipoSchema = new mongoose.Schema({
   },
   
   // Especificaciones técnicas
+  mother: { type: String, trim: true, default: "" },
   cpu: { type: String, trim: true, default: "" },
   ram: { type: String, trim: true, default: "" },
   gpu: { type: String, trim: true, default: "" }, 
   fuente: { type: String, trim: true, default: "" },
   gabinete: { type: String, trim: true, default: "" },
-  
+  discos: { type: String, trim: true, default: "" },
   // Reporte del problema
   fallaReportada: { type: String, trim: true, default: "" },
   

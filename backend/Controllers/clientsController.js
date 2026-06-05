@@ -1,4 +1,6 @@
 const Client = require('../models/Client'); 
+const Equipo = require('../models/Equipos'); // Asegúrate de que la ruta sea correcta según tus carpetas
+const OrdenReparacion = require('../models/OrdenReparacion'); // Asegúrate de que la ruta sea correcta
 const { validationResult } = require('express-validator');
 
 // --- 1. REGISTRAR (ALTA DE CLIENTE) ---
@@ -98,23 +100,50 @@ const update = async (req, res) => {
     }
 };
 
-// --- 4. ELIMINAR (BORRADO LÓGICO) ---
+// --- 4. ELIMINAR (BORRADO LÓGICO CON INTEGRIDAD REFERENCIAL) ---
 const removeLogical = async (req, res) => {
     const clientId = req.params.id;
 
     try {
+        // 1. Buscamos todos los equipos asociados a este cliente
+        const equiposDelCliente = await Equipo.find({ cliente: clientId });
+        
+        if (equiposDelCliente.length > 0) {
+            // Extraemos los IDs de los equipos en un arreglo
+            const idsEquipos = equiposDelCliente.map(eq => eq._id);
+
+            // 2. Buscamos si existe alguna orden de reparación abierta para esos equipos
+            // (Consideramos que ENTREGADO y PRESUPUESTO RECHAZADO son circuitos cerrados)
+            const ordenActiva = await OrdenReparacion.findOne({
+                id_equipo: { $in: idsEquipos },
+                estado: { $nin: ['ENTREGADO', 'PRESUPUESTO RECHAZADO'] } 
+            });
+
+            // 3. Si hay una orden activa, frenamos la ejecución y enviamos el error 400
+            if (ordenActiva) {
+                return res.status(400).json({ 
+                    status: "error", 
+                    message: "NO SE PUEDE DESACTIVAR: EL CLIENTE TIENE EQUIPOS EN EL TALLER." 
+                });
+            }
+        }
+
+        // 4. Si no hay órdenes activas (o no tiene equipos), procedemos a desactivarlo
         const clientDeleted = await Client.findByIdAndUpdate(
             clientId, 
             { active: false }, 
             { new: true }
         );
 
-        if (!clientDeleted) return res.status(404).json({ status: "error", message: "CLIENTE INEXISTENTE" });
+        if (!clientDeleted) {
+            return res.status(404).json({ status: "error", message: "CLIENTE INEXISTENTE" });
+        }
 
-        return res.status(200).json({ status: "success", message: "CLIENTE DESACTIVADO" });
+        return res.status(200).json({ status: "success", message: "CLIENTE DESACTIVADO CORRECTAMENTE" });
+        
     } catch (error) {
         console.error("ERROR ELIMINANDO CLIENTE:", error);
-        return res.status(500).json({ status: "error", message: "ERROR ELIMINACION" });
+        return res.status(500).json({ status: "error", message: "ERROR INTERNO DEL SERVIDOR AL ELIMINAR" });
     }
 };
 

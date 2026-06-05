@@ -6,7 +6,7 @@ import {
 import { FiPrinter, FiSearch, FiRefreshCw, FiCheckCircle } from 'react-icons/fi';
 import Navbar from '../../components/Layout/Navbar';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 import '../../styles/GenerarOrden.css'; 
 
@@ -88,92 +88,133 @@ export default function GestionOrdenes() {
     }
   };
 
-
   // --- GENERACIÓN DE PDF ---
   const descargarPDF = (orden) => {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const cliente = orden.id_equipo?.cliente || {};
     const equipo = orden.id_equipo || {};
 
-    doc.setFillColor(13, 15, 17); 
-    doc.rect(0, 0, 210, 40, 'F');
-    doc.setTextColor(0, 168, 232); 
+    // --- ENCABEZADO CORPORATIVO ---
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("TODO PC", 15, 18);
-    doc.setFontSize(9);
-    doc.setFont("courier", "normal");
-    doc.setTextColor(138, 143, 152);
-    doc.text("SERVICIO TÉCNICO TODO PC", 15, 24);
+    doc.setFontSize(26);
+    doc.setTextColor(0, 168, 232); 
+    doc.text("TODO PC", 14, 22);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139); 
+    doc.setFont("helvetica", "normal");
+    doc.text("Servicio Técnico Especializado", 14, 28);
+    doc.text("Tel: (379) 412-3456 | soporte@todopc.com", 14, 33);
+
+    doc.setFillColor(13, 15, 17); 
+    doc.roundedRect(130, 12, 66, 26, 2, 2, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(`COMPROBANTE DE OPERACIÓN`, 120, 16);
-    doc.setFontSize(12);
+    doc.setFontSize(11);
+    doc.text("ORDEN DE INGRESO", 163, 20, { align: 'center' });
     doc.setTextColor(0, 168, 232);
-    doc.text(`ORDEN NRO: #${orden.nro_orden}`, 120, 23);
+    doc.setFontSize(16);
+    doc.text(`# ${orden.nro_orden}`, 163, 28, { align: 'center' });
+    doc.setTextColor(200, 200, 200);
     doc.setFontSize(9);
-    doc.setTextColor(180, 180, 180);
-    doc.text(`Fecha: ${orden.fecha_alta ? new Date(orden.fecha_alta).toLocaleDateString('es-AR') : 'N/A'}`, 120, 29);
-    doc.setTextColor(40, 40, 40);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("DATOS DEL CLIENTE", 15, 52);
-    
-    doc.autoTable({
-      startY: 55,
-      head: [['Nombre y Apellido', 'DNI / CUIL', 'Teléfono de Contacto', 'Email']],
-      body: [[
-        `${cliente.name || 'N/A'} ${cliente.lastname || ''}`,
-        cliente.cel || 'N/A',
-        cliente.email || 'N/A'
-      ]],
-      theme: 'grid',
-      headStyles: { fillColor: [45, 50, 56], textColor: [255, 255, 255] },
-      styles: { fontSize: 9 }
-    });
+    doc.setFont("helvetica", "normal");
+    doc.text(`FECHA: ${orden.fecha_alta ? new Date(orden.fecha_alta).toLocaleDateString('es-AR') : 'N/A'}`, 163, 34, { align: 'center' });
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("DETALLE DEL EQUIPO REGISTRADO", 15, doc.lastAutoTable.finalY + 12);
+    doc.setDrawColor(0, 168, 232);
+    doc.setLineWidth(0.5);
+    doc.line(14, 42, 196, 42);
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 15,
-        head: [['Componente / CPU', 'Gabinete / Modelo', 'Falla Inicial Reportada']],
+    // --- SECCIÓN 1: DATOS DEL CLIENTE ---
+    autoTable(doc, {
+        startY: 48,
+        head: [['Nombre y Apellido', 'Teléfono / Celular', 'Email', 'Domicilio']],
         body: [[
-        equipo.cpu || 'N/A',
-        equipo.gabinete || 'N/A',
-        equipo.fallaReportada || 'No especifica' 
+            `${cliente.name || '---'} ${cliente.lastname || ''}`,
+            cliente.cel || '---',
+            cliente.email || '---',
+            cliente.domicilio || '---'
         ]],
         theme: 'grid',
-        headStyles: { fillColor: [0, 168, 232], textColor: [13, 15, 17] },
-        styles: { fontSize: 9 }
+        headStyles: { fillColor: [13, 15, 17], textColor: [0, 168, 232], fontStyle: 'bold' },
+        bodyStyles: { textColor: [50, 50, 50], fontStyle: 'bold' },
+        styles: { fontSize: 9, cellPadding: 4 }
     });
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("ESTADO DE RECEPCIÓN", 15, doc.lastAutoTable.finalY + 12);
-
-    doc.autoTable({
-      startY: doc.lastAutoTable.finalY + 15,
-      head: [['Estado Actual', 'Observaciones Visuales del Recepcionista']],
-      body: [[
-        orden.estado,
-        orden.observaciones || 'Sin observaciones adicionales registradas.'
-      ]],
-      theme: 'grid',
-      headStyles: { fillColor: [245, 158, 11], textColor: [255, 255, 255] },
-      styles: { fontSize: 9 }
+    // --- SECCIÓN 2: HARDWARE ---
+    autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 8,
+        head: [['Procesador', 'Motherboard', 'Memoria RAM', 'GPU / Gráficos', 'Almacenamiento']],
+        body: [[
+            equipo.cpu || '---',
+            equipo.mother || '---',
+            equipo.ram || '---',
+            equipo.gpu || '---',
+            equipo.discos || '---'
+        ]],
+        theme: 'grid',
+        headStyles: { fillColor: [240, 244, 248], textColor: [13, 15, 17], fontStyle: 'bold' },
+        bodyStyles: { textColor: [50, 50, 50] },
+        styles: { fontSize: 8, cellPadding: 3 }
     });
 
-    let finalY = doc.lastAutoTable.finalY + 20;
+    autoTable(doc, {
+        startY: doc.lastAutoTable.finalY,
+        head: [['Gabinete', 'Fuente de Alimentación']],
+        body: [[
+            equipo.gabinete || '---',
+            equipo.fuente || '---'
+        ]],
+        theme: 'grid',
+        headStyles: { fillColor: [250, 250, 250], textColor: [100, 100, 100] },
+        styles: { fontSize: 8, cellPadding: 3 }
+    });
+
+    // --- SECCIÓN 3: REPORTE Y OBSERVACIONES ---
+    autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 8,
+        head: [['FALLA REPORTADA POR EL CLIENTE']],
+        body: [[equipo.fallaReportada || 'Sin especificar']],
+        theme: 'grid',
+        headStyles: { fillColor: [13, 15, 17], textColor: [255, 255, 255] },
+        bodyStyles: { textColor: [220, 38, 38], fontStyle: 'bold' }, 
+        styles: { fontSize: 9, cellPadding: 4 }
+    });
+
+    autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 4,
+        head: [['OBSERVACIONES DE RECEPCIÓN (ESTADO ESTÉTICO Y NOTAS)']],
+        body: [[orden.observaciones || 'El equipo ingresa sin observaciones adicionales registradas por el recepcionista.']],
+        theme: 'grid',
+        headStyles: { fillColor: [240, 244, 248], textColor: [13, 15, 17] },
+        styles: { fontSize: 9, cellPadding: 4 }
+    });
+
+    // --- SECCIÓN LEGAL Y FIRMAS ---
+    let finalY = doc.lastAutoTable.finalY + 15;
+
     doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(100, 100, 100);
-    doc.text("Nota legal: El retiro del hardware se realiza únicamente presentando este comprobante físico o digital.", 15, finalY);
-    doc.text("Todo equipo guardado por más de 90 días sin reclamo pasará a disposición del taller técnico.", 15, finalY + 4);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(13, 15, 17);
+    doc.text("TÉRMINOS Y CONDICIONES DEL SERVICIO:", 14, finalY);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text("1. Todo presupuesto tiene una validez técnica y comercial de 7 días corridos desde su emisión.", 14, finalY + 5);
+    doc.text("2. Las reparaciones de hardware cuentan con 90 días de garantía exclusiva sobre la mano de obra realizada.", 14, finalY + 9);
+    doc.text("3. Pasados los 90 días de la notificación de retiro, el taller no se responsabiliza por el estado del equipo.", 14, finalY + 13);
+    doc.text("4. Es OBLIGATORIO presentar este comprobante físico o en formato digital para retirar el equipo.", 14, finalY + 17);
 
-    doc.save(`Comprobante_Orden_${orden.nro_orden}.pdf`);
+    finalY += 35; 
+    doc.setDrawColor(100, 116, 139);
+    doc.setLineWidth(0.3);
+    
+    doc.line(30, finalY, 80, finalY);
+    doc.setFontSize(9);
+    doc.text("Firma / Aclaración del Cliente", 55, finalY + 5, { align: 'center' });
+
+    doc.line(130, finalY, 180, finalY);
+    doc.text("Firma del Recepcionista", 155, finalY + 5, { align: 'center' });
+
+    doc.save(`Comprobante_TodoPC_ORD${orden.nro_orden}.pdf`);
   };
 
   return (

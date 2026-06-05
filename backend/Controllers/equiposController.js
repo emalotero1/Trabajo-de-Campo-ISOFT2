@@ -5,7 +5,7 @@ const { validationResult } = require('express-validator');
 
 // --- 1. REGISTRAR (ALTA DE EQUIPO) ---
 const register = async (req, res) => {
-    const { clienteId, cpu, ram, gpu, fuente, gabinete, fallaReportada } = req.body;
+    const { clienteId,mother, cpu, ram, gpu, fuente, gabinete, discos, fallaReportada } = req.body;
 
     // Validación estricta: No se puede registrar un equipo sin un cliente asociado
     if (!clienteId) {
@@ -24,11 +24,13 @@ const register = async (req, res) => {
         // Crear el equipo relacionándolo con el ObjectId del cliente
         const newEquipo = new Equipo({
             cliente: clienteId, // Acá establecemos la relación
+            mother: mother ? mother.trim() : "",
             cpu: cpu ? cpu.trim() : "",
             ram: ram ? ram.trim() : "",
             gpu: gpu ? gpu.trim() : "",
             fuente: fuente ? fuente.trim() : "",
             gabinete: gabinete ? gabinete.trim() : "",
+            discos: discos ? discos.trim() : "",
             fallaReportada: fallaReportada ? fallaReportada.trim() : "",
             createdBy: userLogueado
         });
@@ -47,7 +49,7 @@ const register = async (req, res) => {
     }
 };
 
-// --- 2. LISTAR EQUIPOS EN ESPERA (ULTRA OPTIMIZADO) ---
+// --- 2. LISTAR EQUIPOS EN ESPERA ---
 const list = async (req, res) => {
     try {
         // Traemos directamente los equipos que NO estén marcados como asignados.

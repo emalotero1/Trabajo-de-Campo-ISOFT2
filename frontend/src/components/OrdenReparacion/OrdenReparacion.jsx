@@ -20,7 +20,7 @@ export default function GenerarOrden() {
   const [alertConfig, setAlertConfig] = useState({ severity: 'success', message: '' });
   
   const [ordenData, setOrdenData] = useState({
-    estado: 'INGRESADO',
+    estado: 'PENDIENTE DE REVISION', // Valor por defecto para el estado inicial
     observaciones: ''
   });
 
@@ -115,7 +115,7 @@ export default function GenerarOrden() {
 
   const handleCancelar = () => {
     setEquipoSeleccionado(null);
-    setOrdenData({ estado: 'INGRESADO', observaciones: '' });
+    setOrdenData({ estado: 'PENDIENTE DE REVISION', observaciones: '' });
   };
 
   const mostrarAlerta = (severity, message) => {
@@ -290,20 +290,6 @@ export default function GenerarOrden() {
                 </header>
                 
                 <Box style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="ESTADO INICIAL DE INGRESO"
-                    name="estado"
-                    value={ordenData.estado}
-                    onChange={handleChange}
-                    className="industrial-input"
-                    size="small"
-                  >
-                    <MenuItem value="INGRESADO">Pendiente de Revision (EN ESPERA)</MenuItem>
-                    <MenuItem value="EN REVISION">En Revision (URGENTE)</MenuItem>
-                  </TextField>
-
                   <TextField 
                     fullWidth 
                     multiline 

@@ -22,7 +22,7 @@ exports.crearOrden = async (req, res) => {
       nro_orden,
       id_equipo,
       id_usuario: id_usuario_recepcionista,
-      estado: estado || 'INGRESADO',
+      estado: estado || 'PENDIENTE DE REVISION',
       observaciones: observaciones
       
     });
@@ -38,6 +38,7 @@ exports.crearOrden = async (req, res) => {
       });
       await primerHistorial.save();
     } catch (errorHistorial) {
+      console.error("ERROR REAL DE MONGOOSE EN HISTORIAL:", errorHistorial); // <-- Agrega esta línea
       await OrdenReparacion.findByIdAndDelete(ordenGuardada._id);
       throw new Error('Error al inicializar el historial de estados.');
     }

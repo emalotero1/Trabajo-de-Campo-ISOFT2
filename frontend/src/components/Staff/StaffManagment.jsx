@@ -12,7 +12,7 @@ import {
 
 import Navbar from '../../components/Layout/Navbar';
 import StaffFormModal from './StaffFormModal';
-import { useUsers } from '../../hooks/Users/useUsers';
+import { useUsuarios } from '../../hooks/useUsuario';
 
 import '../../styles/HomeRoles.css'; 
 import '../../styles/Staff.css';
@@ -20,7 +20,7 @@ import '../../styles/Staff.css';
 const StaffManagement = () => {
   const navigate = useNavigate();
   // Extraemos también error y setError del hook para sincronizar con el backend
-  const { users, getUsers, deleteUser, loading, error, setError } = useUsers();
+  const { usuarios, getUsers, deleteUser, loading, error, setError } = useUsuarios();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
@@ -46,8 +46,8 @@ const StaffManagement = () => {
   }, [success, error, setError]);
 
   const filteredStaff = useMemo(() => {
-    if (!users) return [];
-    return users.filter(staff => {
+    if (!usuarios) return [];
+    return usuarios.filter(staff => {
       const fullName = `${staff.name} ${staff.lastname}`.toLowerCase();
       const matchesSearch = 
         fullName.includes(searchTerm.toLowerCase()) || 
@@ -57,7 +57,7 @@ const StaffManagement = () => {
       const matchesRole = filterRole === "todos" || staff.rol === filterRole;
       return matchesSearch && matchesRole;
     });
-  }, [searchTerm, filterRole, users]);
+  }, [searchTerm, filterRole, usuarios]);
 
   const handleEdit = (staff) => {
     setSelectedStaff(staff);

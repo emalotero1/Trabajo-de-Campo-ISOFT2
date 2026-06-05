@@ -18,8 +18,8 @@ const OrdenReparacionSchema = new mongoose.Schema({
   },
   estado: {
     type: String,
-    enum: ['INGRESADO', 'PENDIENTE DE REVISION', 'EN DIAGNOSTICO' ,'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'],
-    default: 'INGRESADO'
+    enum: ['PENDIENTE DE REVISION', 'EN DIAGNOSTICO' ,'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'],
+    default: 'PENDIENTE DE REVISION'
   },
   observaciones: {
     type: String,
@@ -64,4 +64,4 @@ presupuesto: {
   timestamps: true  // crea createdAt y updatedAt automáticamente para saber cuándo se editó por última vez.
 });
 
-module.exports = mongoose.model('OrdenReparacion', OrdenReparacionSchema, 'ordenes_reparacion');
+module.exports = mongoose.models.OrdenReparacion || mongoose.model('OrdenReparacion', OrdenReparacionSchema, 'ordenes_reparacion');

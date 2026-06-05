@@ -1,32 +1,32 @@
+// src/components/Taller/ModificarEstado.jsx (o tu ruta actual)
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Box, Typography, Button, TextField, Grid, Snackbar, Alert, CircularProgress } from '@mui/material';
 import { 
   FiSettings, FiArrowLeft, FiClock, FiCpu, FiFileText, 
-  FiCheckCircle, FiXCircle, FiTool, FiTruck 
+  FiCheckCircle, FiXCircle, FiTool 
 } from 'react-icons/fi';
 import Navbar from '../../components/Layout/Navbar';
 import { useAuth } from '../../../context/authProvider';
 import '../../styles/ModificarEstado.css';
 
-// 1. DICCIONARIO DE ESTADOS CON NIVELES PARA LA LÓGICA EXCLUYENTE
+// Importamos el servicio modularizado
+import { obtenerOrdenPorId, actualizarEstadoTrabajo } from '../../services/ordenServicio';
+
 const ESTADOS_REPARACION = [
   { id: 'PENDIENTE DE REVISION', icon: FiClock, titulo: 'Pendiente de Revisión', desc: 'EQUIPO EN ESPERA DE TÉCNICO ASIGNADO', nivel: 1 },
   { id: 'EN DIAGNOSTICO', icon: FiCpu, titulo: 'En Diagnóstico', desc: 'IDENTIFICACIÓN TÉCNICA DE FALLAS', nivel: 2 },
   { id: 'PRESUPUESTADO', icon: FiFileText, titulo: 'Presupuestado', desc: 'COSTOS ENVIADOS AL CLIENTE', nivel: 3 },
-  // Nivel 4: Ramificación Excluyente
   { id: 'PRESUPUESTO ACEPTADO', icon: FiCheckCircle, titulo: 'Presupuesto Aceptado', desc: 'REPARACIÓN AUTORIZADA POR CLIENTE', nivel: 4 },
   { id: 'PRESUPUESTO RECHAZADO', icon: FiXCircle, titulo: 'Presupuesto Rechazado', desc: 'CLIENTE DECLINÓ LA REPARACIÓN', nivel: 4 },
   { id: 'REPARADO', icon: FiTool, titulo: 'Reparado', desc: 'INTERVENCIÓN TÉCNICA FINALIZADA', nivel: 5 },
-  
 ];
 
 export default function ModificarEstado() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const rol = user?.rol?.toLowerCase()?.trim() || 'tecnico'; // Capturamos el rol
+  const rol = user?.rol?.toLowerCase()?.trim() || 'tecnico'; 
   const [orden, setOrden] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -35,17 +35,14 @@ export default function ModificarEstado() {
   
   const [alertConfig, setAlertConfig] = useState({ open: false, type: 'success', msg: '' });
   
-  // 2. TRAER LA ORDEN DESDE LA BD
+  // CONSUMO DE API: Traer datos de la orden
   useEffect(() => {
     const fetchOrden = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:5000/api/ordenes/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const data = await obtenerOrdenPorId(id);
         
-        if (res.data.status === 'success' || res.data.ok) {
-          const ordenDB = res.data.orden;
+        if (data.status === 'success' || data.ok) {
+          const ordenDB = data.orden;
           setOrden(ordenDB);
           setNuevoEstadoSel(ordenDB.estado || 'PENDIENTE DE REVISION');
           setBitacora(ordenDB.observaciones || '');
@@ -60,21 +57,13 @@ export default function ModificarEstado() {
     fetchOrden();
   }, [id]);
 
-  // 3. GUARDAR LOS CAMBIOS
+  // CONSUMO DE API: Guardar cambios
   const handleGuardar = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.put(`http://localhost:5000/api/ordenes/${id}/trabajo`, {
-        estado: nuevoEstadoSel,
-        observaciones: bitacora 
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const data = await actualizarEstadoTrabajo(id, nuevoEstadoSel, bitacora);
       
-      if (res.status === 200 || res.data.ok) {
-        setAlertConfig({ open: true, type: 'success', msg: 'Estado actualizado correctamente' });
-        setTimeout(() => navigate('/trabajospendientes'), 1500); 
-      }
+      setAlertConfig({ open: true, type: 'success', msg: 'Estado actualizado correctamente' });
+      setTimeout(() => navigate('/trabajospendientes'), 1500); 
     } catch (error) {
       console.error(error);
       setAlertConfig({ open: true, type: 'error', msg: 'Error al actualizar el estado en el servidor' });
@@ -84,11 +73,9 @@ export default function ModificarEstado() {
   if (loading) return <Box className="modificar-wrapper" display="flex" justifyContent="center" alignItems="center"><CircularProgress sx={{color: '#00a8e8'}}/></Box>;
   if (!orden) return <Box className="modificar-wrapper" p={5}><Typography>Orden no encontrada.</Typography></Box>;
 
-  // --- LÓGICA MATEMÁTICA DE ESTADOS ---
   const estadoGuardado = orden.estado || 'PENDIENTE DE REVISION';
   const nivelDB = ESTADOS_REPARACION.find(e => e.id === estadoGuardado)?.nivel || 1;
 
-  // Extracción segura de datos
   const nombreCliente = orden.id_equipo?.cliente ? `${orden.id_equipo.cliente.name} ${orden.id_equipo.cliente.lastname}` : 'Cliente no registrado';
   const cpuEquipo = orden.id_equipo?.cpu || 'Equipo sin detallar';
   const fechaIngreso = new Date(orden.fecha_alta || orden.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -100,8 +87,6 @@ export default function ModificarEstado() {
       <div className="modificar-glow"></div>
 
       <Box sx={{ maxWidth: '1200px', mx: 'auto', px: 3, position: 'relative', zIndex: 10 }}>
-        
-        {/* CABECERA */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <Box>
             <Typography sx={{ color: '#8a8f98', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -127,12 +112,8 @@ export default function ModificarEstado() {
         </header>
 
         <Grid container spacing={3}>
-          
-          {/* COLUMNA IZQUIERDA: DATOS Y BITÁCORA */}
           <Grid item xs={12} lg={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              
-              {/* Panel Datos */}
               <Box className="modificar-panel">
                 <Typography sx={{ color: '#8ed5ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                   <FiFileText size={18} /> Datos de Ingreso
@@ -164,7 +145,6 @@ export default function ModificarEstado() {
                 </Box>
               </Box>
 
-              {/* Panel Bitácora */}
               <Box className="modificar-panel">
                 <Typography sx={{ color: '#8ed5ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <FiFileText size={18} /> Bitácora Interna
@@ -179,11 +159,9 @@ export default function ModificarEstado() {
                   className="industrial-input"
                 />
               </Box>
-
             </Box>
           </Grid>
 
-          {/* COLUMNA DERECHA: SELECTOR DE ESTADOS */}
           <Grid item xs={12} lg={8}>
             <Box className="modificar-panel" sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box mb={3}>
@@ -193,32 +171,25 @@ export default function ModificarEstado() {
 
               <Box sx={{ flexGrow: 1 }}>
                 {ESTADOS_REPARACION.map((paso) => {
-        // --- LÓGICA EXCLUYENTE, RAMIFICACIÓN Y ROLES ---
                   const isCompletado = paso.nivel < nivelDB;
                   const isActualSeleccionado = paso.id === nuevoEstadoSel;
                   const isProximo = paso.nivel === nivelDB + 1;
-                  
                   let isExcluido = false;
 
-                  // 1. Exclusión Nivel 4 (Presupuesto)
                   if (paso.nivel === 4) {
                     if (nivelDB >= 4 && estadoGuardado !== paso.id && ESTADOS_REPARACION.find(e => e.id === estadoGuardado)?.nivel >= 4) {
                       isExcluido = true;
                     }
                   }
 
-                  // 2. RAMIFICACIÓN: Si se rechaza, se cancela la reparación y la entrega
                   const isRechazado = estadoGuardado === 'PRESUPUESTO RECHAZADO' || nuevoEstadoSel === 'PRESUPUESTO RECHAZADO';
                   if (isRechazado && paso.nivel > 4) {
                     isExcluido = true;
                   }
 
-                  
-                  // Evaluación final combinando todas las reglas
                   const isClickable = (isProximo || isActualSeleccionado) && !isExcluido && paso.nivel >= nivelDB;
                   const isBloqueado = (!isClickable && !isCompletado) || isExcluido;
                   
-                  // Definir clases CSS dinámicas
                   let className = "estado-item";
                   if (isActualSeleccionado) className += " selected";
                   else if (isCompletado) className += " completado";
@@ -247,7 +218,6 @@ export default function ModificarEstado() {
                         </Box>
                       </Box>
                       
-                      {/* Círculo indicador derecho (Radio Button visual) */}
                       {isActualSeleccionado && (
                         <Box sx={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid #00a8e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Box sx={{ width: '10px', height: '10px', borderRadius: '50%', bgcolor: '#00a8e8' }} />
@@ -258,7 +228,6 @@ export default function ModificarEstado() {
                 })}
               </Box>
 
-              {/* FOOTER BOTONES */}
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pt: 3, mt: 2, borderTop: '1px solid #2d3238' }}>
                 <Button 
                   variant="outlined" 
@@ -276,13 +245,11 @@ export default function ModificarEstado() {
                   GUARDAR CAMBIOS
                 </Button>
               </Box>
-
             </Box>
           </Grid>
         </Grid>
       </Box>
 
-      {/* ALERTAS */}
       <Snackbar open={alertConfig.open} autoHideDuration={3000} onClose={() => setAlertConfig({...alertConfig, open: false})} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity={alertConfig.type} variant="filled">{alertConfig.msg}</Alert>
       </Snackbar>

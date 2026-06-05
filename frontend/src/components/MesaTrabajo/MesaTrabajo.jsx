@@ -132,6 +132,7 @@ const MesaTrabajo = () => {
           </Box>
         </header>
 
+        {/* Comentario mensaje cuando guarda exitosamente */}
         <Snackbar open={mostrarExito} autoHideDuration={3000} onClose={() => setMostrarExito(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
           <Alert severity="success" variant="filled" sx={{ width: '100%', bgcolor: '#10b981', color: '#fff', fontWeight: 'bold' }}>
             Cambios guardados exitosamente en el servidor.
