@@ -32,3 +32,9 @@ export const actualizarOrdenCompleta = async (id, datosActualizados) => {
   const res = await api.put(`/ordenes/${id}/trabajo`, datosActualizados);
   return res.data;
 };
+
+export const asignarOrden = async (id) => {
+  // Asegurate de que 'api' sea tu instancia de Axios
+  const res = await api.put(`/ordenes/${id}/asignar`);
+  return res.data;
+};

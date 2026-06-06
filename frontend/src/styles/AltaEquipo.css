@@ -148,3 +148,35 @@
   color: #00a8e8;
   border: 1px solid rgba(0, 168, 232, 0.3);
 }
+
+/* --- AJUSTES PARA ESTRUCTURA DE DOS COLUMNAS --- */
+
+/* Asegura que los paneles mantengan la altura en el layout de Grid */
+.corp-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ajuste específico para el panel de la derecha donde está el formulario largo */
+.panel-mode-edit {
+  border: 1px solid rgba(245, 158, 11, 0.2); /* Borde naranja para indicar edición */
+}
+
+/* Asegura que los inputs tengan el mismo estilo industrial en los dos paneles */
+.industrial-input-corp {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid #2d3238 !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+}
+
+.industrial-input-corp .MuiInputBase-input {
+  color: #fff !important;
+}
+
+/* Asegura que los textos dentro de los inputs sean legibles */
+.industrial-input-corp label {
+  color: #64748b !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

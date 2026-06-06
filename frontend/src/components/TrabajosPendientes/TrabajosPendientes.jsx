@@ -1,4 +1,3 @@
-// src/components/Taller/TrabajosPendientes.jsx (o tu ruta actual)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid, Button } from '@mui/material';
@@ -6,8 +5,8 @@ import { FiSettings, FiSearch, FiClock, FiList } from 'react-icons/fi';
 import '../../styles/AltaEquipo.css'; 
 import Navbar from '../../components/Layout/Navbar';
 
-// Importamos el servicio modularizado
-import { obtenerOrdenesPendientes } from '../../Services/ordenServicio';
+// Importamos el servicio modularizado (¡Asegurate de importar asignarOrden!)
+import { obtenerOrdenesPendientes, asignarOrden } from '../../Services/ordenServicio';
 
 const calcularTiempoTranscurrido = (fechaCreacion) => {
   if (!fechaCreacion) return '0h 0m';
@@ -29,35 +28,47 @@ export default function TrabajosPendientes() {
   const [busqueda, setBusqueda] = useState('');
   const [ordenes, setOrdenes] = useState([]);
 
-  // CONSUMO DE API: Cargar órdenes pendientes de la cola de servicio
-  useEffect(() => {
-    const cargarOrdenesBD = async () => {
-      try {
-        const data = await obtenerOrdenesPendientes();
+  // Función extraída para poder reutilizarla al refrescar
+  const cargarOrdenesBD = async () => {
+    try {
+      const data = await obtenerOrdenesPendientes();
 
-        if (data.status === "success") {
-          const ordenesFormateadas = data.ordenes.map(orden => ({
-            _id: orden.nro_orden ? `ORD-${orden.nro_orden}` : orden._id.slice(-8), 
-            _realId: orden._id,
-            equipo: {
-              cpu: orden.id_equipo?.cpu || 'PC Genérica', 
-              gpu: orden.id_equipo?.gpu || 'Video Integrado',
-              gabinete: orden.id_equipo?.gabinete || 'Gabinete Estándar'
-            },
-            fallaReportada: orden.id_equipo?.fallaReportada || 'Sin descripción de falla.',
-            estadoActual: orden.estado || 'PENDIENTE DE REVISION',
-            tiempo: calcularTiempoTranscurrido(orden.createdAt) 
-          }));
+      if (data.status === "success") {
+        const ordenesFormateadas = data.ordenes.map(orden => ({
+          _id: orden.nro_orden ? `ORD-${orden.nro_orden}` : orden._id.slice(-8), 
+          _realId: orden._id,
+          equipo: {
+            cpu: orden.id_equipo?.cpu || 'PC Genérica', 
+            gpu: orden.id_equipo?.gpu || 'Video Integrado',
+            gabinete: orden.id_equipo?.gabinete || 'Gabinete Estándar'
+          },
+          fallaReportada: orden.id_equipo?.fallaReportada || 'Sin descripción de falla.',
+          estadoActual: orden.estado || 'PENDIENTE DE REVISION',
+          tiempo: calcularTiempoTranscurrido(orden.createdAt) 
+        }));
 
-          setOrdenes(ordenesFormateadas);
-        }
-      } catch (error) {
-        console.error("❌ ERROR AL CARGAR LAS ÓRDENES:", error);
+        setOrdenes(ordenesFormateadas);
       }
-    };
+    } catch (error) {
+      console.error("❌ ERROR AL CARGAR LAS ÓRDENES:", error);
+    }
+  };
 
+  useEffect(() => {
     cargarOrdenesBD();
   }, []);
+
+  // --- NUEVA FUNCIÓN PARA ASIGNARSE LA ORDEN ---
+  const handleAsignar = async (id) => {
+    try {
+      await asignarOrden(id);
+      // Recargamos la lista para que el estado cambie visualmente a EN DIAGNOSTICO
+      cargarOrdenesBD(); 
+    } catch (error) {
+      console.error("Error al asignar la orden:", error);
+      alert("Hubo un error al asignarse la orden. Revisa la consola.");
+    }
+  };
 
   const ordenesFiltradas = ordenes.filter(orden => {
     const query = busqueda.toLowerCase();
@@ -111,7 +122,10 @@ export default function TrabajosPendientes() {
         {/* GRILLA DE TARJETAS TÉCNICAS */}
         <Grid container spacing={3}>
           {ordenesFiltradas.map((orden) => {
-            const estadosBloqueados = ['INGRESADO', 'PENDIENTE DE REVISION', 'EN DIAGNOSTICO'];
+            // Modificamos esta lógica para que el botón "Modificar Estado" siga tu regla anterior, 
+            // pero habilitamos una vía exclusiva para las PENDIENTES.
+            const esPendiente = orden.estadoActual === 'PENDIENTE DE REVISION';
+            const estadosBloqueados = ['INGRESADO', 'EN DIAGNOSTICO'];
             const botonHabilitado = !estadosBloqueados.includes(orden.estadoActual.toUpperCase());
 
             return (
@@ -126,7 +140,7 @@ export default function TrabajosPendientes() {
                         </Typography>
                       </Box>
 
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>              
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>               
                         <Typography variant="h6" sx={{ color: '#8ed5ff', fontWeight: 700, fontSize: '1.1rem' }}>
                           {orden.equipo.cpu}
                         </Typography>
@@ -163,29 +177,47 @@ export default function TrabajosPendientes() {
                         </Box>
                       </Box>
 
-                      <Button 
-                        variant="contained"
-                        disabled={!botonHabilitado}
-                        onClick={() => navigate(`/modificar-estado/${orden._realId}`)}
-                        sx={{
-                          bgcolor: botonHabilitado ? '#0ea5e9' : '#374151',
-                          color: botonHabilitado ? '#fff' : '#6b7280',
-                          fontSize: '0.7rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '0.5px',
-                          textTransform: 'none',
-                          py: 0.8,
-                          '&:hover': {
-                            bgcolor: botonHabilitado ? '#0284c7' : '#374151'
-                          },
-                          '&.Mui-disabled': {
-                            bgcolor: 'rgba(255, 255, 255, 0.05)',
-                            color: '#64748b'
-                          }
-                        }}
-                      >
-                        Modificar Estado
-                      </Button>
+                      {/* --- LÓGICA DE BOTONES DINÁMICA --- */}
+                      {esPendiente ? (
+                        <Button 
+                          variant="contained"
+                          onClick={() => handleAsignar(orden._realId)}
+                          sx={{
+                            bgcolor: '#10b981', // Verde esmeralda para indicar "Tomar trabajo"
+                            color: '#fff',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            letterSpacing: '0.5px',
+                            textTransform: 'none',
+                            py: 0.8,
+                            '&:hover': { bgcolor: '#059669' }
+                          }}
+                        >
+                          Asignarme Orden
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="contained"
+                          disabled={!botonHabilitado}
+                          onClick={() => navigate(`/modificar-estado/${orden._realId}`)}
+                          sx={{
+                            bgcolor: botonHabilitado ? '#0ea5e9' : '#374151',
+                            color: botonHabilitado ? '#fff' : '#6b7280',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            letterSpacing: '0.5px',
+                            textTransform: 'none',
+                            py: 0.8,
+                            '&:hover': { bgcolor: botonHabilitado ? '#0284c7' : '#374151' },
+                            '&.Mui-disabled': {
+                              bgcolor: 'rgba(255, 255, 255, 0.05)',
+                              color: '#64748b'
+                            }
+                          }}
+                        >
+                          Modificar Estado
+                        </Button>
+                      )}
                       
                     </Box>
                   </Box>

@@ -15,7 +15,4 @@ router.get('/list', [auth, isAdmin], userController.list);
 router.put('/update/:id', [auth, isAdmin], userController.update);
 router.delete('/delete/:id', [auth, isAdmin], userController.removeLogical);
 
-// Ejemplo: Una ruta que CUALQUIER logueado puede usar (sin isAdmin)
-// router.get('/perfil', auth, userController.getProfile);
-
 module.exports = router;

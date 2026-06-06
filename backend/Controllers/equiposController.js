@@ -1,6 +1,6 @@
 const Equipo = require('../Models/Equipos');
 const OrdenReparacion = require('../Models/OrdenReparacion');
-const Client = require('../models/Client'); // Importamos el modelo de cliente para validar su existencia
+const Client = require('../models/Client');
 const { validationResult } = require('express-validator');
 
 // --- 1. REGISTRAR (ALTA DE EQUIPO) ---
@@ -44,7 +44,6 @@ const register = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("ERROR EN REGISTRO DE EQUIPO:", error);
         return res.status(500).json({ status: "error", message: "ERROR INTERNO DEL SERVIDOR" });
     }
 };
@@ -68,7 +67,6 @@ const list = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("ERROR AL LISTAR EQUIPOS DISPONIBLES:", error);
         return res.status(500).json({ status: "error", message: "ERROR AL LISTAR" });
     }
 };
@@ -96,7 +94,6 @@ const update = async (req, res) => {
 
         return res.status(200).json({ status: "success", equipo: equipoUpdated });
     } catch (error) {
-        console.error("ERROR ACTUALIZANDO EQUIPO:", error);
         return res.status(500).json({ status: "error", message: "ERROR ACTUALIZACION" });
     }
 };

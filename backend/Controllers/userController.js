@@ -25,9 +25,6 @@ const register = async (req, res) => {
 
         // 3. Hashear password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // 4. EL TRUCO: Sacar el creador del token decodificado (inyectado por tu middleware)
-        // Si por alguna razón no hay token (desarrollo), usamos 'SYSTEM_ROOT'
         const adminLogueado = req.user ? req.user.username : 'SYSTEM_ROOT';
 
         // 5. Crear usuario
@@ -39,7 +36,7 @@ const register = async (req, res) => {
             password: hashedPassword,
             rol: rol.toLowerCase(),
             cel: cel || "",
-            createdBy: adminLogueado, // <--- Ahora sí tendrá valor
+            createdBy: adminLogueado,
             active: true
         });
 

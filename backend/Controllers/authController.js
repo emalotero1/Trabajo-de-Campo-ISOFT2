@@ -15,23 +15,12 @@ exports.login = async (req, res) => {
       ],
     });
 
-    // --- DEBUG ---
-    console.log("-----------------------------------------");
-    console.log("Buscando a:", emailOrUser);
-    console.log("Usuario encontrado en DB:", user ? "SÍ" : "NO");
-    
     if (!user) {
       return res.status(401).json({ message: 'Credenciales inválidas - Usuario no existe' });
     }
 
     // 2. Comparamos contraseña
     const validPassword = await bcrypt.compare(password, user.password);
-    
-    console.log("¿Password coincide?:", validPassword);
-    console.log("Password enviada (plain):", password);
-    console.log("Password en DB (hash):", user.password);
-    console.log("-----------------------------------------");
-    // --- FIN DEBUG ---
 
     if (!validPassword) {
       return res.status(401).json({ message: 'Credenciales inválidas - Password incorrecta' });
@@ -62,7 +51,6 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("ERROR_EN_LOGIN:", error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };

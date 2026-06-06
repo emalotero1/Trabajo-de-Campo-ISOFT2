@@ -22,6 +22,9 @@ import TrabajosPendientes from '../components/TrabajosPendientes/TrabajosPendien
 import MesaTrabajo from '../components/MesaTrabajo/MesaTrabajo';
 import ModificarEstado from '../components/TrabajosPendientes/ModificarEstado';
 
+// vista para consumidores (en desarrollo)
+import EnDesarrollo from '../assets/EnDesarrollo';
+
 const HomeRouter = () => {
   const { user } = useAuth();
   const role = user?.rol?.toLowerCase()?.trim();
@@ -40,7 +43,8 @@ const AppRoutes = () => {
       {/* RUTAS PÚBLICAS */}
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
-
+      
+      
       {/* NIVEL 1: PROTECCIÓN DE AUTENTICACIÓN (DEBE ESTAR LOGUEADO) */}
       <Route element={<PrivateRoute />}>
         
@@ -51,6 +55,7 @@ const AppRoutes = () => {
         {/* NIVEL 2: PROTECCIÓN DE ROL (SÓLO ADMINISTRADOR) */}
         <Route element={<RoleRoute allowedRoles={['administrador']} />}>
           <Route path="/usuarios" element={<StaffManagement />} />
+          <Route path="/proximamente" element={<EnDesarrollo titulo="Funcionalidad en Desarrollo" porcentaje={65} />} />
         </Route>
 
         {/* NIVEL 2: PROTECCIÓN DE ROL (ADMIN Y RECEPCIONISTA) */}

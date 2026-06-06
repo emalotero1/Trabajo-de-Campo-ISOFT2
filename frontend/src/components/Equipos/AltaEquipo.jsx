@@ -1,12 +1,11 @@
-// src/components/AltaEquipo/AltaEquipo.jsx (o la ruta donde lo tengas)
 import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Button, TextField, Grid, 
-  List, ListItem, ListItemButton, ListItemText, ListItemIcon, Fade
+  List, ListItem, ListItemButton, ListItemText, ListItemIcon, Fade, Divider
 } from '@mui/material';
 import { 
   FiCpu, FiAlertCircle, FiUser, FiCheckCircle, 
-  FiPlusCircle, FiAlertTriangle, FiEdit3, FiRefreshCw, FiSearch 
+  FiPlusCircle, FiAlertTriangle, FiEdit3, FiSearch 
 } from 'react-icons/fi';
 import '../../styles/AltaEquipo.css'; 
 import Navbar from '../../components/Layout/Navbar';
@@ -37,6 +36,7 @@ export default function AltaEquipo() {
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [busquedaEquipo, setBusquedaEquipo] = useState('');
   const [errorForm, setErrorForm] = useState(null);
+  const [tabIzq, setTabIzq] = useState(0); // Tab: 0 = Equipos, 1 = Clientes
 
   const token = localStorage.getItem('token');
 
@@ -121,7 +121,6 @@ export default function AltaEquipo() {
     }
 
     try {
-      // Delegamos la complejidad de Axios a nuestro archivo apiService
       await guardarEquipo(payload, selectedEquipoId, token);
       
       alert(selectedEquipoId ? "ÉXITO: Especificaciones del equipo actualizadas." : "ÉXITO: Equipo registrado e ingresado al taller.");
@@ -197,142 +196,182 @@ export default function AltaEquipo() {
 
         <Grid container spacing={3}>
           
-          {/* PANEL IZQUIERDO: LISTADO COMPLETO DE EQUIPOS */}
-          <Grid item xs={12} lg={4}>
-            <Box className="corp-panel" sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '600px' }}>
-              <header className="corp-panel-header">
-                <FiRefreshCw color="#00a8e8" size={20} className="spin-hover" />
-                <Typography className="corp-panel-title">EQUIPOS EN TALLER</Typography>
-              </header>
+          {/* COLUMNA IZQUIERDA: LISTADOS (TABS) */}
+          <Grid item xs={12} md={5} lg={4}>
+            <Box className="corp-panel" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
               
-              <TextField 
-                fullWidth 
-                placeholder="BUSCAR POR DUEÑO, CPU, GABINETE..." 
-                value={busquedaEquipo} 
-                onChange={(e) => setBusquedaEquipo(e.target.value)} 
-                className="industrial-input-corp" 
-                size="small"
-                InputProps={{ startAdornment: <FiSearch style={{ color: '#64748b', marginRight: '8px' }} /> }}
-                sx={{ mb: 2 }}
-              />
+              {/* TABS */}
+              <Box sx={{ display: 'flex', borderBottom: '1px solid #2d3238', mb: 2 }}>
+                <Button
+                  onClick={() => setTabIzq(0)}
+                  sx={{
+                    flex: 1, py: 2, px: 2, fontWeight: 'bold', textTransform: 'uppercase',
+                    fontSize: '0.85rem', letterSpacing: '0.5px',
+                    color: tabIzq === 0 ? '#00a8e8' : '#64748b',
+                    borderBottom: tabIzq === 0 ? '2px solid #00a8e8' : 'none',
+                    transition: 'all 0.2s', backgroundColor: 'transparent',
+                    '&:hover': { color: '#e2e8f0' }
+                  }}
+                >
+                  <FiCpu style={{ marginRight: '8px', display: 'inline' }} /> EQUIPOS EN TALLER
+                </Button>
+                <Button
+                  onClick={() => setTabIzq(1)}
+                  sx={{
+                    flex: 1, py: 2, px: 2, fontWeight: 'bold', textTransform: 'uppercase',
+                    fontSize: '0.85rem', letterSpacing: '0.5px',
+                    color: tabIzq === 1 ? '#00a8e8' : '#64748b',
+                    borderBottom: tabIzq === 1 ? '2px solid #00a8e8' : 'none',
+                    transition: 'all 0.2s', backgroundColor: 'transparent',
+                    '&:hover': { color: '#e2e8f0' }
+                  }}
+                >
+                  <FiUser style={{ marginRight: '8px', display: 'inline' }} /> DUEÑO DEL EQUIPO
+                </Button>
+              </Box>
 
-              <Box className="client-list-container" sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: '500px' }}>
-                <List disablePadding>
-                  {equiposFiltrados.map(eq => (
-                    <ListItem key={eq._id} disablePadding className={`client-list-item ${selectedEquipoId === eq._id ? 'selected-edit' : ''}`}>
-                      <ListItemButton onClick={() => handleSeleccionarEquipo(eq)}>
-                        <ListItemText 
-                          primary={eq.cpu ? eq.cpu : `Gabinete: ${eq.gabinete || 'Genérico'}`}
-                          secondary={`Dueño: ${eq.cliente?.name || 'S/N'} ${eq.cliente?.lastname || ''}`}
-                          secondaryTypographyProps={{ style: { color: '#818cf8', fontWeight: 500 } }}
-                          classes={{ primary: 'client-item-name' }}
-                        />
-                        <ListItemIcon sx={{ minWidth: 'auto' }}>
-                          <FiEdit3 color={selectedEquipoId === eq._id ? "#f59e0b" : "#64748b"} size={18} />
-                        </ListItemIcon>
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                  {equiposFiltrados.length === 0 && (
-                    <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
-                      NO SE ENCONTRARON EQUIPOS registrados
-                    </Typography>
-                  )}
-                </List>
+              {/* TAB CONTENT */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                
+                {/* TAB 0: EQUIPOS */}
+                {tabIzq === 0 && (
+                  <>
+                    <TextField 
+                      fullWidth 
+                      placeholder="BUSCAR POR DUEÑO, CPU, GABINETE..." 
+                      value={busquedaEquipo} 
+                      onChange={(e) => setBusquedaEquipo(e.target.value)} 
+                      className="industrial-input-corp" 
+                      size="small"
+                      InputProps={{ startAdornment: <FiSearch style={{ color: '#64748b', marginRight: '8px' }} /> }}
+                    />
+
+                    <Box className="client-list-container" sx={{ overflowY: 'auto', maxHeight: '500px' }}>
+                      <List disablePadding>
+                        {equiposFiltrados.map(eq => (
+                          <ListItem key={eq._id} disablePadding className={`client-list-item ${selectedEquipoId === eq._id ? 'selected-edit' : ''}`}>
+                            <ListItemButton onClick={() => handleSeleccionarEquipo(eq)}>
+                              <ListItemText 
+                                primary={eq.cpu ? eq.cpu : `Gabinete: ${eq.gabinete || 'Genérico'}`}
+                                secondary={`Dueño: ${eq.cliente?.name || 'S/N'} ${eq.cliente?.lastname || ''}`}
+                                secondaryTypographyProps={{ style: { color: '#818cf8', fontWeight: 500 } }}
+                                classes={{ primary: 'client-item-name' }}
+                              />
+                              <ListItemIcon sx={{ minWidth: 'auto' }}>
+                                <FiEdit3 color={selectedEquipoId === eq._id ? "#f59e0b" : "#64748b"} size={18} />
+                              </ListItemIcon>
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                        {equiposFiltrados.length === 0 && (
+                          <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
+                            NO SE ENCONTRARON EQUIPOS registrados
+                          </Typography>
+                        )}
+                      </List>
+                    </Box>
+                  </>
+                )}
+
+                {/* TAB 1: CLIENTES */}
+                {tabIzq === 1 && (
+                  <>
+                    <TextField 
+                      fullWidth 
+                      label={selectedEquipoId ? "CLIENTE FIJADO (NO MODIFICABLE)" : "BUSCAR CLIENTE..."}
+                      value={busquedaCliente} 
+                      onChange={(e) => setBusquedaCliente(e.target.value)} 
+                      disabled={!!selectedEquipoId}
+                      className="industrial-input-corp" 
+                      size="small"
+                    />
+
+                    <Box className="client-list-container" sx={{ overflowY: 'auto', maxHeight: '450px' }}>
+                      <List disablePadding>
+                        {clientesFiltrados.map(c => (
+                          <ListItem key={c._id} disablePadding className={`client-list-item ${selectedClientId === c._id ? 'selected' : ''}`}>
+                            <ListItemButton onClick={() => !selectedEquipoId && setSelectedClientId(c._id)} disabled={!!selectedEquipoId}>
+                              <ListItemText 
+                                primary={`${c.name} ${c.lastname}`} 
+                                secondary={c.email || 'Sin Correo'} 
+                                secondaryTypographyProps={{ style: { color: '#818cf8', fontSize: '0.8rem' } }}
+                                classes={{ primary: 'client-item-name' }}
+                              />
+                              <ListItemIcon sx={{ minWidth: 'auto' }}>
+                                {selectedClientId === c._id ? <FiCheckCircle color="#00a8e8" size={20} /> : <FiPlusCircle color="#64748b" size={20} />}
+                              </ListItemIcon>
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+
+                    {/* STATUS FOOTER */}
+                    <Box className="status-footer-corp" sx={{ pt: 2, borderTop: '1px solid #2d3238', mt: 'auto' }}>
+                      <Typography className="status-label">VINCULACIÓN</Typography>
+                      <div className={`status-badge ${selectedClientId ? 'linked' : 'pending'}`}>
+                        {selectedClientId ? <><span className="blink">●</span> ASIGNADO</> : <><span>○</span> PENDIENTE</>}
+                      </div>
+                    </Box>
+                  </>
+                )}
               </Box>
             </Box>
           </Grid>
 
-          {/* PANEL CENTRAL: FORMULARIO DE ESPECIFICACIONES CON MOTHER Y DISCOS */}
-          <Grid item xs={12} md={7} lg={5}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Box className={`corp-panel ${selectedEquipoId ? 'panel-mode-edit' : ''}`}>
-                <header className="corp-panel-header">
-                  <FiCpu color={selectedEquipoId ? "#f59e0b" : "#00a8e8"} size={20} />
-                  <Typography className="corp-panel-title">ESPECIFICACIONES DE HARDWARE</Typography>
-                </header>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="MOTHERBOARD" name="mother" value={formData.mother} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="CPU" name="cpu" value={formData.cpu} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="RAM" name="ram" value={formData.ram} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="GPU" name="gpu" value={formData.gpu} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="DISCOS / ALMACENAMIENTO" name="discos" value={formData.discos} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="FUENTE" name="fuente" value={formData.fuente} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField fullWidth label="GABINETE" name="gabinete" value={formData.gabinete} onChange={handleChange} className="industrial-input-corp" />
-                  </Grid>
+          {/* COLUMNA DERECHA: FORMULARIO UNIFICADO (ESPECIFICACIONES + REPORTE) */}
+          <Grid item xs={12} md={7} lg={8}>
+            <Box className={`corp-panel ${selectedEquipoId ? 'panel-mode-edit' : ''}`} sx={{ height: '100%' }}>
+              
+              {/* SECCIÓN 1: ESPECIFICACIONES DE HARDWARE */}
+              <header className="corp-panel-header">
+                <FiCpu color={selectedEquipoId ? "#f59e0b" : "#00a8e8"} size={20} />
+                <Typography className="corp-panel-title">ESPECIFICACIONES DE HARDWARE</Typography>
+              </header>
+              <Grid container spacing={2} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={4}>
+                  <TextField fullWidth label="MOTHERBOARD" name="mother" value={formData.mother} onChange={handleChange} className="industrial-input-corp" />
                 </Grid>
-              </Box>
+                <Grid item xs={12} sm={4}>
+                  <TextField fullWidth label="CPU" name="cpu" value={formData.cpu} onChange={handleChange} className="industrial-input-corp" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField fullWidth label="RAM" name="ram" value={formData.ram} onChange={handleChange} className="industrial-input-corp" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField fullWidth label="GPU" name="gpu" value={formData.gpu} onChange={handleChange} className="industrial-input-corp" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField fullWidth label="DISCOS / ALMACENAMIENTO" name="discos" value={formData.discos} onChange={handleChange} className="industrial-input-corp" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField fullWidth label="FUENTE" name="fuente" value={formData.fuente} onChange={handleChange} className="industrial-input-corp" />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField fullWidth label="GABINETE" name="gabinete" value={formData.gabinete} onChange={handleChange} className="industrial-input-corp" />
+                </Grid>
+              </Grid>
 
-              <Box className="corp-panel">
-                <header className="corp-panel-header">
-                  <FiAlertCircle color="#f59e0b" size={20} />
-                  <Typography className="corp-panel-title">REPORTE DE CLIENTE (SÍNTOMAS)</Typography>
-                </header>
-                <TextField fullWidth multiline rows={5} label="DESCRIPCIÓN DE FALLA" name="fallaReportada" value={formData.fallaReportada} onChange={handleChange} className="industrial-input-corp" />
-              </Box>
-            </Box>
-          </Grid>
+              <Divider sx={{ borderColor: '#2d3238', mb: 4 }} />
 
-          {/* PANEL DERECHO: CLIENTES ASOCIADOS */}
-          <Grid item xs={12} md={5} lg={3}>
-            <Box className="corp-panel" sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '600px' }}>
+              {/* SECCIÓN 2: REPORTE DE CLIENTE */}
               <header className="corp-panel-header">
-                <FiUser color="#10b981" size={20} />
-                <Typography className="corp-panel-title">DUEÑO DEL EQUIPO</Typography>
+                <FiAlertCircle color="#f59e0b" size={20} />
+                <Typography className="corp-panel-title">REPORTE DE CLIENTE (SÍNTOMAS)</Typography>
               </header>
-              
               <TextField 
                 fullWidth 
-                label={selectedEquipoId ? "CLIENTE FIJADO (NO MODIFICABLE)" : "BUSCAR CLIENTE..."}
-                value={busquedaCliente} 
-                onChange={(e) => setBusquedaCliente(e.target.value)} 
-                disabled={!!selectedEquipoId}
+                multiline 
+                rows={8} 
+                label="DESCRIPCIÓN DE FALLA" 
+                name="fallaReportada" 
+                value={formData.fallaReportada} 
+                onChange={handleChange} 
                 className="industrial-input-corp" 
-                size="small" 
-                sx={{ mb: 2 }}
               />
-
-              <Box className="client-list-container" sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: '400px' }}>
-                <List disablePadding>
-                  {clientesFiltrados.map(c => (
-                    <ListItem key={c._id} disablePadding className={`client-list-item ${selectedClientId === c._id ? 'selected' : ''}`}>
-                      <ListItemButton onClick={() => !selectedEquipoId && setSelectedClientId(c._id)} disabled={!!selectedEquipoId}>
-                        <ListItemText 
-                          primary={`${c.name} ${c.lastname}`} 
-                          secondary={c.email || 'Sin Correo'} 
-                          secondaryTypographyProps={{ style: { color: '#818cf8', fontSize: '0.8rem' } }}
-                          classes={{ primary: 'client-item-name' }}
-                        />
-                        <ListItemIcon sx={{ minWidth: 'auto' }}>
-                          {selectedClientId === c._id ? <FiCheckCircle color="#00a8e8" size={20} /> : <FiPlusCircle color="#64748b" size={20} />}
-                        </ListItemIcon>
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-
-              <Box className="status-footer-corp" sx={{ mt: 'auto', pt: 2 }}>
-                <Typography className="status-label">VINCULACIÓN</Typography>
-                <div className={`status-badge ${selectedClientId ? 'linked' : 'pending'}`}>
-                  {selectedClientId ? <><span className="blink">●</span> ASIGNADO</> : <><span>○</span> PENDIENTE</>}
-                </div>
-              </Box>
             </Box>
           </Grid>
+
         </Grid>
       </Box>
     </Box>

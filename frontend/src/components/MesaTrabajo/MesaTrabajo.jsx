@@ -9,12 +9,13 @@ import SaveIcon from '@mui/icons-material/Save';
 import BuildIcon from '@mui/icons-material/Build';
 import { useMesaTrabajo } from '../../hooks/useMesaTrabajo';
 import Navbar from '../../components/Layout/Navbar';
-
 import '../../styles/MesaTrabajo.css';
+import { useAuth } from '../../../context/authProvider';
 
 const MesaTrabajo = () => {
   const { listaPendientes, loading, error, actualizarOrden } = useMesaTrabajo();
-  
+  const { user } = useAuth();
+
   const [order, setOrder] = useState(null);
   const [activeTab, setActiveTab] = useState(0); 
   const [mostrarExito, setMostrarExito] = useState(false);
@@ -144,26 +145,70 @@ const MesaTrabajo = () => {
             Cargar Orden:
           </Typography>
           <Select
-            fullWidth
-            size="small"
-            value={order?._id || ''}
-            onChange={handleSelectOrder}
-            displayEmpty
-            className="industrial-input"
+  fullWidth
+  size="small"
+  value={order?._id || ''}
+  onChange={handleSelectOrder}
+  displayEmpty
+  className="industrial-input"
+  sx={{ 
+    color: '#ffffff', 
+    fontWeight: 600,
+    '.MuiSvgIcon-root': { color: '#00a8e8' },
+    '.MuiOutlinedInput-notchedOutline': { borderColor: '#374151' }
+  }}
+>
+  <MenuItem value="" disabled>-- Seleccione una orden de la cola de pendientes --</MenuItem>
+  
+ {listaPendientes.map(opcion => {
+    
+    // 1. Extraemos tu ID de forma segura
+    const miId = user?.id || user?._id; 
+    
+    // 2. FORZAMOS A STRING: Convertimos ambos a texto para que la comparación sea perfecta
+    const esMiOrden = miId && opcion.tecnico_asignado && String(opcion.tecnico_asignado) === String(miId);
+  console.log("🛠️ DATOS DEL TOKEN:", user);
+  console.log("📋 PRIMERA ORDEN PENDIENTE:", listaPendientes[0]);
+    return (
+      <MenuItem
+        key={opcion._id} 
+        value={opcion._id} 
+        sx={{ 
+          fontWeight: 600, 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          // Si es tuya, le ponemos un borde verde esmeralda a la izquierda para resaltarla
+          borderLeft: esMiOrden ? '4px solid #10b981' : '4px solid transparent',
+          backgroundColor: esMiOrden ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
+        }}
+      >
+        <Box>
+          ORDEN #{opcion.nro_orden} | {opcion.id_equipo?.cliente?.name || 'S/N'} {opcion.id_equipo?.cliente?.lastname || ''} - {opcion.id_equipo?.cpu || 'Hardware Genérico'}
+        </Box>
+        
+        {/* Etiqueta visual exclusiva para tus órdenes */}
+        {esMiOrden && (
+          <Typography 
             sx={{ 
-              color: '#ffffff', 
-              fontWeight: 600,
-              '.MuiSvgIcon-root': { color: '#00a8e8' },
-              '.MuiOutlinedInput-notchedOutline': { borderColor: '#374151' }
+              ml: 2,
+              fontSize: '0.65rem', 
+              fontWeight: 800,
+              bgcolor: 'rgba(16, 185, 129, 0.2)', 
+              color: '#10b981', 
+              px: 1, 
+              py: 0.3, 
+              borderRadius: 1,
+              letterSpacing: '0.5px'
             }}
           >
-            <MenuItem value="" disabled>-- Seleccione una orden de la cola de pendientes --</MenuItem>
-            {listaPendientes.map(opcion => (
-              <MenuItem key={opcion._id} value={opcion._id} sx={{ fontWeight: 600 }}>
-                ORDEN #{opcion.nro_orden} | {opcion.id_equipo?.cliente?.name || 'S/N'} {opcion.id_equipo?.cliente?.lastname || ''} - {opcion.id_equipo?.cpu || 'Hardware Genérico'}
-              </MenuItem>
-            ))}
-          </Select>
+            TU ASIGNACIÓN
+          </Typography>
+        )}
+      </MenuItem>
+    );
+  })}
+</Select>
         </Box>
 
         {!order ? (

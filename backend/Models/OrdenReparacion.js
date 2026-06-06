@@ -8,14 +8,22 @@ const OrdenReparacionSchema = new mongoose.Schema({
   },
   id_equipo: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Equipos',
+    ref: 'Equipos', // Ojo acá: asegurate de que el modelo exportado se llame 'Equipos' o 'Equipo' según tu archivo Equipos.js
     required: true
   },
-  id_usuario: {
+  id_usuario: { // Este es el Recepcionista
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Usuario', 
     required: true
   },
+  
+  // ---> NUEVO CAMPO: TÉCNICO ASIGNADO <---
+  tecnico_asignado: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Usuario',
+    default: null
+  },
+
   estado: {
     type: String,
     enum: ['PENDIENTE DE REVISION', 'EN DIAGNOSTICO' ,'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'],
@@ -39,11 +47,11 @@ const OrdenReparacionSchema = new mongoose.Schema({
       default: ''
     }
   },
-presupuesto: {
+  presupuesto: {
     repuestos: [{
       descripcion: { type: String, default: '' },
       cantidad: { type: Number, default: 1 },
-      precioUnitario: { type: Number, default: 0 } // Reemplaza 'costo' para calcular cantidad * precio unitario
+      precioUnitario: { type: Number, default: 0 } 
     }],
     manoDeObra: {
       descripcion: { type: String, default: 'Reparación electrónica nivel componente + Mantenimiento' },
@@ -51,7 +59,7 @@ presupuesto: {
     },
     notasCliente: {
       type: String,
-      default: '' // Para el campo de texto inferior derecho de tu mockup ("Notas para el Cliente")
+      default: '' 
     },
     total: {
       type: Number,
@@ -61,7 +69,7 @@ presupuesto: {
 
 }, { 
   versionKey: false,
-  timestamps: true  // crea createdAt y updatedAt automáticamente para saber cuándo se editó por última vez.
+  timestamps: true 
 });
 
 module.exports = mongoose.models.OrdenReparacion || mongoose.model('OrdenReparacion', OrdenReparacionSchema, 'ordenes_reparacion');

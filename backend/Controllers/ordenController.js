@@ -24,7 +24,6 @@ exports.crearOrden = async (req, res) => {
       id_usuario: id_usuario_recepcionista,
       estado: estado || 'PENDIENTE DE REVISION',
       observaciones: observaciones
-      
     });
 
     const ordenGuardada = await nuevaOrden.save();
@@ -38,7 +37,6 @@ exports.crearOrden = async (req, res) => {
       });
       await primerHistorial.save();
     } catch (errorHistorial) {
-      console.error("ERROR REAL DE MONGOOSE EN HISTORIAL:", errorHistorial); // <-- Agrega esta línea
       await OrdenReparacion.findByIdAndDelete(ordenGuardada._id);
       throw new Error('Error al inicializar el historial de estados.');
     }
@@ -188,5 +186,50 @@ exports.obtenerOrdenPorId = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener orden por ID:", error);
     return res.status(500).json({ ok: false, msg: 'Error interno del servidor' });
+  }
+};
+
+// =========================================================================
+// 6. PUT - Asignar Técnico a la Orden (Caso de Uso: Asignarse Orden)
+// =========================================================================
+exports.asignarTecnico = async (req, res) => {
+  try {
+    const { id } = req.params; // El ID de la Orden de Reparación
+    const id_tecnico = req.user.id; // El ID del técnico logueado (viene del JWT)
+
+    const orden = await OrdenReparacion.findById(id);
+    
+    if (!orden) {
+      return res.status(404).json({ ok: false, msg: 'Orden no encontrada.' });
+    }
+
+    if (orden.tecnico_asignado && orden.tecnico_asignado.toString() !== id_tecnico) {
+      return res.status(400).json({ ok: false, msg: 'Esta orden ya fue tomada por otro técnico.' });
+    }
+
+    orden.tecnico_asignado = id_tecnico;
+    
+    if (orden.estado === 'PENDIENTE DE REVISION') {
+      orden.estado = 'EN DIAGNOSTICO';
+      
+      const nuevoHistorial = new EstadoHistorial({
+        id_orden: orden._id,
+        estado: 'EN DIAGNOSTICO',
+        id_usuario: id_tecnico
+      });
+      await nuevoHistorial.save();
+    }
+
+    await orden.save();
+
+    return res.status(200).json({ 
+      ok: true, 
+      msg: 'Te has asignado la orden exitosamente.', 
+      orden 
+    });
+
+  } catch (error) {
+    console.error("Error al asignar técnico:", error);
+    return res.status(500).json({ ok: false, msg: 'Error interno del servidor.' });
   }
 };

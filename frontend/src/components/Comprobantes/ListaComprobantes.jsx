@@ -111,7 +111,7 @@ export default function GestionOrdenes() {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("ORDEN DE INGRESO", 163, 20, { align: 'center' });
+    doc.text("ORDEN DE INGRESO", 160, 20, { align: 'center' });
     doc.setTextColor(0, 168, 232);
     doc.setFontSize(16);
     doc.text(`# ${orden.nro_orden}`, 163, 28, { align: 'center' });
@@ -119,14 +119,15 @@ export default function GestionOrdenes() {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.text(`FECHA: ${orden.fecha_alta ? new Date(orden.fecha_alta).toLocaleDateString('es-AR') : 'N/A'}`, 163, 34, { align: 'center' });
+    doc.text(`EMISIÓN: ${new Date().toLocaleDateString('es-AR')}`, 163, 38, { align: 'center' });
 
     doc.setDrawColor(0, 168, 232);
-    doc.setLineWidth(0.5);
-    doc.line(14, 42, 196, 42);
+    doc.setLineWidth(0.1);
+    doc.line(30, 48, 196, 60);
 
     // --- SECCIÓN 1: DATOS DEL CLIENTE ---
     autoTable(doc, {
-        startY: 48,
+        startY: 54,
         head: [['Nombre y Apellido', 'Teléfono / Celular', 'Email', 'Domicilio']],
         body: [[
             `${cliente.name || '---'} ${cliente.lastname || ''}`,

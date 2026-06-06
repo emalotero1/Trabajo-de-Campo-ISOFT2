@@ -53,8 +53,6 @@ exports.createToken = (user) => {
     rol: user.rol,
     active: user.active,
     cel: user.cel
-    
-
   };
 
   return jwt.sign(payload, secret, { expiresIn: '30d' }); // Token válido 30 días

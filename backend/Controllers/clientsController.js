@@ -1,6 +1,6 @@
 const Client = require('../models/Client'); 
-const Equipo = require('../models/Equipos'); // Asegúrate de que la ruta sea correcta según tus carpetas
-const OrdenReparacion = require('../models/OrdenReparacion'); // Asegúrate de que la ruta sea correcta
+const Equipo = require('../models/Equipos'); 
+const OrdenReparacion = require('../models/OrdenReparacion'); 
 const { validationResult } = require('express-validator');
 
 // --- 1. REGISTRAR (ALTA DE CLIENTE) ---
@@ -44,7 +44,6 @@ const register = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("ERROR EN REGISTRO DE CLIENTE:", error);
         return res.status(500).json({ status: "error", message: "ERROR INTERNO DEL SERVIDOR" });
     }
 };
@@ -62,7 +61,6 @@ const list = async (req, res) => {
             clients
         });
     } catch (error) {
-        console.error("ERROR AL LISTAR CLIENTES:", error);
         return res.status(500).json({ status: "error", message: "ERROR AL LISTAR" });
     }
 };
@@ -92,7 +90,6 @@ const update = async (req, res) => {
 
         return res.status(200).json({ status: "success", client: clientUpdated });
     } catch (error) {
-        console.error("ERROR ACTUALIZANDO CLIENTE:", error);
         if (error.code === 11000) {
             return res.status(409).json({ status: "error", message: "EL EMAIL YA ESTÁ EN USO POR OTRO CLIENTE" });
         }
@@ -142,7 +139,6 @@ const removeLogical = async (req, res) => {
         return res.status(200).json({ status: "success", message: "CLIENTE DESACTIVADO CORRECTAMENTE" });
         
     } catch (error) {
-        console.error("ERROR ELIMINANDO CLIENTE:", error);
         return res.status(500).json({ status: "error", message: "ERROR INTERNO DEL SERVIDOR AL ELIMINAR" });
     }
 };
