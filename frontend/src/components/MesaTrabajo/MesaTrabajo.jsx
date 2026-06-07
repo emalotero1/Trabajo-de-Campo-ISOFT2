@@ -12,6 +12,9 @@ import Navbar from '../../components/Layout/Navbar';
 import '../../styles/MesaTrabajo.css';
 import { useAuth } from '../../../context/authProvider';
 
+// 1. IMPORTAMOS NUESTRO MOTOR DE ESTADOS (Ajustá la ruta según tu estructura)
+import OrdenReparacionContexto from './states/OrdenReparacion'; 
+
 const MesaTrabajo = () => {
   const { listaPendientes, loading, error, actualizarOrden } = useMesaTrabajo();
   const { user } = useAuth();
@@ -20,8 +23,9 @@ const MesaTrabajo = () => {
   const [activeTab, setActiveTab] = useState(0); 
   const [mostrarExito, setMostrarExito] = useState(false);
 
-  const workStates = ['PENDIENTE DE REVISION', 'EN DIAGNOSTICO', 'PRESUPUESTADO'];
-  const currentStateIndex = order ? workStates.indexOf(order.estado) : -1;
+  // 2. CREAMOS EL CONTEXTO EN TIEMPO REAL
+  // Cada vez que 'order' cambia, React le pone el "sombrero" correcto automáticamente
+  const ordenContexto = order ? new OrdenReparacionContexto(order) : null;
 
   useEffect(() => {
     if (order && order.presupuesto) {
@@ -62,51 +66,20 @@ const MesaTrabajo = () => {
     }
   };
 
-  const handleStateChange = (targetState) => {
-    const targetIndex = workStates.indexOf(targetState);
-    if (targetIndex === currentStateIndex + 1) {
-      setOrder({ ...order, estado: targetState });
+  // 3. CAMBIO DE ESTADO + AUTO-GUARDADO
+  const handleStateChange = async (targetState) => {
+    // 1. Armamos la orden con el nuevo estado
+    const ordenActualizada = { ...order, estado: targetState };
+    
+    // 2. Actualizamos la pantalla al instante
+    setOrder(ordenActualizada); 
+    
+    // 3. Mandamos el cambio a la base de datos automáticamente
+    const guardadoCorrecto = await actualizarOrden(ordenActualizada._id, ordenActualizada);
+    if (guardadoCorrecto) {
+      setMostrarExito(true);
     }
   };
-
-  const renderStateButton = (stateName, index) => {
-    let label = "";
-    let btnStyles = { width: '130px', fontWeight: '800', borderRadius: '4px', fontSize: '0.75rem', letterSpacing: '0.5px' };
-    let isDisabled = true;
-
-    if (index < currentStateIndex) {
-      label = "COMPLETADO";
-      btnStyles = { ...btnStyles, bgcolor: 'rgba(0, 168, 232, 0.1)', color: '#00a8e8', border: '1px solid rgba(0, 168, 232, 0.3)' };
-    } else if (index === currentStateIndex) {
-      label = "ACTUAL";
-      btnStyles = { ...btnStyles, bgcolor: 'rgba(0, 168, 232, 0.2)', color: '#fff', border: '1px solid #00a8e8' };
-    } else if (index === currentStateIndex + 1) {
-      label = "ASIGNAR";
-      btnStyles = { ...btnStyles, bgcolor: '#00a8e8', color: '#0b0f19', border: 'none', '&:hover': { bgcolor: '#008bbf' } };
-      isDisabled = false;
-    } else {
-      label = "BLOQUEADO";
-      btnStyles = { 
-        ...btnStyles, 
-        '&.Mui-disabled': {
-          bgcolor: 'rgba(255,255,255,0.05)', 
-          color: '#ffffff', 
-          border: '1px solid #4b5563',
-          opacity: 0.6 
-        } 
-      };
-    }
-
-    return (
-      <Box key={stateName} display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="body2" sx={{ color: '#8a8f98', fontWeight: 600 }}>{stateName}</Typography>
-        <Button disabled={isDisabled} onClick={() => handleStateChange(stateName)} sx={btnStyles}>
-          {label}
-        </Button>
-      </Box>
-    );
-  };
-
   const clienteData = order?.id_equipo?.cliente;
   const nombreCliente = clienteData?.name ? `${clienteData.name} ${clienteData.lastname || ''}`.trim() : 'Cliente no registrado';
   const infoEquipo = order?.id_equipo?.cpu ? `${order.id_equipo.cpu} - ${order.id_equipo.ram || ''}` : 'Sin detallar';
@@ -133,7 +106,6 @@ const MesaTrabajo = () => {
           </Box>
         </header>
 
-        {/* Comentario mensaje cuando guarda exitosamente */}
         <Snackbar open={mostrarExito} autoHideDuration={3000} onClose={() => setMostrarExito(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
           <Alert severity="success" variant="filled" sx={{ width: '100%', bgcolor: '#10b981', color: '#fff', fontWeight: 'bold' }}>
             Cambios guardados exitosamente en el servidor.
@@ -145,70 +117,38 @@ const MesaTrabajo = () => {
             Cargar Orden:
           </Typography>
           <Select
-  fullWidth
-  size="small"
-  value={order?._id || ''}
-  onChange={handleSelectOrder}
-  displayEmpty
-  className="industrial-input"
-  sx={{ 
-    color: '#ffffff', 
-    fontWeight: 600,
-    '.MuiSvgIcon-root': { color: '#00a8e8' },
-    '.MuiOutlinedInput-notchedOutline': { borderColor: '#374151' }
-  }}
->
-  <MenuItem value="" disabled>-- Seleccione una orden de la cola de pendientes --</MenuItem>
-  
- {listaPendientes.map(opcion => {
-    
-    // 1. Extraemos tu ID de forma segura
-    const miId = user?.id || user?._id; 
-    
-    // 2. FORZAMOS A STRING: Convertimos ambos a texto para que la comparación sea perfecta
-    const esMiOrden = miId && opcion.tecnico_asignado && String(opcion.tecnico_asignado) === String(miId);
-  console.log("🛠️ DATOS DEL TOKEN:", user);
-  console.log("📋 PRIMERA ORDEN PENDIENTE:", listaPendientes[0]);
-    return (
-      <MenuItem
-        key={opcion._id} 
-        value={opcion._id} 
-        sx={{ 
-          fontWeight: 600, 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          // Si es tuya, le ponemos un borde verde esmeralda a la izquierda para resaltarla
-          borderLeft: esMiOrden ? '4px solid #10b981' : '4px solid transparent',
-          backgroundColor: esMiOrden ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
-        }}
-      >
-        <Box>
-          ORDEN #{opcion.nro_orden} | {opcion.id_equipo?.cliente?.name || 'S/N'} {opcion.id_equipo?.cliente?.lastname || ''} - {opcion.id_equipo?.cpu || 'Hardware Genérico'}
-        </Box>
-        
-        {/* Etiqueta visual exclusiva para tus órdenes */}
-        {esMiOrden && (
-          <Typography 
+            fullWidth size="small" value={order?._id || ''} onChange={handleSelectOrder} displayEmpty className="industrial-input"
             sx={{ 
-              ml: 2,
-              fontSize: '0.65rem', 
-              fontWeight: 800,
-              bgcolor: 'rgba(16, 185, 129, 0.2)', 
-              color: '#10b981', 
-              px: 1, 
-              py: 0.3, 
-              borderRadius: 1,
-              letterSpacing: '0.5px'
+              color: '#ffffff', fontWeight: 600,
+              '.MuiSvgIcon-root': { color: '#00a8e8' },
+              '.MuiOutlinedInput-notchedOutline': { borderColor: '#374151' }
             }}
           >
-            TU ASIGNACIÓN
-          </Typography>
-        )}
-      </MenuItem>
-    );
-  })}
-</Select>
+            <MenuItem value="" disabled>-- Seleccione una orden de la cola de pendientes --</MenuItem>
+            
+            {listaPendientes.map(opcion => {
+              const miId = user?.id || user?._id; 
+              const esMiOrden = miId && opcion.tecnico_asignado && String(opcion.tecnico_asignado) === String(miId);
+
+              return (
+                <MenuItem
+                  key={opcion._id} value={opcion._id} 
+                  sx={{ 
+                    fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    borderLeft: esMiOrden ? '4px solid #10b981' : '4px solid transparent',
+                    backgroundColor: esMiOrden ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
+                  }}
+                >
+                  <Box>ORDEN #{opcion.nro_orden} | {opcion.id_equipo?.cliente?.name || 'S/N'} {opcion.id_equipo?.cliente?.lastname || ''} - {opcion.id_equipo?.cpu || 'Hardware Genérico'}</Box>
+                  {esMiOrden && (
+                    <Typography sx={{ ml: 2, fontSize: '0.65rem', fontWeight: 800, bgcolor: 'rgba(16, 185, 129, 0.2)', color: '#10b981', px: 1, py: 0.3, borderRadius: 1, letterSpacing: '0.5px' }}>
+                      TU ASIGNACIÓN
+                    </Typography>
+                  )}
+                </MenuItem>
+              );
+            })}
+          </Select>
         </Box>
 
         {!order ? (
@@ -249,11 +189,41 @@ const MesaTrabajo = () => {
                   </Box>
                 </Box>
 
-                <Box className="mesatrabajo-panel" sx={{ borderLeft: '3px solid #00a8e8', flexGrow: 1 }}>
+                {/* 4. SECCIÓN PROGRESO TÉCNICO RENOVADA (Totalmente dinámica) */}
+                <Box className="mesatrabajo-panel" sx={{ borderLeft: `3px solid ${ordenContexto.getMetadatosUI().color}`, flexGrow: 1 }}>
                   <Typography sx={{ color: '#fff', fontWeight: 800, mb: 3, textTransform: 'uppercase', fontSize: '0.9rem' }}>
-                    Progreso Técnico
+                    Estado del Servicio
                   </Typography>
-                  {workStates.map((state, idx) => renderStateButton(state, idx))}
+
+                  {/* Mostramos el Estado Actual consumiendo los metadatos */}
+                  <Box sx={{ mb: 4, p: 2, borderRadius: 1, bgcolor: `${ordenContexto.getMetadatosUI().color}15`, border: `1px solid ${ordenContexto.getMetadatosUI().color}50` }}>
+                    <Typography sx={{ color: ordenContexto.getMetadatosUI().color, fontWeight: 900, mb: 0.5, fontSize: '0.75rem', letterSpacing: '1px' }}>ESTADO ACTUAL</Typography>
+                    <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.2rem', mb: 0.5 }}>{ordenContexto.getMetadatosUI().label}</Typography>
+                    <Typography sx={{ color: '#8a8f98', fontSize: '0.8rem' }}>{ordenContexto.getMetadatosUI().descripcion}</Typography>
+                  </Box>
+
+                  {/* Renderizamos los botones basándonos en getTransicionesValidas() */}
+                  <Typography sx={{ color: '#64748b', fontWeight: 700, fontSize: '0.75rem', mb: 2, letterSpacing: '0.5px' }}>SUIQUIENTE PASO PERMITIDO:</Typography>
+                  
+                  {ordenContexto.getTransicionesValidas().length > 0 ? (
+                    ordenContexto.getTransicionesValidas().map(estadoDestino => (
+                      <Button 
+                        key={estadoDestino}
+                        variant="contained"
+                        onClick={() => handleStateChange(estadoDestino)}
+                        sx={{ 
+                          width: '100%', mb: 1.5, bgcolor: '#00a8e8', color: '#0b0f19', 
+                          fontWeight: 800, '&:hover': { bgcolor: '#008bbf' } 
+                        }}
+                      >
+                        Pasar a {estadoDestino}
+                      </Button>
+                    ))
+                  ) : (
+                    <Typography sx={{ color: '#ef4444', fontSize: '0.8rem', fontStyle: 'italic', fontWeight: 600 }}>
+                      No hay transiciones disponibles o el proceso finalizó.
+                    </Typography>
+                  )}
                 </Box>
 
               </Box>
@@ -263,12 +233,9 @@ const MesaTrabajo = () => {
               <Box className="mesatrabajo-panel" sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 0, overflow: 'hidden' }}>
                 
                 <Tabs 
-                  value={activeTab} 
-                  onChange={(e, val) => setActiveTab(val)}
-                  variant="fullWidth"
+                  value={activeTab} onChange={(e, val) => setActiveTab(val)} variant="fullWidth"
                   sx={{ 
-                    borderBottom: '1px solid #2d3238',
-                    bgcolor: 'rgba(13, 15, 17, 0.4)',
+                    borderBottom: '1px solid #2d3238', bgcolor: 'rgba(13, 15, 17, 0.4)',
                     '& .MuiTab-root': { color: '#64748b', fontWeight: 800, py: 2.5, fontFamily: 'Inter' },
                     '& .Mui-selected': { color: '#00a8e8', bgcolor: 'rgba(0, 168, 232, 0.05)' },
                     '& .MuiTabs-indicator': { backgroundColor: '#00a8e8', height: '3px' }
@@ -285,14 +252,16 @@ const MesaTrabajo = () => {
                     </Typography>
                     
                     <TextField
-                      multiline
-                      fullWidth
-                      rows={12} 
-                      className="industrial-input"
-                      placeholder="Ej: Se detectó corto en la línea de 12V..."
-                      value={order.diagnostico.informe}
-                      onChange={(e) => setOrder({...order, diagnostico: {...order.diagnostico, informe: e.target.value}})}
-                    />
+                        multiline fullWidth rows={12} 
+                        className="industrial-input"
+                        placeholder="Ej: Se detectó corto en la línea de 12V..."
+                        value={order.diagnostico.informe}
+                        onChange={(e) => setOrder({...order, diagnostico: {...order.diagnostico, informe: e.target.value}})}
+                        disabled={!ordenContexto.puedeEditarDiagnostico()}
+                        // Agregá esto para mejorar la experiencia:
+                        helperText={`${order.diagnostico.informe.length} / 15 caracteres mínimos`}
+                        FormHelperTextProps={{ sx: { color: order.diagnostico.informe.length < 15 ? '#ef4444' : '#10b981' } }}
+                      />
                   </Box>
                 )}
 
@@ -301,10 +270,16 @@ const MesaTrabajo = () => {
                     
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                       <Typography sx={{ color: '#fff', fontWeight: 800, textTransform: 'uppercase', fontSize: '0.9rem' }}>Repuestos a Utilizar</Typography>
-                      <Button size="small" startIcon={<AddIcon />} sx={{ color: '#0b0f19', bgcolor: '#00a8e8', fontWeight: 700, '&:hover': { bgcolor: '#008bbf' } }} onClick={() => {
-                        const newParts = [...order.presupuesto.repuestos, { descripcion: '', cantidad: 1, precioUnitario: 0 }];
-                        setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}});
-                      }}>
+                      <Button 
+                        size="small" startIcon={<AddIcon />} 
+                        sx={{ color: '#0b0f19', bgcolor: '#00a8e8', fontWeight: 700, '&:hover': { bgcolor: '#008bbf' }, '&.Mui-disabled': { bgcolor: '#2d3238', color: '#64748b' } }} 
+                        // BLOQUEO DE BOTON AGREGAR
+                        disabled={!ordenContexto.puedeEditarPresupuesto()}
+                        onClick={() => {
+                          const newParts = [...order.presupuesto.repuestos, { descripcion: '', cantidad: 1, precioUnitario: 0 }];
+                          setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}});
+                        }}
+                      >
                         AGREGAR ÍTEM
                       </Button>
                     </Box>
@@ -314,13 +289,17 @@ const MesaTrabajo = () => {
                         <Box key={index} sx={{ display: 'flex', gap: 2, alignItems: 'center', p: 2, bgcolor: 'rgba(13, 15, 17, 0.6)', border: '1px solid #2d3238', borderRadius: 1 }}>
                           <TextField 
                             variant="standard" placeholder="Descripción del repuesto" fullWidth value={item.descripcion}
+                            // BLOQUEO DE INPUTS
+                            disabled={!ordenContexto.puedeEditarPresupuesto()}
                             onChange={(e) => { const newParts = [...order.presupuesto.repuestos]; newParts[index].descripcion = e.target.value; setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}}); }}
                             InputProps={{ disableUnderline: true, sx: { color: '#fff', fontSize: '0.9rem', fontWeight: 500 } }}
                           />
                           <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.3)', px: 1, borderRadius: 1, border: '1px solid #2d3238' }}>
                             <Typography sx={{ color: '#64748b', fontSize: '0.75rem', mr: 1, fontWeight: 700 }}>CANT.</Typography>
                             <TextField 
-                              type="number" variant="standard" value={item.cantidad} inputProps={{ min: 1, style: { textAlign: 'center', color: '#00a8e8', fontWeight: 700 } }} sx={{ width: '40px' }}
+                              type="number" variant="standard" value={item.cantidad} 
+                              disabled={!ordenContexto.puedeEditarPresupuesto()}
+                              inputProps={{ min: 1, style: { textAlign: 'center', color: '#00a8e8', fontWeight: 700 } }} sx={{ width: '40px' }}
                               onChange={(e) => { const newParts = [...order.presupuesto.repuestos]; newParts[index].cantidad = Number(e.target.value); setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}}); }}
                               InputProps={{ disableUnderline: true }}
                             />
@@ -328,15 +307,22 @@ const MesaTrabajo = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.3)', px: 1.5, py: 0.5, borderRadius: 1, border: '1px solid #2d3238', minWidth: '130px' }}>
                             <Typography sx={{ color: '#00a8e8', mr: 1, fontWeight: 700 }}>$</Typography>
                             <TextField 
-                              type="number" variant="standard" value={item.precioUnitario} inputProps={{ min: 0, style: { textAlign: 'right', color: '#fff', fontWeight: 600 } }} fullWidth
+                              type="number" variant="standard" value={item.precioUnitario} 
+                              disabled={!ordenContexto.puedeEditarPresupuesto()}
+                              inputProps={{ min: 0, style: { textAlign: 'right', color: '#fff', fontWeight: 600 } }} fullWidth
                               onChange={(e) => { const newParts = [...order.presupuesto.repuestos]; newParts[index].precioUnitario = Number(e.target.value); setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}}); }}
                               InputProps={{ disableUnderline: true }}
                             />
                           </Box>
-                          <IconButton size="small" sx={{ color: '#ef4444', bgcolor: 'rgba(239, 68, 68, 0.1)', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.2)' } }} onClick={() => {
-                            const newParts = order.presupuesto.repuestos.filter((_, i) => i !== index);
-                            setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}});
-                          }}>
+                          <IconButton 
+                            size="small" 
+                            disabled={!ordenContexto.puedeEditarPresupuesto()}
+                            sx={{ color: '#ef4444', bgcolor: 'rgba(239, 68, 68, 0.1)', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.2)' }, '&.Mui-disabled': { color: '#64748b', bgcolor: 'transparent' } }} 
+                            onClick={() => {
+                              const newParts = order.presupuesto.repuestos.filter((_, i) => i !== index);
+                              setOrder({...order, presupuesto: {...order.presupuesto, repuestos: newParts}});
+                            }}
+                          >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Box>
@@ -354,7 +340,9 @@ const MesaTrabajo = () => {
                        <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.4)', px: 2, py: 1, borderRadius: 1, border: '1px solid #00a8e8' }}>
                          <Typography sx={{ color: '#00a8e8', fontWeight: 800, mr: 1, fontSize: '1.1rem' }}>$</Typography>
                          <TextField 
-                            type="number" variant="standard" value={order.presupuesto.manoDeObra.precio} inputProps={{ min: 0, style: { textAlign: 'right', fontWeight: 800, color: '#00a8e8', fontSize: '1.1rem' } }} sx={{ width: '100px' }}
+                            type="number" variant="standard" value={order.presupuesto.manoDeObra.precio} 
+                            disabled={!ordenContexto.puedeEditarPresupuesto()}
+                            inputProps={{ min: 0, style: { textAlign: 'right', fontWeight: 800, color: '#00a8e8', fontSize: '1.1rem' } }} sx={{ width: '100px' }}
                             onChange={(e) => setOrder({...order, presupuesto: {...order.presupuesto, manoDeObra: {...order.presupuesto.manoDeObra, precio: Number(e.target.value)}}})}
                             InputProps={{ disableUnderline: true }}
                           />
@@ -373,12 +361,18 @@ const MesaTrabajo = () => {
                       </>
                     )}
                   </Box>
-                  <Button 
-                    variant="contained" 
-                    startIcon={<SaveIcon />}
-                    onClick={handleGuardar}
-                    sx={{ bgcolor: '#00a8e8', color: '#0b0f19', '&:hover': { bgcolor: '#008bbf' }, fontWeight: 800, px: 4, py: 1.5, letterSpacing: '1px' }}
-                  >
+                 <Button 
+                      variant="contained" 
+                      startIcon={<SaveIcon />}
+                      onClick={handleGuardar}
+                      // Preguntamos al contexto si en este estado se puede editar algo
+                      disabled={!ordenContexto.puedeEditarDiagnostico() && !ordenContexto.puedeEditarPresupuesto()}
+                      sx={{ 
+                        bgcolor: '#00a8e8', color: '#0b0f19', fontWeight: 800, px: 4, py: 1.5, letterSpacing: '1px',
+                        '&:hover': { bgcolor: '#008bbf' },
+                        '&.Mui-disabled': { bgcolor: '#2d3238', color: '#64748b' } // Estilo para cuando está bloqueado
+                      }}
+                    >
                     GUARDAR CAMBIOS
                   </Button>
                 </Box>
