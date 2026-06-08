@@ -8,7 +8,7 @@ const EstadoHistorialSchema = new mongoose.Schema({
   },
   estado: {
     type: String,
-    enum: ['PENDIENTE DE REVISION', 'EN DIAGNOSTICO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'],
+    enum: ['PENDIENTE DE REVISION', 'ASIGNADO', 'DIAGNOSTICADO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'],
     required: true
   },
   id_usuario: {

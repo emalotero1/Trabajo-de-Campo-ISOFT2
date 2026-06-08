@@ -15,7 +15,7 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
   const [success, setSuccess] = useState(null);
   
   const [formData, setFormData] = useState({
-    name: '', lastname: '', username: '', email: '', 
+    nombre: '', apellido: '', username: '', email: '', 
     password: '', rol: 'recepcionista', cel: '', active: true
   });
 
@@ -27,7 +27,7 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
         setFormData({ ...staffToEdit, password: '' });
       } else {
         setFormData({ 
-          name: '', lastname: '', username: '', email: '', 
+          nombre: '', apellido: '', username: '', email: '', 
           password: '', rol: 'recepcionista', cel: '', active: true 
         });
       }
@@ -87,10 +87,10 @@ const StaffFormModal = ({ open, onClose, onSave, staffToEdit }) => {
                 {/* SECCIÓN IDENTIDAD */}
               
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="NOMBRE" name="name" value={formData.name} onChange={handleChange} required className="industrial-input-corp" />
+                  <TextField fullWidth label="NOMBRE" name="nombre" value={formData.nombre} onChange={handleChange} required className="industrial-input-corp" />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="APELLIDO" name="lastname" value={formData.lastname} onChange={handleChange} required className="industrial-input-corp" />
+                  <TextField fullWidth label="APELLIDO" name="apellido" value={formData.apellido} onChange={handleChange} required className="industrial-input-corp" />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField fullWidth label="CELULAR" name="cel" value={formData.cel} onChange={handleChange} required className="industrial-input-corp" />

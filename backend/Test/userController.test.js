@@ -23,7 +23,7 @@ describe('Pruebas de userController', () => {
 
   describe('Método register', () => {
     it('Debe retornar 409 si el usuario ya existe', async () => {
-      req.body = { email: 'a@a.com', username: 'test', password: '123', name: 'N', lastname: 'L', rol: 'admin' };
+      req.body = { email: 'a@a.com', username: 'test', password: '123', nombre: 'N', apellido: 'L', rol: 'admin' };
       
       // 1. Mockeamos User.findOne
       User.findOne.mockResolvedValue({ _id: '1' });
@@ -56,7 +56,7 @@ describe('Pruebas de userController', () => {
       await update(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "USUARIO_NO_ENCONTRADO" }));
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "USUARIO NO ENCONTRADO" }));
     });
 
     // 2. Caso: Seguridad contra "suicidio de rol"
@@ -70,15 +70,15 @@ describe('Pruebas de userController', () => {
       await update(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "NO_PUEDES_QUITARTE_EL_ROL_ADMIN" }));
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "NO PUEDES QUITARTE EL ROL ADMIN" }));
     });
 
     // 3. Caso: Éxito (Acá usamos la técnica del "túnel de juguete" para el .select)
     it('Debe actualizar el usuario correctamente (sin tocar la contraseña)', async () => {
       req.params.id = 'user1';
-      req.body = { name: 'Emanuel' }; // Dato a modificar
+      req.body = { nombre: 'Emanuel' }; // Dato a modificar
 
-      const mockUpdatedUser = { _id: 'user1', name: 'Emanuel ', rol: 'tecnico' };
+      const mockUpdatedUser = { _id: 'user1', nombre: 'Emanuel ', rol: 'tecnico' };
 
       // Pasamos el chequeo de existencia
       User.findById.mockResolvedValue({ _id: 'user1' });

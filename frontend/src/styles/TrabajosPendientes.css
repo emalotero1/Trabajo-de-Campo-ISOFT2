@@ -1,0 +1,339 @@
+/* =========================================
+   CONTENEDOR PRINCIPAL Y CABECERA
+========================================= */
+.tp-main-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+}
+
+.tp-header-panel {
+  margin-bottom: 40px;
+  padding: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+@media (min-width: 900px) {
+  .tp-header-panel {
+    padding: 32px;
+  }
+}
+
+.tp-header-title {
+  color: #8ed5ff;
+  font-weight: 800;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px !important;
+}
+
+.tp-header-subtitle {
+  color: #bdc8d1;
+  font-size: 0.9rem !important;
+}
+
+/* =========================================
+   BUSCADOR Y SUBHEADER
+========================================= */
+.tp-search-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .tp-search-wrapper {
+    width: 350px;
+  }
+}
+
+.tp-search-inner {
+  position: relative;
+  width: 100%;
+}
+
+.tp-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #87929a;
+}
+
+.tp-search-input {
+  padding-left: 45px !important;
+  border-radius: 8px !important;
+  width: 100%;
+}
+
+.tp-subheader-panel {
+  margin-bottom: 32px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #161c22;
+}
+
+.tp-subheader-left {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  color: #bdc8d1;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px;
+}
+
+.tp-subheader-right {
+  color: #8ed5ff;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+}
+
+.tp-list-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (min-width: 700px) {
+  .tp-list-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .tp-list-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.tp-list-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(15, 23, 42, 0.85);
+  min-height: 260px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.15);
+}
+
+.tp-row-meta,
+.tp-row-content,
+.tp-row-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tp-row-actions {
+  justify-content: space-between;
+}
+
+.tp-row-meta {
+  min-width: 0;
+}
+
+.tp-row-content {
+  min-width: 0;
+}
+
+.tp-row-actions {
+  min-width: 0;
+}
+
+.tp-row-actions .tp-btn-action {
+  width: 100% !important;
+}
+
+/* =========================================
+   TARJETAS TÉCNICAS (CARDS)
+========================================= */
+.technical-card {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; 
+  box-sizing: border-box;
+}
+
+.tp-card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  width: 100%;
+  min-width: 0; 
+  box-sizing: border-box;
+}
+
+.tp-card-top {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0; 
+}
+
+.tp-badge-wrapper {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid #3e484f;
+  border-radius: 4px;
+  padding: 4px 12px;
+  margin-bottom: 16px;
+  width: fit-content;
+}
+
+.tp-badge-text {
+  color: #87929a;
+  font-size: 0.7rem !important;
+  font-family: monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+}
+
+/* INFORMACIÓN DEL HARDWARE */
+.tp-hw-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  width: 100%;
+  min-width: 0; 
+  height: 130px; /* Mantiene todas las tarjetas de la misma altura */
+}
+
+.tp-hw-title {
+  color: #8ed5ff;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+}
+
+.tp-hw-subtitle {
+  color: #64748b;
+  font-size: 0.8rem !important;
+  margin-bottom: 8px !important;
+  font-weight: 600 !important;
+}
+
+.tp-hw-desc {
+  color: #bdc8d1;
+  font-size: 0.85rem !important;
+  margin-top: 4px;
+  width: 100%;
+  
+  /* Forzamos el salto de línea para que no se ensanche */
+  white-space: normal !important;
+  word-break: break-word !important; 
+  overflow-wrap: anywhere !important; 
+
+  /* Oculta el texto extra añadiendo "..." al final de la 3ra línea */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* =========================================
+   FOOTER DE LA TARJETA (ESTADO Y BOTONES)
+========================================= */
+.tp-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(62, 72, 79, 0.5);
+  margin-top: auto; 
+}
+
+/* Fila 1: Tiempo */
+.tp-time-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8ed5ff;
+  margin-bottom: 4px;
+}
+
+.tp-time-text {
+  font-size: 0.8rem !important;
+  color: #dde3ec;
+  font-weight: 700 !important;
+}
+
+/* Fila 2: Contenedor 50/50 para Estado y Acción */
+.tp-footer-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch; 
+}
+
+/* Badge de Estado transformado para que se vea como la imagen */
+.tp-status-badge {
+  background-color: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 4px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.tp-status-text {
+  color: #38bdf8;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* BOTONES GLOBALES DE LA TARJETA */
+.tp-btn-action {
+  font-size: 0.75rem !important;
+  font-weight: bold !important;
+  letter-spacing: 0.5px !important;
+  text-transform: none !important;
+  padding: 8px 4px !important;
+  width: 100% !important;
+  box-shadow: none !important;
+  border-radius: 4px !important;
+}
+
+.tp-btn-assign {
+  background-color: #22c55e !important;
+  color: #fff !important;
+}
+
+.tp-btn-assign:hover {
+  background-color: #16a34a !important;
+}
+
+.tp-btn-modify {
+  background-color: #0ea5e9 !important;
+  color: #fff !important;
+}
+
+.tp-btn-modify:hover {
+  background-color: #0284c7 !important;
+}
+
+/* ESTADO DESHABILITADO DEL BOTÓN MODIFICAR */
+.tp-btn-action.Mui-disabled,
+.tp-btn-disabled {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #64748b !important;
+}

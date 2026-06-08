@@ -25,10 +25,10 @@ const HomeAdministrador = () => {
   // Opciones actualizadas: EMPLEADOS, CLIENTES, REPORTES, TRABAJOS, CALENDARIO
   const options = [
     { icon: <FaUserTie />, title: 'EMPLEADOS', path: '/usuarios', desc: 'Gestión de Staff y Permisos' },
-    { icon: <FaUsers />, title: 'CLIENTES', path: '/proximamente', desc: 'Base de Datos de Clientes' },
-    { icon: <FaChartLine />, title: 'REPORTES', path: '/proximamente', desc: 'Estadísticas y Balances' },
-    { icon: <FaBriefcase />, title: 'TRABAJOS', path: '/proximamente', desc: 'Gestión de Órdenes y Tareas' },
-    { icon: <IoCalendarNumberSharp />, title: 'CALENDARIO', path: '/proximamente', desc: 'Planificación y Fechas' },
+    { icon: <FaUsers />, title: 'CLIENTES', path: '/clients', desc: 'Base de datos con búsqueda activa' },
+    { icon: <FaChartLine />, title: 'REPORTES', path: '/proximamente', desc: 'Estadísticas y balances' },
+    { icon: <FaBriefcase />, title: 'TRABAJOS', path: '/comprobantes', desc: 'Órdenes y trabajos con filtro' },
+    { icon: <IoCalendarNumberSharp />, title: 'CALENDARIO', path: '/proximamente', desc: 'Planificación y fechas' },
   ];
 
   return (

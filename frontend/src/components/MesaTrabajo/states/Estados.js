@@ -5,7 +5,8 @@ import EstadoOrden from './EstadoOrden';
 // ─────────────────────────────────────────────────────────────────────────────
 export const ESTADOS = {
   PENDIENTE_REVISION:    'PENDIENTE DE REVISION',
-  EN_DIAGNOSTICO:        'EN DIAGNOSTICO',
+  ASIGNADO:              'ASIGNADO',
+  DIAGNOSTICADO:         'DIAGNOSTICADO',
   PRESUPUESTADO:         'PRESUPUESTADO',
   PRESUPUESTO_ACEPTADO:  'PRESUPUESTO ACEPTADO',
   PRESUPUESTO_RECHAZADO: 'PRESUPUESTO RECHAZADO',
@@ -18,7 +19,7 @@ export const ESTADOS = {
 // ─────────────────────────────────────────────────────────────────────────────
 export class PendienteRevision extends EstadoOrden {
   getNombre() { return ESTADOS.PENDIENTE_REVISION; }
-  getTransicionesValidas() { return [ESTADOS.EN_DIAGNOSTICO]; }
+  getTransicionesValidas() { return [ESTADOS.ASIGNADO]; }
   puedeEditarDiagnostico() { return true; }
   getMetadatosUI() {
     return { color: '#f59e0b', label: 'Pendiente de Revisión', descripcion: 'En espera de ser tomada por un técnico.' };
@@ -26,26 +27,28 @@ export class PendienteRevision extends EstadoOrden {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. EN DIAGNOSTICO
+// 2. ASIGNADO
 // ─────────────────────────────────────────────────────────────────────────────
-export class EnDiagnostico extends EstadoOrden {
-  getNombre() { return ESTADOS.EN_DIAGNOSTICO; }
+export class Asignado extends EstadoOrden {
+  getNombre() { return ESTADOS.ASIGNADO; }
+  getTransicionesValidas() { return [ESTADOS.DIAGNOSTICADO]; }
+  puedeEditarDiagnostico() { return true; }
+  puedeEditarPresupuesto() { return false; }
+  getMetadatosUI() {
+    return { color: '#06b6d4', label: 'Asignado', descripcion: 'Equipo asignado. Completa el diagnóstico ahora para avanzar a DIAGNOSTICADO.' };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. DIAGNOSTICADO
+// ─────────────────────────────────────────────────────────────────────────────
+export class Diagnosticado extends EstadoOrden {
+  getNombre() { return ESTADOS.DIAGNOSTICADO; }
   getTransicionesValidas() { return [ESTADOS.PRESUPUESTADO]; }
-
-  // Esta es la parte clave que pedís:
-  transicionarA(estadoDestino) {
-    if (estadoDestino === ESTADOS.PRESUPUESTADO) {
-      // Validamos los datos ANTES de dejarlo cambiar el estado
-      const { presupuesto } = this.contexto.datos;
-      
-      const hayRepuestos = presupuesto?.repuestos?.length > 0;
-      const hayManoObra = Number(presupuesto?.manoDeObra?.precio) > 0;
-
-      if (!hayRepuestos && !hayManoObra) {
-        throw new Error("Para pasar a PRESUPUESTADO, primero debes cargar repuestos o mano de obra.");
-      }
-    }
-    super.transicionarA(estadoDestino);
+  puedeEditarDiagnostico() { return false; }
+  puedeEditarPresupuesto() { return true; }
+  getMetadatosUI() {
+    return { color: '#f59e0b', label: 'Diagnosticado', descripcion: 'Diagnóstico completado. Ahora arma el presupuesto.' };
   }
 }
 

@@ -5,12 +5,16 @@ import {
 } from '@mui/material';
 import { FiPrinter, FiSearch, FiRefreshCw, FiCheckCircle } from 'react-icons/fi';
 import Navbar from '../../components/Layout/Navbar';
+import { useAuth } from '../../../context/authProvider';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 import '../../styles/GenerarOrden.css'; 
 
 export default function GestionOrdenes() {
+  const { user } = useAuth();
+  const isRecepcionista = user?.rol?.toLowerCase()?.trim() === 'recepcionista';
+
   const [ordenes, setOrdenes] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
@@ -325,8 +329,8 @@ export default function GestionOrdenes() {
                               IMPRIMIR
                             </Button>
 
-                            {/* BOTÓN ENTREGAR (Solo visible si cumple condiciones) */}
-                            {listoParaEntregar && (
+                            {/* BOTÓN ENTREGAR (Solo visible para recepcionistas) */}
+                            {listoParaEntregar && isRecepcionista && (
                               <Button
                                 variant="contained"
                                 size="small"

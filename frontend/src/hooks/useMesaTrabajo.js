@@ -11,7 +11,7 @@ export const useMesaTrabajo = () => {
     const fetchPendientes = async () => {
       try {
         setLoading(true);
-        const data = await obtenerOrdenesPendientes();
+        const data = await obtenerOrdenesPendientes(true);
         
         if (data.ok || data.status === 'success') {
           setListaPendientes(data.ordenes);

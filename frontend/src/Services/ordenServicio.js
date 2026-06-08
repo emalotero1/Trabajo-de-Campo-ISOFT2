@@ -11,8 +11,9 @@ export const obtenerTodasLasOrdenes = async () => {
   return res.data;
 };
 
-export const obtenerOrdenesPendientes = async () => {
-  const res = await api.get('/ordenes/pendientes');
+export const obtenerOrdenesPendientes = async (soloAsignadas = false) => {
+  const query = soloAsignadas ? '?soloAsignadas=true' : '';
+  const res = await api.get(`/ordenes/pendientes${query}`);
   return res.data;
 };
 

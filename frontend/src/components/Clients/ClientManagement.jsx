@@ -5,7 +5,7 @@ import {
 } from 'react-icons/fa';
 import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { 
-  Typography, IconButton, TextField, 
+  Typography, IconButton, Button, TextField, 
   InputAdornment, CircularProgress, Box, Fade 
 } from '@mui/material';
 
@@ -45,6 +45,42 @@ const ClientManagement = () => {
     }
   }, [success, error, setError]);
 
+  const handleEdit = (client) => {
+    setSelectedClient(client);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (setError) setError(null);
+    setSuccess(null);
+
+    if (window.confirm("¿ESTÁ SEGURO DE DESACTIVAR A ESTE CLIENTE?")) {
+      try {
+        await deleteClient(id, authToken);
+        setSuccess('CLIENTE DESACTIVADO CON ÉXITO');
+        getClients(authToken);
+      } catch (err) {
+        const msg = err.response?.data?.message || 'NO SE PUDO ELIMINAR EL CLIENTE';
+        if (setError) setError(msg);
+      }
+    }
+  };
+
+  const handleOpenCreate = () => {
+    setSelectedClient(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedClient(null);
+  };
+
+  const handleModalSave = async () => {
+    handleCloseModal();
+    getClients(authToken);
+  };
+
   const filteredClients = useMemo(() => {
     if (!clients) return [];
     return clients.filter(client => {
@@ -58,31 +94,6 @@ const ClientManagement = () => {
     });
   }, [searchTerm, clients]);
 
-  const handleEdit = (client) => {
-    setSelectedClient(client);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (setError) setError(null);
-    setSuccess(null);
-    
-    if (window.confirm("¿ESTÁ SEGURO DE DESACTIVAR A ESTE CLIENTE?")) {
-        try {
-            await deleteClient(id, authToken);
-            setSuccess('CLIENTE DESACTIVADO CON ÉXITO');
-            getClients(authToken);
-        } catch (err) {
-            const msg = err.response?.data?.message || 'NO SE PUDO ELIMINAR EL CLIENTE';
-            if (setError) setError(msg);
-        }
-    }
-  };
-
-  const handleOpenCreate = () => {
-    setSelectedClient(null);
-    setIsModalOpen(true);
-  };
 
   return (
     <Box className="corp-wrapper" style={{ paddingTop: '140px' }}>
@@ -95,13 +106,16 @@ const ClientManagement = () => {
         <header className="corp-header" style={{ paddingBottom: '0.5rem', marginBottom: '1rem' }}>
           <Box>
             <h1 className="corp-title" style={{ margin: 0 }}>GESTIÓN DE CLIENTES</h1>
-            <Typography className="corp-subtitle" style={{ marginTop: '4px' }}>
-              RECEPCIONISTA: {user?.username?.toUpperCase() || 'SISTEMA'}
-            </Typography>
           </Box>
-          <button className="btn-corp-submit" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>
+          {isRecepcionista && (
+            <Button
+              className="btn-corp-submit"
+              onClick={handleOpenCreate}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+            >
               <FaUserPlus /> <span style={{ fontWeight: 700 }}>NUEVO CLIENTE</span>
-          </button>
+            </Button>
+          )}
         </header>
 
         {/* ÁREA DE FEEDBACK ALERTAS */}
@@ -156,7 +170,7 @@ const ClientManagement = () => {
                       <th style={{ padding: '1rem' }}>NOMBRE Y APELLIDO</th>
                       <th style={{ padding: '1rem' }}>CONTACTO</th>
                       <th style={{ padding: '1rem' }}>DOMICILIO</th>
-                      <th style={{ padding: '1rem', textAlign: 'right' }}>ACCIONES</th>
+                      {isRecepcionista && <th style={{ padding: '1rem', textAlign: 'right' }}>ACCIONES</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -184,23 +198,23 @@ const ClientManagement = () => {
                               <FaMapMarkerAlt style={{ color: '#64748b' }} /> {client.domicilio?.toUpperCase()}
                             </div>
                           </td>
-                          <td style={{ padding: '1.2rem 1rem', textAlign: 'right' }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                              <IconButton sx={{ color: '#ffffff', '&:hover': { color: '#f59e0b' } }} onClick={() => handleEdit(client)}>
-                                <FaEdit size={16} />
-                              </IconButton>
-                              {isRecepcionista && (
+                          {isRecepcionista && (
+                            <td style={{ padding: '1.2rem 1rem', textAlign: 'right' }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                                <IconButton sx={{ color: '#ffffff', '&:hover': { color: '#f59e0b' } }} onClick={() => handleEdit(client)}>
+                                  <FaEdit size={16} />
+                                </IconButton>
                                 <IconButton sx={{ color: '#ef4444', '&:hover': { color: '#ff6b6b' } }} onClick={() => handleDelete(client._id)}>
                                   <FaTrashAlt size={14} />
                                 </IconButton>
-                              )}
-                            </Box>
-                          </td>
+                              </Box>
+                            </td>
+                          )}
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: '#64748b', fontFamily: 'JetBrains Mono', fontSize: '0.85rem' }}>
+                        <td colSpan={isRecepcionista ? 4 : 3} style={{ textAlign: 'center', padding: '3rem', color: '#64748b', fontFamily: 'JetBrains Mono', fontSize: '0.85rem' }}>
                           NO SE ENCONTRARON CLIENTES
                         </td>
                       </tr>
@@ -211,14 +225,14 @@ const ClientManagement = () => {
             </Fade>
           )}
         </Box>
+        <ClientFormModal 
+          open={isModalOpen} 
+          onClose={handleCloseModal}
+          clientToEdit={selectedClient}
+          onSave={handleModalSave} 
+        />
       </div>
 
-      <ClientFormModal 
-        open={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        clientToEdit={selectedClient}
-        onSave={() => getClients(authToken)} 
-      />
     </Box>
   );
 };

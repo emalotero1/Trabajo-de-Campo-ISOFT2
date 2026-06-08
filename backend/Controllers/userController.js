@@ -4,10 +4,10 @@ const { validationResult } = require('express-validator'); // Recomendado usar e
 
 // --- 1. REGISTRAR (ALTA DE STAFF) ---
 const register = async (req, res) => {
-    const { email, password, username, rol, name, lastname, cel } = req.body;
+    const { email, password, username, rol, nombre, apellido, cel } = req.body;
 
     // 1. Validación de datos obligatorios
-    if (!email || !password || !username || !rol || !name || !lastname) {
+    if (!email || !password || !username || !rol || !nombre || !apellido) {
         return res.status(400).json({ status: "error", message: "FALTAN DATOS OBLIGATORIOS" });
     }
 
@@ -29,8 +29,8 @@ const register = async (req, res) => {
 
         // 5. Crear usuario
         const newUser = new User({
-            name: name.trim(),
-            lastname: lastname.trim(),
+            nombre: nombre.trim(),
+            apellido: apellido.trim(),
             username: username.trim(),
             email: emailLower,
             password: hashedPassword,
@@ -60,7 +60,7 @@ const list = async (req, res) => {
         // Solo traemos usuarios activos y ocultamos información sensible
         const users = await User.find({ active: true })
             .select("-password -__v -tokens") 
-            .sort({ lastname: 1 });
+            .sort({ apellido: 1 });
 
         return res.status(200).json({
             status: "success",

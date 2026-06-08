@@ -15,8 +15,9 @@ import { obtenerOrdenPorId, actualizarEstadoTrabajo } from '../../services/orden
 
 const ESTADOS_REPARACION = [
   { id: 'PENDIENTE DE REVISION', icon: FiClock, titulo: 'Pendiente de Revisión', desc: 'EQUIPO EN ESPERA DE TÉCNICO ASIGNADO', nivel: 1 },
-  { id: 'EN DIAGNOSTICO', icon: FiCpu, titulo: 'En Diagnóstico', desc: 'IDENTIFICACIÓN TÉCNICA DE FALLAS', nivel: 2 },
-  { id: 'PRESUPUESTADO', icon: FiFileText, titulo: 'Presupuestado', desc: 'COSTOS ENVIADOS AL CLIENTE', nivel: 3 },
+  { id: 'ASIGNADO', icon: FiCpu, titulo: 'Asignado', desc: 'Orden tomada por el técnico.', nivel: 2 },
+  { id: 'DIAGNOSTICADO', icon: FiFileText, titulo: 'Diagnosticado', desc: 'Diagnóstico completo. Preparar presupuesto.', nivel: 3 },
+  { id: 'PRESUPUESTADO', icon: FiFileText, titulo: 'Presupuestado', desc: 'Costos enviados al cliente', nivel: 4 },
   { id: 'PRESUPUESTO ACEPTADO', icon: FiCheckCircle, titulo: 'Presupuesto Aceptado', desc: 'REPARACIÓN AUTORIZADA POR CLIENTE', nivel: 4 },
   { id: 'PRESUPUESTO RECHAZADO', icon: FiXCircle, titulo: 'Presupuesto Rechazado', desc: 'CLIENTE DECLINÓ LA REPARACIÓN', nivel: 4 },
   { id: 'REPARADO', icon: FiTool, titulo: 'Reparado', desc: 'INTERVENCIÓN TÉCNICA FINALIZADA', nivel: 5 },
@@ -43,8 +44,9 @@ export default function ModificarEstado() {
         
         if (data.status === 'success' || data.ok) {
           const ordenDB = data.orden;
+          const estadoNormalizado = ordenDB.estado === 'EN DIAGNOSTICO' ? 'ASIGNADO' : ordenDB.estado;
           setOrden(ordenDB);
-          setNuevoEstadoSel(ordenDB.estado || 'PENDIENTE DE REVISION');
+          setNuevoEstadoSel(estadoNormalizado || 'PENDIENTE DE REVISION');
           setBitacora(ordenDB.observaciones || '');
         }
       } catch (error) {
@@ -73,8 +75,34 @@ export default function ModificarEstado() {
   if (loading) return <Box className="modificar-wrapper" display="flex" justifyContent="center" alignItems="center"><CircularProgress sx={{color: '#00a8e8'}}/></Box>;
   if (!orden) return <Box className="modificar-wrapper" p={5}><Typography>Orden no encontrada.</Typography></Box>;
 
-  const estadoGuardado = orden.estado || 'PENDIENTE DE REVISION';
+  const estadoGuardado = orden.estado === 'EN DIAGNOSTICO' ? 'ASIGNADO' : (orden.estado || 'PENDIENTE DE REVISION');
   const nivelDB = ESTADOS_REPARACION.find(e => e.id === estadoGuardado)?.nivel || 1;
+  const estadoEsRechazado = estadoGuardado === 'PRESUPUESTO RECHAZADO';
+  const estadoEsAceptado = estadoGuardado === 'PRESUPUESTO ACEPTADO';
+
+  const puedeSeleccionar = (paso) => {
+    if (paso.id === estadoGuardado) return false;
+    if (estadoGuardado === 'PENDIENTE DE REVISION' && paso.id === 'ASIGNADO') return true;
+    if (estadoGuardado === 'ASIGNADO' && paso.id === 'DIAGNOSTICADO') return true;
+    if (estadoGuardado === 'DIAGNOSTICADO' && paso.id === 'PRESUPUESTADO') return true;
+    if (estadoGuardado === 'PRESUPUESTADO' && ['PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO'].includes(paso.id)) return true;
+    if (estadoGuardado === 'PRESUPUESTO ACEPTADO' && paso.id === 'REPARADO') return true;
+    return false;
+  };
+
+  const estaBloqueadoPorExclusion = (paso) => {
+    if (paso.id === 'PRESUPUESTO RECHAZADO' && estadoEsAceptado) return true;
+    if (paso.id === 'PRESUPUESTO ACEPTADO' && estadoEsRechazado) return true;
+    if (paso.id === 'REPARADO' && estadoEsRechazado) return true;
+    return false;
+  };
+
+  const getEstadoLabel = (paso, isActual, isDisponible, estaBloqueado) => {
+    if (isActual) return 'ESTADO ACTUAL';
+    if (isDisponible) return 'ASIGNAR';
+    if (estaBloqueado) return 'NO DISPONIBLE';
+    return '';
+  };
 
   const nombreCliente = orden.id_equipo?.cliente ? `${orden.id_equipo.cliente.name} ${orden.id_equipo.cliente.lastname}` : 'Cliente no registrado';
   const cpuEquipo = orden.id_equipo?.cpu || 'Equipo sin detallar';
@@ -173,39 +201,30 @@ export default function ModificarEstado() {
                 {ESTADOS_REPARACION.map((paso) => {
                   const isCompletado = paso.nivel < nivelDB;
                   const isActualSeleccionado = paso.id === nuevoEstadoSel;
-                  const isProximo = paso.nivel === nivelDB + 1;
-                  let isExcluido = false;
+                  const isDisponible = puedeSeleccionar(paso) && !estaBloqueadoPorExclusion(paso);
+                  const isBloqueado = !isActualSeleccionado && !isCompletado && !isDisponible;
+                  const isReparadoSeleccionado = isActualSeleccionado && paso.id === 'REPARADO';
+                  const estadoLabel = getEstadoLabel(paso, paso.id === estadoGuardado, isDisponible, estaBloqueadoPorExclusion(paso));
 
-                  if (paso.nivel === 4) {
-                    if (nivelDB >= 4 && estadoGuardado !== paso.id && ESTADOS_REPARACION.find(e => e.id === estadoGuardado)?.nivel >= 4) {
-                      isExcluido = true;
-                    }
-                  }
-
-                  const isRechazado = estadoGuardado === 'PRESUPUESTO RECHAZADO' || nuevoEstadoSel === 'PRESUPUESTO RECHAZADO';
-                  if (isRechazado && paso.nivel > 4) {
-                    isExcluido = true;
-                  }
-
-                  const isClickable = (isProximo || isActualSeleccionado) && !isExcluido && paso.nivel >= nivelDB;
-                  const isBloqueado = (!isClickable && !isCompletado) || isExcluido;
-                  
                   let className = "estado-item";
                   if (isActualSeleccionado) className += " selected";
                   else if (isCompletado) className += " completado";
-                  else if (isClickable) className += " clickable";
+                  else if (isDisponible) className += " clickable";
                   else if (isBloqueado) className += " disabled";
 
                   const Icon = paso.icon;
+                  const itemStyle = isReparadoSeleccionado ? { background: 'rgba(16, 185, 129, 0.12)', borderColor: '#10b981' } : {};
+                  const iconBoxStyle = isReparadoSeleccionado ? { background: '#10b981', borderColor: '#10b981', color: '#0b0f19' } : {};
 
                   return (
                     <Box 
                       key={paso.id} 
                       className={className} 
-                      onClick={() => isClickable && setNuevoEstadoSel(paso.id)}
+                      onClick={() => isDisponible && setNuevoEstadoSel(paso.id)}
+                      sx={itemStyle}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <div className="icon-box">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <div className="icon-box" style={iconBoxStyle}>
                           <Icon size={20} />
                         </div>
                         <Box>
@@ -217,12 +236,19 @@ export default function ModificarEstado() {
                           </Typography>
                         </Box>
                       </Box>
-                      
-                      {isActualSeleccionado && (
-                        <Box sx={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid #00a8e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Box sx={{ width: '10px', height: '10px', borderRadius: '50%', bgcolor: '#00a8e8' }} />
-                        </Box>
-                      )}
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {estadoLabel && (
+                          <Typography sx={{ color: '#cbd5e1', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+                            {estadoLabel}
+                          </Typography>
+                        )}
+                        {isActualSeleccionado && (
+                          <Box sx={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid #00a8e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Box sx={{ width: '10px', height: '10px', borderRadius: '50%', bgcolor: '#00a8e8' }} />
+                          </Box>
+                        )}
+                      </Box>
                     </Box>
                   );
                 })}

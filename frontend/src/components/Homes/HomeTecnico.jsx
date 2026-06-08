@@ -39,7 +39,7 @@ const HomeTecnico = () => {
 
           // Filtramos la cantidad de equipos que ya están en la mesa de trabajo activa
           const enMesaDeTrabajo = ordenes.filter(
-            o => ['EN DIAGNOSTICO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO'].includes(o.estado)
+            o => ['ASIGNADO', 'DIAGNOSTICADO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO'].includes(o.estado)
           ).length;
 
           // Actualizamos el estado para que React vuelva a renderizar los números

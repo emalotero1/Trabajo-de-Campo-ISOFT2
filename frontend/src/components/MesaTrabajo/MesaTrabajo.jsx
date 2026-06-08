@@ -13,6 +13,7 @@ import '../../styles/MesaTrabajo.css';
 import { useAuth } from '../../../context/authProvider';
 
 // 1. IMPORTAMOS NUESTRO MOTOR DE ESTADOS (Ajustá la ruta según tu estructura)
+import { ESTADOS } from './states/Estados';
 import OrdenReparacionContexto from './states/OrdenReparacion'; 
 
 const MesaTrabajo = () => {
@@ -60,23 +61,27 @@ const MesaTrabajo = () => {
 
   const handleGuardar = async () => {
     if (!order) return;
-    const guardadoCorrecto = await actualizarOrden(order._id, order);
-    if (guardadoCorrecto) {
-      setMostrarExito(true);
-    }
-  };
 
-  // 3. CAMBIO DE ESTADO + AUTO-GUARDADO
-  const handleStateChange = async (targetState) => {
-    // 1. Armamos la orden con el nuevo estado
-    const ordenActualizada = { ...order, estado: targetState };
-    
-    // 2. Actualizamos la pantalla al instante
-    setOrder(ordenActualizada); 
-    
-    // 3. Mandamos el cambio a la base de datos automáticamente
+    const diagnosticoValido = order.diagnostico?.informe?.trim().length >= 15;
+    const presupuestoValido = (order.presupuesto?.repuestos?.length > 0) || (Number(order.presupuesto?.manoDeObra?.precio) > 0);
+
+    const ordenActualizada = { ...order };
+
+    const estadoActual = ordenActualizada.estado;
+
+    if (estadoActual === ESTADOS.ASIGNADO) {
+      if (!diagnosticoValido) {
+        alert('Debes completar el detalle del diagnóstico antes de avanzar.');
+        return;
+      }
+      ordenActualizada.estado = ESTADOS.DIAGNOSTICADO;
+    } else if (estadoActual === ESTADOS.DIAGNOSTICADO && presupuestoValido) {
+      ordenActualizada.estado = ESTADOS.PRESUPUESTADO;
+    }
+
     const guardadoCorrecto = await actualizarOrden(ordenActualizada._id, ordenActualizada);
     if (guardadoCorrecto) {
+      setOrder(ordenActualizada);
       setMostrarExito(true);
     }
   };
@@ -202,28 +207,9 @@ const MesaTrabajo = () => {
                     <Typography sx={{ color: '#8a8f98', fontSize: '0.8rem' }}>{ordenContexto.getMetadatosUI().descripcion}</Typography>
                   </Box>
 
-                  {/* Renderizamos los botones basándonos en getTransicionesValidas() */}
-                  <Typography sx={{ color: '#64748b', fontWeight: 700, fontSize: '0.75rem', mb: 2, letterSpacing: '0.5px' }}>SUIQUIENTE PASO PERMITIDO:</Typography>
-                  
-                  {ordenContexto.getTransicionesValidas().length > 0 ? (
-                    ordenContexto.getTransicionesValidas().map(estadoDestino => (
-                      <Button 
-                        key={estadoDestino}
-                        variant="contained"
-                        onClick={() => handleStateChange(estadoDestino)}
-                        sx={{ 
-                          width: '100%', mb: 1.5, bgcolor: '#00a8e8', color: '#0b0f19', 
-                          fontWeight: 800, '&:hover': { bgcolor: '#008bbf' } 
-                        }}
-                      >
-                        Pasar a {estadoDestino}
-                      </Button>
-                    ))
-                  ) : (
-                    <Typography sx={{ color: '#ef4444', fontSize: '0.8rem', fontStyle: 'italic', fontWeight: 600 }}>
-                      No hay transiciones disponibles o el proceso finalizó.
-                    </Typography>
-                  )}
+                  <Typography sx={{ color: '#64748b', fontWeight: 700, fontSize: '0.75rem', mb: 2, letterSpacing: '0.5px' }}>
+                    El estado avanzará automáticamente cuando completes el diagnóstico y el presupuesto.
+                  </Typography>
                 </Box>
 
               </Box>

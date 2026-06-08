@@ -41,8 +41,9 @@ const MisDatos = () => {
         <Grid container spacing={2} className="mis-datos-info m-5">
           <Grid item xs={12} md={6}>
             <Grid container direction="column" spacing={1}>
-              <Grid item><Typography><strong>Nombre:</strong> {user.name || '-'}</Typography></Grid>
-              <Grid item><Typography><strong>Apellido:</strong> {user.lastname || '-'}</Typography></Grid>
+              <Grid item><Typography><strong>Nombre:</strong> {user.nombre || '-'}</Typography></Grid>
+              <Grid item><Typography><strong>Apellido:</strong> {user.apellido || '-'}</Typography></Grid>
+
               <Grid item><Typography><strong>Celular:</strong> {user.cel || '-'}</Typography></Grid>
               <Grid item><Typography><strong>Email:</strong> {user.email || '-'}</Typography></Grid>
             </Grid>

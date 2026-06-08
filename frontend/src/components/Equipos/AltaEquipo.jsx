@@ -37,6 +37,9 @@ export default function AltaEquipo() {
   const [busquedaEquipo, setBusquedaEquipo] = useState('');
   const [errorForm, setErrorForm] = useState(null);
   const [tabIzq, setTabIzq] = useState(0); // Tab: 0 = Equipos, 1 = Clientes
+  const PAGE_SIZE = 5;
+  const [pageEquipos, setPageEquipos] = useState(0);
+  const [pageClientes, setPageClientes] = useState(0);
 
   const token = localStorage.getItem('token');
 
@@ -147,6 +150,20 @@ export default function AltaEquipo() {
     return dueño.includes(query) || hardware.includes(query);
   });
 
+  const totalPagesEquipos = Math.ceil(equiposFiltrados.length / PAGE_SIZE) || 1;
+  const equiposPaginados = equiposFiltrados.slice(pageEquipos * PAGE_SIZE, pageEquipos * PAGE_SIZE + PAGE_SIZE);
+
+  const totalPagesClientes = Math.ceil(clientesFiltrados.length / PAGE_SIZE) || 1;
+  const clientesPaginados = clientesFiltrados.slice(pageClientes * PAGE_SIZE, pageClientes * PAGE_SIZE + PAGE_SIZE);
+
+  useEffect(() => {
+    setPageEquipos(0);
+  }, [busquedaEquipo, equipos]);
+
+  useEffect(() => {
+    setPageClientes(0);
+  }, [busquedaCliente, clientes]);
+
   return (
     <Box className="alta-equipo-wrapper corporate-dark home-content-z">
       <Navbar />
@@ -194,11 +211,11 @@ export default function AltaEquipo() {
           </Fade>
         )}
 
-        <Grid container spacing={3}>
-          
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3, alignItems: 'flex-start', minHeight: { lg: '75vh' } }}>
+
           {/* COLUMNA IZQUIERDA: LISTADOS (TABS) */}
-          <Grid item xs={12} md={5} lg={4}>
-            <Box className="corp-panel" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Box sx={{ width: '100%', maxWidth: { lg: '420px' }, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <Box className="corp-panel" sx={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
               
               {/* TABS */}
               <Box sx={{ display: 'flex', borderBottom: '1px solid #2d3238', mb: 2 }}>
@@ -231,7 +248,7 @@ export default function AltaEquipo() {
               </Box>
 
               {/* TAB CONTENT */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, minHeight: 0 }}>
                 
                 {/* TAB 0: EQUIPOS */}
                 {tabIzq === 0 && (
@@ -246,9 +263,9 @@ export default function AltaEquipo() {
                       InputProps={{ startAdornment: <FiSearch style={{ color: '#64748b', marginRight: '8px' }} /> }}
                     />
 
-                    <Box className="client-list-container" sx={{ overflowY: 'auto', maxHeight: '500px' }}>
+                    <Box className="client-list-container" sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
                       <List disablePadding>
-                        {equiposFiltrados.map(eq => (
+                        {equiposPaginados.map(eq => (
                           <ListItem key={eq._id} disablePadding className={`client-list-item ${selectedEquipoId === eq._id ? 'selected-edit' : ''}`}>
                             <ListItemButton onClick={() => handleSeleccionarEquipo(eq)}>
                               <ListItemText 
@@ -268,7 +285,36 @@ export default function AltaEquipo() {
                             NO SE ENCONTRARON EQUIPOS registrados
                           </Typography>
                         )}
+                        {equiposFiltrados.length > 0 && equiposPaginados.length === 0 && (
+                          <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
+                            NO HAY EQUIPOS EN ESTA PÁGINA
+                          </Typography>
+                        )}
                       </List>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => setPageEquipos(p => Math.max(0, p - 1))}
+                        disabled={pageEquipos <= 0}
+                        sx={{ color: '#64748b', fontWeight: 700 }}
+                      >
+                        ANTERIOR
+                      </Button>
+                      <Typography sx={{ color: '#8a8f98', fontWeight: 700, fontSize: '0.9rem' }}>
+                        Página {pageEquipos + 1} de {totalPagesEquipos}
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => setPageEquipos(p => Math.min(totalPagesEquipos - 1, p + 1))}
+                        disabled={pageEquipos >= totalPagesEquipos - 1}
+                        sx={{ color: '#64748b', fontWeight: 700 }}
+                      >
+                        SIGUIENTE
+                      </Button>
                     </Box>
                   </>
                 )}
@@ -286,9 +332,9 @@ export default function AltaEquipo() {
                       size="small"
                     />
 
-                    <Box className="client-list-container" sx={{ overflowY: 'auto', maxHeight: '450px' }}>
+                    <Box className="client-list-container" sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
                       <List disablePadding>
-                        {clientesFiltrados.map(c => (
+                        {clientesPaginados.map(c => (
                           <ListItem key={c._id} disablePadding className={`client-list-item ${selectedClientId === c._id ? 'selected' : ''}`}>
                             <ListItemButton onClick={() => !selectedEquipoId && setSelectedClientId(c._id)} disabled={!!selectedEquipoId}>
                               <ListItemText 
@@ -303,11 +349,45 @@ export default function AltaEquipo() {
                             </ListItemButton>
                           </ListItem>
                         ))}
+                        {clientesFiltrados.length === 0 && (
+                          <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
+                            NO SE ENCONTRARON DUEÑOS registrados
+                          </Typography>
+                        )}
+                        {clientesFiltrados.length > 0 && clientesPaginados.length === 0 && (
+                          <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
+                            NO HAY DUEÑOS EN ESTA PÁGINA
+                          </Typography>
+                        )}
                       </List>
                     </Box>
 
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => setPageClientes(p => Math.max(0, p - 1))}
+                        disabled={pageClientes <= 0}
+                        sx={{ color: '#64748b', fontWeight: 700 }}
+                      >
+                        ANTERIOR
+                      </Button>
+                      <Typography sx={{ color: '#8a8f98', fontWeight: 700, fontSize: '0.9rem' }}>
+                        Página {pageClientes + 1} de {totalPagesClientes}
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => setPageClientes(p => Math.min(totalPagesClientes - 1, p + 1))}
+                        disabled={pageClientes >= totalPagesClientes - 1}
+                        sx={{ color: '#64748b', fontWeight: 700 }}
+                      >
+                        SIGUIENTE
+                      </Button>
+                    </Box>
+
                     {/* STATUS FOOTER */}
-                    <Box className="status-footer-corp" sx={{ pt: 2, borderTop: '1px solid #2d3238', mt: 'auto' }}>
+                    <Box className="status-footer-corp" sx={{ pt: 2, borderTop: '1px solid #2d3238', mt: 2 }}>
                       <Typography className="status-label">VINCULACIÓN</Typography>
                       <div className={`status-badge ${selectedClientId ? 'linked' : 'pending'}`}>
                         {selectedClientId ? <><span className="blink">●</span> ASIGNADO</> : <><span>○</span> PENDIENTE</>}
@@ -317,11 +397,11 @@ export default function AltaEquipo() {
                 )}
               </Box>
             </Box>
-          </Grid>
+          </Box>
 
           {/* COLUMNA DERECHA: FORMULARIO UNIFICADO (ESPECIFICACIONES + REPORTE) */}
-          <Grid item xs={12} md={7} lg={8}>
-            <Box className={`corp-panel ${selectedEquipoId ? 'panel-mode-edit' : ''}`} sx={{ height: '100%' }}>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <Box className={`corp-panel ${selectedEquipoId ? 'panel-mode-edit' : ''}`} sx={{ height: '100%', minWidth: 0 }}>
               
               {/* SECCIÓN 1: ESPECIFICACIONES DE HARDWARE */}
               <header className="corp-panel-header">
@@ -370,9 +450,9 @@ export default function AltaEquipo() {
                 className="industrial-input-corp" 
               />
             </Box>
-          </Grid>
+          </Box>
 
-        </Grid>
+        </Box>
       </Box>
     </Box>
   );

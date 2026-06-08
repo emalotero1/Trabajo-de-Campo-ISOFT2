@@ -3,10 +3,12 @@ const EstadoHistorial = require('../Models/EstadoHistorial');
 const Equipo = require('../Models/Equipos'); 
 const Client = require('../Models/Client'); 
 
+const normalizeEstado = (estado) => estado === 'EN DIAGNOSTICO' ? 'ASIGNADO' : estado;
+
 // =========================================================================
-// 1. POST - Crear Orden
+// 1. POST - Create Order
 // =========================================================================
-exports.crearOrden = async (req, res) => {
+const create = async (req, res) => {
   try {
     const { id_equipo, estado, observaciones } = req.body;
 
@@ -37,6 +39,7 @@ exports.crearOrden = async (req, res) => {
       });
       await primerHistorial.save();
     } catch (errorHistorial) {
+      // para evitar dejar datos huerfanos en caso de que falle el historial, eliminamos la orden creada
       await OrdenReparacion.findByIdAndDelete(ordenGuardada._id);
       throw new Error('Error al inicializar el historial de estados.');
     }
@@ -54,9 +57,9 @@ exports.crearOrden = async (req, res) => {
 };
 
 // =========================================================================
-// 2. GET - Obtener Órdenes Emitidas
+// 2. GET - List Orders
 // =========================================================================
-exports.obtenerOrdenes = async (req, res) => {
+const list = async (req, res) => {
   try {
     const ordenes = await OrdenReparacion.find()
       .populate({
@@ -69,10 +72,15 @@ exports.obtenerOrdenes = async (req, res) => {
       })
       .sort({ nro_orden: -1 });
 
+    const ordenesNormalizadas = ordenes.map((orden) => {
+      orden.estado = normalizeEstado(orden.estado);
+      return orden;
+    });
+
     return res.status(200).json({
       ok: true,
       status: "success", 
-      ordenes
+      ordenes: ordenesNormalizadas
     });
 
   } catch (error) {
@@ -82,13 +90,19 @@ exports.obtenerOrdenes = async (req, res) => {
 };
 
 // =========================================================================
-// 3. GET - Trabajos Pendientes (Para el Técnico)
+// 3. GET - Get Pending Jobs (Para el Técnico)
 // =========================================================================
-exports.getTrabajosPendientes = async (req, res) => {
+const getPendingJobs = async (req, res) => {
   try {
-      const ordenes = await OrdenReparacion.find({
-          estado: { $nin: ['ENTREGADO', 'REPARADO'] } 
-      })
+      const filtro = {
+          estado: { $nin: ['ENTREGADO', 'REPARADO'] }
+      };
+
+      if (req.query.soloAsignadas === 'true') {
+          filtro.tecnico_asignado = req.user.id;
+      }
+
+      const ordenes = await OrdenReparacion.find(filtro)
       .populate({
           path: 'id_equipo', 
           model: 'Equipo',
@@ -96,10 +110,15 @@ exports.getTrabajosPendientes = async (req, res) => {
       })
       .sort({ nro_orden: 1 }); // Orden de llegada
 
+      const ordenesNormalizadas = ordenes.map((orden) => {
+          orden.estado = normalizeEstado(orden.estado);
+          return orden;
+      });
+
       return res.status(200).json({ 
           ok: true,
           status: "success", 
-          ordenes 
+          ordenes: ordenesNormalizadas 
       });
   } catch (error) {
       console.error("Error al obtener trabajos pendientes:", error);
@@ -111,11 +130,10 @@ exports.getTrabajosPendientes = async (req, res) => {
   }
 };
 
-
 // =========================================================================
-// 4. PUT - Actualizar Diagnóstico, Presupuesto, Estado y Bitácora
+// 4. PUT - Update Job (Diagnóstico, Presupuesto, Estado y Bitácora)
 // =========================================================================
-exports.actualizarTrabajo = async (req, res) => {
+const update = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -133,6 +151,33 @@ exports.actualizarTrabajo = async (req, res) => {
         id_usuario: req.user.id 
       });
       await nuevoHistorial.save();
+    }
+
+    // --- VALIDACIONES DE ESTADO EN LA MESA DE TRABAJO ---
+    if (estado === 'DIAGNOSTICADO') {
+      if (!diagnostico?.informe || diagnostico.informe.trim().length < 15) {
+        return res.status(400).json({ ok: false, msg: 'Para avanzar a DIAGNOSTICADO debes completar el detalle de la falla con al menos 15 caracteres.' });
+      }
+    }
+
+    if (estado === 'PRESUPUESTADO') {
+      const hayRepuestos = presupuesto?.repuestos?.length > 0;
+      const hayManoObra = Number(presupuesto?.manoDeObra?.precio) > 0;
+      if (!hayRepuestos && !hayManoObra) {
+        return res.status(400).json({ ok: false, msg: 'Para avanzar a PRESUPUESTADO debes cargar repuestos o mano de obra.' });
+      }
+    }
+
+    if (estado === 'PRESUPUESTO ACEPTADO' && orden.estado === 'PRESUPUESTO RECHAZADO') {
+      return res.status(400).json({ ok: false, msg: 'No se puede cambiar un presupuesto rechazado a aceptado.' });
+    }
+
+    if (estado === 'PRESUPUESTO RECHAZADO' && orden.estado === 'PRESUPUESTO ACEPTADO') {
+      return res.status(400).json({ ok: false, msg: 'No se puede cambiar un presupuesto aceptado a rechazado.' });
+    }
+
+    if (estado === 'REPARADO' && orden.estado === 'PRESUPUESTO RECHAZADO') {
+      return res.status(400).json({ ok: false, msg: 'No se puede avanzar a REPARADO cuando el presupuesto fue rechazado.' });
     }
 
     // --- ACTUALIZACIÓN DE DATOS DINÁMICA ---
@@ -165,9 +210,9 @@ exports.actualizarTrabajo = async (req, res) => {
 };
 
 // =========================================================================
-// 5. GET - Obtener Orden por ID (Para cargar la Mesa de Trabajo y Timeline)
+// 5. GET - Get Order By ID (Para cargar la Mesa de Trabajo y Timeline)
 // =========================================================================
-exports.obtenerOrdenPorId = async (req, res) => {
+const getById = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -182,6 +227,8 @@ exports.obtenerOrdenPorId = async (req, res) => {
       return res.status(404).json({ ok: false, msg: 'Orden no encontrada' });
     }
 
+    orden.estado = normalizeEstado(orden.estado);
+
     return res.status(200).json({ ok: true, status: "success", orden });
   } catch (error) {
     console.error("Error al obtener orden por ID:", error);
@@ -190,9 +237,9 @@ exports.obtenerOrdenPorId = async (req, res) => {
 };
 
 // =========================================================================
-// 6. PUT - Asignar Técnico a la Orden (Caso de Uso: Asignarse Orden)
+// 6. PUT - Assign Technician (Caso de Uso: Asignarse Orden)
 // =========================================================================
-exports.asignarTecnico = async (req, res) => {
+const assignTechnician = async (req, res) => {
   try {
     const { id } = req.params; // El ID de la Orden de Reparación
     const id_tecnico = req.user.id; // El ID del técnico logueado (viene del JWT)
@@ -209,12 +256,13 @@ exports.asignarTecnico = async (req, res) => {
 
     orden.tecnico_asignado = id_tecnico;
     
-    if (orden.estado === 'PENDIENTE DE REVISION') {
-      orden.estado = 'EN DIAGNOSTICO';
+    const estadosAvanzados = ['ASIGNADO', 'DIAGNOSTICADO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'];
+    if (!estadosAvanzados.includes(orden.estado)) {
+      orden.estado = 'ASIGNADO';
       
       const nuevoHistorial = new EstadoHistorial({
         id_orden: orden._id,
-        estado: 'EN DIAGNOSTICO',
+        estado: 'ASIGNADO',
         id_usuario: id_tecnico
       });
       await nuevoHistorial.save();
@@ -232,4 +280,16 @@ exports.asignarTecnico = async (req, res) => {
     console.error("Error al asignar técnico:", error);
     return res.status(500).json({ ok: false, msg: 'Error interno del servidor.' });
   }
+};
+
+// =========================================================================
+// EXPORTS
+// =========================================================================
+module.exports = {
+  create,
+  list,
+  getPendingJobs,
+  update,
+  getById,
+  assignTechnician
 };

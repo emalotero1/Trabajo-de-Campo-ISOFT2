@@ -1,7 +1,8 @@
 import { 
   ESTADOS, 
   PendienteRevision, 
-  EnDiagnostico, 
+  Asignado,
+  Diagnosticado,
   Presupuestado, 
   PresupuestoAceptado, 
   PresupuestoRechazado, 
@@ -18,7 +19,8 @@ export default class OrdenReparacionContexto {
   _instanciarEstado(nombreEstado) {
     switch (nombreEstado) {
       case ESTADOS.PENDIENTE_REVISION:    return new PendienteRevision(this);
-      case ESTADOS.EN_DIAGNOSTICO:        return new EnDiagnostico(this);
+      case ESTADOS.ASIGNADO:              return new Asignado(this);
+      case ESTADOS.DIAGNOSTICADO:         return new Diagnosticado(this);
       case ESTADOS.PRESUPUESTADO:         return new Presupuestado(this);
       case ESTADOS.PRESUPUESTO_ACEPTADO:  return new PresupuestoAceptado(this);
       case ESTADOS.PRESUPUESTO_RECHAZADO: return new PresupuestoRechazado(this);

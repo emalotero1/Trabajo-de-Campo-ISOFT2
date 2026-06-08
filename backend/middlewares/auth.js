@@ -46,8 +46,8 @@ exports.isStaff = (req, res, next) => {
 exports.createToken = (user) => {
   const payload = {
     id: user._id,
-    name: user.name,
-    lastname: user.lastname,
+    nombre: user.nombre,
+    apellido: user.apellido,
     email: user.email,
     username: user.username,
     rol: user.rol,

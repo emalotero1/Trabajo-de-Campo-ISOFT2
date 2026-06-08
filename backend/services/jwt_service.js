@@ -10,8 +10,8 @@ if (!secret) {
 const createToken = (user) => {
   const payload = {
     id: user._id,
-    name: user.name,
-    lastname: user.lastname,
+    nombre: user.nombre,
+    apellido: user.apellido,
     username: user.username,  // corregido
     email: user.email,
     rol: user.rol,

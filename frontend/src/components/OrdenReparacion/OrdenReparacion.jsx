@@ -15,6 +15,10 @@ export default function GenerarOrden() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const PAGE_SIZE = 5;
+  const [page, setPage] = useState(0);
+
+
   // Estados para alertas de feedback
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertConfig, setAlertConfig] = useState({ severity: 'success', message: '' });
@@ -68,6 +72,10 @@ export default function GenerarOrden() {
     return cpuMatch || clienteMatch;
   });
 
+  const totalPages = Math.ceil(equiposFiltrados.length / PAGE_SIZE) || 1;
+  const equiposPaginados = equiposFiltrados.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
+
   // 3. ENVÍO DE LA ORDEN AL BACKEND
   const handleGenerarOrden = async (e) => {
     e.preventDefault();
@@ -108,6 +116,10 @@ export default function GenerarOrden() {
   const handleChange = (e) => {
     setOrdenData({ ...ordenData, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    setPage(0);
+  }, [busqueda, equiposDb]);
 
   const handleSeleccionarEquipo = (eq) => {
     setEquipoSeleccionado(eq);
@@ -168,10 +180,10 @@ export default function GenerarOrden() {
         </header>
 
         {/* GRILLA PRINCIPAL */}
-        <Grid container spacing={4} alignItems="flex-start">
+        <Grid container spacing={4} alignItems="stretch" className="orden-grid-wrap">
           
           {/* COLUMNA IZQUIERDA: SELECCIÓN DE EQUIPO REAL */}
-          <Grid item xs={12} lg={7}>
+          <Grid item xs={12} lg={7} className="orden-left">
             <div className="orden-panel">
               <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -180,6 +192,7 @@ export default function GenerarOrden() {
                     EQUIPOS EN ESPERA ({equiposFiltrados.length})
                   </Typography>
                 </Box>
+
                 <TextField 
                   placeholder="Buscar por dueño o hardware..." 
                   value={busqueda} 
@@ -193,6 +206,7 @@ export default function GenerarOrden() {
 
               <div className="orden-table-container">
                 <table className="orden-table" style={{ minWidth: '600px' }}>
+
                   <thead>
                     <tr>
                       <th>Hardware</th>
@@ -202,8 +216,9 @@ export default function GenerarOrden() {
                     </tr>
                   </thead>
                   <tbody>
-                    {equiposFiltrados.map((eq) => (
+                    {equiposPaginados.map((eq) => (
                       <tr key={eq._id} className={equipoSeleccionado?._id === eq._id ? 'selected' : ''}>
+
                         <td>
                           <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.95rem' }}>{eq.cpu || 'N/A'}</div>
                           <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Gab: {eq.gabinete || 'Genérico'}</div>
@@ -238,15 +253,52 @@ export default function GenerarOrden() {
                         </td>
                       </tr>
                     )}
+                    {equiposFiltrados.length > 0 && equiposPaginados.length === 0 && (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', color: '#64748b', padding: '24px', fontFamily: 'JetBrains Mono' }}>
+                          NO HAY MÁS EQUIPOS EN ESTA PÁGINA
+                        </td>
+                      </tr>
+                    )}
+
                   </tbody>
                 </table>
               </div>
+
+              {/* PAGINACIÓN */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                <Button
+                  size="small"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page <= 0}
+                  variant="text"
+                  style={{ color: '#64748b', fontWeight: 700 }}
+                >
+                  ANTERIOR
+                </Button>
+
+                <Typography style={{ color: '#8a8f98', fontWeight: 700 }}>
+                  Página {page + 1} de {totalPages}
+                </Typography>
+
+                <Button
+                  size="small"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  variant="text"
+                  style={{ color: '#64748b', fontWeight: 700 }}
+                >
+                  SIGUIENTE
+                </Button>
+              </Box>
+
             </div>
           </Grid>
 
           {/* COLUMNA DERECHA: CONFIGURACIÓN DE LA ORDEN */}
-          <Grid item xs={12} lg={5}>
+          <Grid item xs={12} lg={5} className="orden-right">
             <Box style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
               
               {/* RESUMEN DEL EQUIPO SELECCIONADO */}
               <div className="orden-panel" style={{ backgroundColor: equipoSeleccionado ? 'rgba(0, 168, 232, 0.05)' : 'rgba(22, 25, 29, 0.8)', borderColor: equipoSeleccionado ? '#00a8e8' : '#2d3238' }}>

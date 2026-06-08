@@ -5,10 +5,10 @@ const ordenesController = require('../Controllers/ordenController');
 const { auth } = require('../middlewares/authenticated'); 
 
 // --- RUTAS PROTEGIDAS DE ÓRDENES ---
-router.post('/', [auth], ordenesController.crearOrden);
-router.get('/', [auth], ordenesController.obtenerOrdenes);
-router.get('/pendientes', [auth], ordenesController.getTrabajosPendientes);
-router.get('/:id', [auth], ordenesController.obtenerOrdenPorId);
-router.put('/:id/trabajo', [auth], ordenesController.actualizarTrabajo);
-router.put('/:id/asignar', [auth], ordenesController.asignarTecnico);
+router.post('/', [auth], ordenesController.create);
+router.get('/', [auth], ordenesController.list);
+router.get('/pendientes', [auth], ordenesController.getPendingJobs);
+router.get('/:id', [auth], ordenesController.getById);
+router.put('/:id/trabajo', [auth], ordenesController.update);
+router.put('/:id/asignar', [auth], ordenesController.assignTechnician);
 module.exports = router;

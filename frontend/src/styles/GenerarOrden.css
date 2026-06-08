@@ -32,6 +32,38 @@
   box-sizing: border-box;
 }
 
+/* Layout: mantener columnas en fila mientras el ancho permita */
+.orden-grid-wrap {
+  align-items: flex-start;
+}
+
+/* En pantallas grandes: dos columnas sin “bajar” */
+@media (min-width: 1200px) {
+  .orden-grid-wrap {
+    flex-wrap: nowrap !important;
+  }
+
+  .orden-grid-wrap .orden-left {
+    flex: 0 0 58.3333% !important;
+    max-width: 58.3333% !important;
+  }
+  .orden-grid-wrap .orden-right {
+    flex: 0 0 41.6667% !important;
+    max-width: 41.6667% !important;
+  }
+}
+
+
+/* En pantallas pequeñas: apilar */
+@media (max-width: 1199.98px) {
+  .orden-grid-wrap .orden-left,
+  .orden-grid-wrap .orden-right {
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
+
+
 /* Tabla Estilizada */
 .orden-table-container {
   overflow-x: auto;

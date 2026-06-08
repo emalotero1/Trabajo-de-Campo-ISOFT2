@@ -1,27 +1,29 @@
 /* --- ALTA EQUIPO CORPORATIVO --- */
 .alta-equipo-wrapper {
-  background-color: #0b0f19; /* Fondo oscuro industrial */
+  background-color: #0b0f19;
   min-height: 100vh;
-  padding-bottom: 3rem;
+  padding: 6rem 0 3rem;
   color: #e2e8f0;
   font-family: 'Inter', 'Roboto', sans-serif;
   position: relative;
-  margin-top: 5rem; /* Compensa la altura del navbar para que el contenido quede debajo */
 }
 
 .alta-equipo-header {
   margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.75rem 1.75rem 1.5rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 2rem;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
 }
 
 .alta-equipo-title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 800;
   letter-spacing: 2px;
   color: #ffffff;
   margin: 0;
@@ -29,76 +31,119 @@
 
 .alta-equipo-subtitle {
   color: #8a8f98;
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   letter-spacing: 1px;
-  margin-top: 0.5rem;
+  margin-top: 0.65rem;
+  max-width: 620px;
+}
+
+.alta-equipo-header .MuiButton-root {
+  min-width: 170px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.btn-corp-submit {
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
+  color: #0b0f19 !important;
+}
+
+.btn-corp-update {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important;
+  color: #0b0f19 !important;
+}
+
+.btn-corp-cancel {
+  border-color: rgba(255, 71, 87, 0.35) !important;
+  color: #ef4444 !important;
+}
+
+.alta-equipo-header .btn-corp-cancel:hover {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08);
 }
 
 /* Tarjetas (Paneles) */
 .corp-panel {
-  background-color: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 1.5rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(10, 18, 33, 0.96) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.75rem;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.25);
 }
 
 .corp-panel-header {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.85rem;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .corp-panel-title {
-  color: #e2e8f0;
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.corp-panel .MuiTextField-root {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
 }
 
 /* Lista de clientes (Búsqueda) */
 .client-list-container {
-  max-height: 400px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 /* Scrollbar personalizado para lista */
 .client-list-container::-webkit-scrollbar {
-  width: 6px;
+  width: 7px;
 }
 .client-list-container::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.2);
+  background: rgba(255,255,255,0.04);
 }
 .client-list-container::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
 }
 
 .client-list-item {
-  border: 1px solid transparent;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  margin-bottom: 0.75rem;
   transition: all 0.2s ease;
+  background: rgba(255,255,255,0.02);
 }
 
 .client-list-item:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .client-list-item.selected {
-  background-color: rgba(0, 168, 232, 0.1);
-  border: 1px solid rgba(0, 168, 232, 0.3);
-  border-left: 4px solid #00a8e8;
+  background-color: rgba(0, 168, 232, 0.12);
+  border: 1px solid rgba(0, 168, 232, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(0, 168, 232, 0.2);
 }
 
 .client-item-name {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.9rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 
 .client-item-name.selected {
@@ -106,47 +151,49 @@
 }
 
 .client-item-dni {
-  color: #64748b;
-  font-size: 0.75rem;
-  letter-spacing: 1px;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  letter-spacing: 0.6px;
 }
 
 .status-footer-corp {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .status-label {
-  color: #8a8f98;
-  font-size: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
   letter-spacing: 1.5px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .status-badge {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 1px;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  display: flex;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-width: 120px;
+  justify-content: center;
 }
 
 .status-badge.pending {
   background-color: rgba(255, 255, 255, 0.05);
   color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .status-badge.linked {
-  background-color: rgba(0, 168, 232, 0.1);
-  color: #00a8e8;
-  border: 1px solid rgba(0, 168, 232, 0.3);
+  background-color: rgba(0, 168, 232, 0.12);
+  color: #c7d2fe;
+  border: 1px solid rgba(0, 168, 232, 0.25);
 }
 
 /* --- AJUSTES PARA ESTRUCTURA DE DOS COLUMNAS --- */

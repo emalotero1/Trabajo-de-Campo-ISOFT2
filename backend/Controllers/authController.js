@@ -33,8 +33,8 @@ exports.login = async (req, res) => {
     const payload = {
       id: user._id,
       username: user.username,
-      name: user.name,
-      lastname: user.lastname,  
+      nombre: user.nombre,
+      apellido: user.apellido,  
       cel: user.cel,   
       email: user.email,
       rol: user.rol,          
@@ -47,7 +47,7 @@ exports.login = async (req, res) => {
     res.status(200).json({ 
       status: "success",
       token,
-      user: { name: user.name, rol: user.rol }
+      user: { nombre: user.nombre, apellido: user.apellido, rol: user.rol }
     });
 
   } catch (error) {
