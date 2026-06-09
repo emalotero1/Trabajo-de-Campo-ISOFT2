@@ -6,7 +6,7 @@ const Client = require('../Models/Client');
 const normalizeEstado = (estado) => estado === 'EN DIAGNOSTICO' ? 'ASIGNADO' : estado;
 
 // =========================================================================
-// 1. POST - Create Order
+// 1. POST - CREAR ORDEN DE REPARACIÓN
 // =========================================================================
 const create = async (req, res) => {
   try {
@@ -95,11 +95,13 @@ const list = async (req, res) => {
 const getPendingJobs = async (req, res) => {
   try {
       const filtro = {
-          estado: { $nin: ['ENTREGADO', 'REPARADO'] }
+          estado: 'PENDIENTE DE REVISION',
+          tecnico_asignado: null
       };
 
       if (req.query.soloAsignadas === 'true') {
           filtro.tecnico_asignado = req.user.id;
+          filtro.estado = { $nin: ['ENTREGADO', 'REPARADO'] };
       }
 
       const ordenes = await OrdenReparacion.find(filtro)
@@ -237,8 +239,67 @@ const getById = async (req, res) => {
 };
 
 // =========================================================================
-// 6. PUT - Assign Technician (Caso de Uso: Asignarse Orden)
+// 6. PUT - ASIGNAR TECNICO (Caso de Uso: Asignarse Orden)
 // =========================================================================
+const getActiveJobs = async (req, res) => {
+  try {
+    const filtro = {
+      estado: { $in: ['PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO'] }
+    };
+
+    if (req.query.soloAsignadas === 'true') {
+      filtro.tecnico_asignado = req.user.id;
+    }
+
+    const ordenes = await OrdenReparacion.find(filtro)
+      .populate({ path: 'id_equipo', model: 'Equipo', populate: { path: 'cliente', model: 'Client' } })
+      .sort({ nro_orden: 1 });
+
+    const ordenesNormalizadas = ordenes.map((orden) => {
+      orden.estado = normalizeEstado(orden.estado);
+      return orden;
+    });
+
+    return res.status(200).json({ ok: true, status: 'success', ordenes: ordenesNormalizadas });
+  } catch (error) {
+    console.error('Error al obtener trabajos activos:', error);
+    return res.status(500).json({ ok: false, status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+const getHistoryJobs = async (req, res) => {
+  try {
+    const filtro = {
+      estado: { $in: ['ENTREGADO'] }
+    };
+
+    const texto = req.query.buscar ? req.query.buscar.trim() : '';
+
+    const ordenes = await OrdenReparacion.find(filtro)
+      .populate({ path: 'id_equipo', model: 'Equipo', populate: { path: 'cliente', model: 'Client' } })
+      .sort({ updatedAt: -1 });
+
+    let ordenesNormalizadas = ordenes.map((orden) => {
+      orden.estado = normalizeEstado(orden.estado);
+      return orden;
+    });
+
+    if (texto) {
+      const query = texto.toLowerCase();
+      ordenesNormalizadas = ordenesNormalizadas.filter((orden) => {
+        const cliente = orden.id_equipo?.cliente || {};
+        const nombre = `${cliente.name || ''} ${cliente.lastname || ''}`.toLowerCase();
+        return nombre.includes(query) || String(orden.nro_orden).includes(query);
+      });
+    }
+
+    return res.status(200).json({ ok: true, status: 'success', ordenes: ordenesNormalizadas });
+  } catch (error) {
+    console.error('Error al obtener historial:', error);
+    return res.status(500).json({ ok: false, status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
 const assignTechnician = async (req, res) => {
   try {
     const { id } = req.params; // El ID de la Orden de Reparación
@@ -289,6 +350,8 @@ module.exports = {
   create,
   list,
   getPendingJobs,
+  getActiveJobs,
+  getHistoryJobs,
   update,
   getById,
   assignTechnician

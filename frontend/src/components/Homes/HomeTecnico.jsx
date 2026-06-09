@@ -2,15 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid } from '@mui/material';
-import { 
-  FaReceipt, FaMicrochip, FaFilePen, FaClock, FaArrowRight, FaTemperatureHigh 
-} from 'react-icons/fa6';
+import { FaReceipt, FaClock, FaArrowRight, FaWrench } from 'react-icons/fa6';
+import { FaHistory } from 'react-icons/fa';
 import { useAuth } from '../../../context/authProvider';
 import Navbar from '../../components/Layout/Navbar';
 import '../../styles/HomeRoles.css'; 
 
 // Importamos el servicio para traer las órdenes desde la BD
-import { obtenerOrdenesPendientes } from '../../Services/ordenServicio';
+import { obtenerTodasLasOrdenes } from '../../Services/ordenServicio';
 
 const HomeTecnico = () => {
   const { user } = useAuth();
@@ -20,32 +19,36 @@ const HomeTecnico = () => {
   // 1. inicializamos los datos en 0
   const [cantOrdenes, setcantOrdenes] = useState({
     pendientes: 0,
-    enProceso: 0
+    gestion: 0,
+    activos: 0,
+    historial: 0
   });
 
   // 2. CONSUMO DE API: Cargar órdenes y agruparlas matemáticamente por estado
   useEffect(() => {
     const cargarEstadisticas = async () => {
       try {
-        const data = await obtenerOrdenesPendientes();
-        
+        const data = await obtenerTodasLasOrdenes();
+
         if (data.status === "success" || data.ok) {
           const ordenes = data.ordenes || [];
-          
-          // Filtramos la cantidad de equipos que esperan ser revisados
-          const esperandoRevision = ordenes.filter(
-            o => o.estado === 'PENDIENTE DE REVISION'
-          ).length;
+          const tecnicoId = String(user?.id || user?._id || '');
 
-          // Filtramos la cantidad de equipos que ya están en la mesa de trabajo activa
-          const enMesaDeTrabajo = ordenes.filter(
-            o => ['ASIGNADO', 'DIAGNOSTICADO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO'].includes(o.estado)
-          ).length;
+          const ordenesAsignadasAlTecnico = ordenes.filter((o) => {
+            const asignadoA = o.tecnico_asignado ? String(o.tecnico_asignado._id || o.tecnico_asignado) : '';
+            return asignadoA === tecnicoId;
+          });
 
-          // Actualizamos el estado para que React vuelva a renderizar los números
+          const pendientesSinAsignar = ordenes.filter(o => o.estado === 'PENDIENTE DE REVISION' && !o.tecnico_asignado).length;
+          const gestion = ordenesAsignadasAlTecnico.filter(o => ['ASIGNADO', 'DIAGNOSTICADO'].includes(o.estado)).length;
+          const activos = ordenesAsignadasAlTecnico.filter(o => ['PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO'].includes(o.estado)).length;
+          const historial = ordenesAsignadasAlTecnico.filter(o => o.estado === 'ENTREGADO').length;
+
           setcantOrdenes({
-            pendientes: esperandoRevision,
-            enProceso: enMesaDeTrabajo
+            pendientes: pendientesSinAsignar,
+            gestion,
+            activos,
+            historial
           });
         }
       } catch (error) {
@@ -58,20 +61,34 @@ const HomeTecnico = () => {
 
   // 3. Tus acciones ahora se alimentan automáticamente del estado "labStats"
   const actions = [
-    { 
-      title: "TRABAJOS PENDIENTES", 
-      desc: "Equipos en proceso de reparación.", 
-      icon: <FaClock />, 
-      path: "/trabajospendientes",
-      count: cantOrdenes.pendientes 
+    {
+      title: 'TRABAJOS PENDIENTES',
+      desc: 'Órdenes en espera de asignación técnica.',
+      icon: <FaClock />,
+      path: '/trabajospendientes',
+      count: cantOrdenes.pendientes
     },
-    { 
-      title: "GESTION DE TRABAJOS", 
-      desc: "Realizar diagnosticos y asignar presupuestos.", 
-      icon: <FaReceipt />, 
-      path: "/mesatrabajo",
-      count: cantOrdenes.enProceso  
-    },   
+    {
+      title: 'GESTIÓN DE TRABAJOS',
+      desc: 'Realizar diagnósticos y asignar presupuestos.',
+      icon: <FaReceipt />,
+      path: '/mesatrabajo',
+      count: cantOrdenes.gestion
+    },
+    {
+      title: 'TRABAJOS ACTIVOS',
+      desc: 'Espera de aceptación y ejecución de reparaciones.',
+      icon: <FaWrench />,
+      path: '/trabajosactivos',
+      count: cantOrdenes.activos
+    },
+    {
+      title: 'HISTORIAL DE TRABAJOS',
+      desc: 'Registro de trabajos finalizados y entregados.',
+      icon: <FaHistory />,
+      path: '/historialtrabajos',
+      count: cantOrdenes.historial
+    }
   ];
 
   return (

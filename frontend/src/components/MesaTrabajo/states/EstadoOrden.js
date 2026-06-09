@@ -39,7 +39,8 @@ class EstadoOrden {
     this.contexto.setEstado(estadoDestino);
   }
 
-  // Por defecto, nadie puede editar nada a menos que el estado específico (ej: EnDiagnostico) diga que sí (return true)
+  // Por defecto, nadie puede editar nada a menos que el estado específico 
+  // (ej: EnDiagnostico) diga que sí (return true)
   puedeEditarDiagnostico() { return false; }
   puedeEditarPresupuesto() { return false; }
   puedeSerDecididoPorCliente() { return false; }

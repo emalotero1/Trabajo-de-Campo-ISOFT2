@@ -17,6 +17,18 @@ export const obtenerOrdenesPendientes = async (soloAsignadas = false) => {
   return res.data;
 };
 
+export const obtenerOrdenesActivas = async (soloAsignadas = false) => {
+  const query = soloAsignadas ? '?soloAsignadas=true' : '';
+  const res = await api.get(`/ordenes/activos${query}`);
+  return res.data;
+};
+
+export const obtenerHistorialOrdenes = async (buscar = '') => {
+  const query = buscar ? `?buscar=${encodeURIComponent(buscar)}` : '';
+  const res = await api.get(`/ordenes/historial${query}`);
+  return res.data;
+};
+
 export const obtenerOrdenPorId = async (id) => {
   const res = await api.get(`/ordenes/${id}`);
   return res.data;

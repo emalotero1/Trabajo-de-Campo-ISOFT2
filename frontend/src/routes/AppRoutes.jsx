@@ -19,6 +19,8 @@ import AltaEquipo from '../components/Equipos/AltaEquipo';
 import OrdenReparacion from '../components/OrdenReparacion/OrdenReparacion';
 import ListaComprobantes from '../components/Comprobantes/ListaComprobantes';
 import TrabajosPendientes from '../components/TrabajosPendientes/TrabajosPendientes';
+import TrabajosActivos from '../components/TrabajosActivos/TrabajosActivos';
+import HistorialTrabajos from '../components/HistorialTrabajos/HistorialTrabajos';
 import MesaTrabajo from '../components/MesaTrabajo/MesaTrabajo';
 import ModificarEstado from '../components/TrabajosPendientes/ModificarEstado';
 
@@ -71,9 +73,11 @@ const AppRoutes = () => {
         {/* NIVEL 2: PROTECCIÓN DE ROL (TÉCNICO) */}
         <Route element={<RoleRoute allowedRoles={['tecnico']} />}>
           <Route path="/trabajospendientes" element={<TrabajosPendientes />} />
-          <Route path="/mesatrabajo" element={<MesaTrabajo />} /> 
+          <Route path="/mesatrabajo" element={<MesaTrabajo />} />
+          <Route path="/trabajosactivos" element={<TrabajosActivos />} />
+          <Route path="/historialtrabajos" element={<HistorialTrabajos />} />
           <Route path="/modificar-estado/:id" element={<ModificarEstado />} />
-        </Route>  
+        </Route>
       </Route> {/* <-- AQUÍ CIERRA EL PrivateRoute CORRECTAMENTE */}
 
     
