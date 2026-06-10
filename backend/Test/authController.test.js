@@ -29,10 +29,10 @@ describe('Pruebas Unitarias - authController.login', () => {
     await login(req, res);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Credenciales inválidas - Usuario no existe' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Usuario no existe' });
   });
 
-  // 2. Caso: Password incorrecta
+  // 2. Caso: Password incorrecta 
   it('Debe retornar 401 si la contraseña es incorrecta', async () => {
     req.body = { emailOrUser: 'emalotero1', password: '1234' };
     User.findOne.mockResolvedValue({ password: 'hashed_password' });

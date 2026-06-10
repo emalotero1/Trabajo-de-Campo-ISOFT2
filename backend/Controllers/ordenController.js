@@ -8,43 +8,57 @@ const Client = require('../Models/Client');
 // =========================================================================
 const create = async (req, res) => {
   try {
-    const { id_equipo, estado, observaciones } = req.body;
+    const { id_equipo, observaciones } = req.body;
     const id_usuario_recepcionista = req.user.id;
+
+    // 1. Validación de entrada (Excepción según contrato)
+    if (!id_equipo) {
+      return res.status(400).json({ ok: false, msg: 'EL EQUIPO ES OBLIGATORIO' });
+    }
+
+    // 2. Validación de existencia del equipo
+    const equipo = await Equipo.findById(id_equipo);
+    if (!equipo) {
+      return res.status(404).json({ ok: false, msg: 'EQUIPO NO ENCONTRADO' });
+    }
+
+    // 3. Generación del número de orden
     const ultimaOrden = await OrdenReparacion.findOne().sort({ nro_orden: -1 });
     const nro_orden = ultimaOrden ? ultimaOrden.nro_orden + 1 : 1000;
 
+    // 4. Creación de la instancia
     const nuevaOrden = new OrdenReparacion({
       nro_orden,
       id_equipo,
       id_usuario: id_usuario_recepcionista,
-      estado: estado || 'PENDIENTE DE REVISION',
-      observaciones: observaciones
+      estado: 'PENDIENTE', // Estandarizado según contrato
+      observaciones
     });
 
+    // 5. Persistencia (Usando una estructura más robusta)
     const ordenGuardada = await nuevaOrden.save();
+    
+    // Actualizar estado del equipo
     await Equipo.findByIdAndUpdate(id_equipo, { asignadoAOrden: true });
 
-    try {
-      const primerHistorial = new EstadoHistorial({
-        id_orden: ordenGuardada._id,
-        estado: ordenGuardada.estado,
-        id_usuario: id_usuario_recepcionista
-      });
-      await primerHistorial.save();
-    } catch (errorHistorial) {
-      await OrdenReparacion.findByIdAndDelete(ordenGuardada._id);
-      throw new Error('Error al inicializar el historial de estados.');
-    }
+    // 6. Registro de historial inicial
+    const primerHistorial = new EstadoHistorial({
+      id_orden: ordenGuardada._id,
+      estado: 'PENDIENTE',
+      id_usuario: id_usuario_recepcionista
+    });
+    await primerHistorial.save();
 
-    res.status(201).json({
+    // 7. Respuesta exitosa (201 Created)
+    return res.status(201).json({
       ok: true,
-      msg: 'Orden de reparación generada exitosamente',
+      msg: 'EQUIPO REGISTRADO OK', // O "ORDEN CREADA EXITOSAMENTE"
       orden: ordenGuardada
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ ok: false, msg: 'Hubo un error en el servidor.' });
+    // Excepción de fallo de conexión/base de datos según contrato
+    return res.status(500).json({ ok: false, msg: 'ERROR INTERNO DEL SERVIDOR' });
   }
 };
 

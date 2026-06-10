@@ -206,7 +206,7 @@ export default function AltaEquipo() {
         {errorForm && (
           <Fade in={!!errorForm}>
             <Box className="feedback-error-corp" sx={{ mb: 3 }}>
-              <FiAlertTriangle /> ERROR: {errorForm}
+              <FiAlertTriangle /> {errorForm}
             </Box>
           </Fade>
         )}
@@ -470,7 +470,7 @@ export default function AltaEquipo() {
       >
         <DialogTitle sx={{ color: '#8ed5ff', display: 'flex', alignItems: 'center', gap: 1.5, fontWeight: 'bold' }}>
           <FiCheckCircle size={24} color="#10b981" />
-          ¡Operación Exitosa!
+          EQUIPO REGISTRADO OK
         </DialogTitle>
         <DialogActions sx={{ p: 3, pt: 0 }}>
           <Button 
