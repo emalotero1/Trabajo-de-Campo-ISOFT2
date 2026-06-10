@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
-import { FiSettings, FiSearch, FiClock, FiList } from 'react-icons/fi';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { FiSettings, FiSearch, FiClock, FiList, FiCheckCircle } from 'react-icons/fi'; 
 import '../../styles/AltaEquipo.css'; 
 import Navbar from '../../components/Layout/Navbar';
 import '../../styles/TrabajosPendientes.css';
 
-// Importamos el servicio modularizado (¡Asegurate de importar asignarOrden!)
 import { obtenerOrdenesPendientes, asignarOrden } from '../../Services/ordenServicio';
 
 const calcularTiempoTranscurrido = (fechaCreacion) => {
@@ -28,8 +27,10 @@ export default function TrabajosPendientes() {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState('');
   const [ordenes, setOrdenes] = useState([]);
+  
+  // NUEVO ESTADO PARA EL POP-UP
+  const [openDialog, setOpenDialog] = useState(false);
 
-  // Función extraída para poder reutilizarla al refrescar
   const cargarOrdenesBD = async () => {
     try {
       const data = await obtenerOrdenesPendientes();
@@ -59,12 +60,12 @@ export default function TrabajosPendientes() {
     cargarOrdenesBD();
   }, []);
 
-  // --- NUEVA FUNCIÓN PARA ASIGNARSE LA ORDEN ---
   const handleAsignar = async (id) => {
     try {
       await asignarOrden(id);
-      // Recargamos la lista para que el estado cambie visualmente a EN DIAGNOSTICO
       cargarOrdenesBD(); 
+      // ABRIMOS EL POP-UP AL TENER ÉXITO
+      setOpenDialog(true);
     } catch (error) {
       console.error("Error al asignar la orden:", error);
       alert("Hubo un error al asignarse la orden. Revisa la consola.");
@@ -102,7 +103,7 @@ export default function TrabajosPendientes() {
                 type="text" 
                 className="industrial-input-corp" 
                 style={{ paddingLeft: '45px', borderRadius: '8px', width: '100%' }}
-                placeholder="Buscar modelo, ID de pedido..." 
+                placeholder="Buscar modelo, Numero de pedido..." 
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
@@ -123,8 +124,6 @@ export default function TrabajosPendientes() {
         {/* GRILLA DE TARJETAS TÉCNICAS */}
         <Box className="tp-cards-grid">
           {ordenesFiltradas.map((orden) => {
-            // Modificamos esta lógica para que el botón "Modificar Estado" siga tu regla anterior, 
-            // pero habilitamos una vía exclusiva para las PENDIENTES.
             const esPendiente = orden.estadoActual === 'PENDIENTE DE REVISION';
             const estadosBloqueados = ['INGRESADO', 'EN DIAGNOSTICO'];
             const botonHabilitado = !estadosBloqueados.includes(orden.estadoActual.toUpperCase());
@@ -156,12 +155,10 @@ export default function TrabajosPendientes() {
                         </Typography>
                       </Box>
 
-                      {/* spacer para que el bloque inferior quede alineado siempre (solo ajuste vertical) */}
                       <Box sx={{ flexGrow: 1 }} />
                     </Box>
 
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, alignItems: 'end', pt: 2, borderTop: '1px solid rgba(62, 72, 79, 0.5)' }}>
-                      {/* Caja izquierda: estado + tiempo */}
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#8ed5ff' }}>
                           <FiClock size={14} />
@@ -182,7 +179,6 @@ export default function TrabajosPendientes() {
                         </Box>
                       </Box>
 
-                      {/* Caja derecha: botón SIEMPRE con mismo ancho */}
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         {esPendiente ? (
                           <Button 
@@ -235,6 +231,52 @@ export default function TrabajosPendientes() {
           })}
         </Box>
       </Box>
+
+      {/* --- INICIO DEL POP-UP (DIALOG) --- */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#161c22',
+            border: '1px solid #3e484f',
+            color: '#bdc8d1',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: '#8ed5ff', display: 'flex', alignItems: 'center', gap: 1.5, fontWeight: 'bold' }}>
+          <FiCheckCircle size={24} color="#10b981" />
+          ¡Orden Asignada!
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: '#87929a', mt: 1 }}>
+            La orden se ha asignado correctamente a tu usuario. ¿Deseas dirigirte a la gestión de trabajos para comenzar el diagnóstico o prefieres seguir viendo los trabajos pendientes?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button 
+            onClick={() => setOpenDialog(false)} 
+            sx={{ color: '#87929a', '&:hover': { color: '#fff' } }}
+          >
+            Quedarme aquí
+          </Button>
+          <Button 
+            variant="contained"
+            onClick={() => navigate('/mesatrabajo')} 
+            sx={{
+              bgcolor: '#0ea5e9',
+              color: '#fff',
+              '&:hover': { bgcolor: '#0284c7' }
+            }}
+            autoFocus
+          >
+            Ir a Gestión de Trabajos
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* --- FIN DEL POP-UP --- */}
+
     </Box>
   );
 }

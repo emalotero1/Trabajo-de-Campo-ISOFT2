@@ -40,7 +40,7 @@ const HomeTecnico = () => {
           });
 
           const pendientesSinAsignar = ordenes.filter(o => o.estado === 'PENDIENTE DE REVISION' && !o.tecnico_asignado).length;
-          const gestion = ordenesAsignadasAlTecnico.filter(o => ['ASIGNADO', 'DIAGNOSTICADO'].includes(o.estado)).length;
+          const gestion = ordenesAsignadasAlTecnico.filter(o => ['ASIGNADO', 'DIAGNOSTICADO', 'PRESUPUESTADO'].includes(o.estado)).length;
           const activos = ordenesAsignadasAlTecnico.filter(o => ['PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO'].includes(o.estado)).length;
           const historial = ordenesAsignadasAlTecnico.filter(o => o.estado === 'ENTREGADO').length;
 

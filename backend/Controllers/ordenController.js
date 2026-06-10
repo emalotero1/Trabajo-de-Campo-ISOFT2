@@ -3,8 +3,6 @@ const EstadoHistorial = require('../Models/EstadoHistorial');
 const Equipo = require('../Models/Equipos'); 
 const Client = require('../Models/Client'); 
 
-const normalizeEstado = (estado) => estado === 'EN DIAGNOSTICO' ? 'ASIGNADO' : estado;
-
 // =========================================================================
 // 1. POST - CREAR ORDEN DE REPARACIÓN
 // =========================================================================
@@ -39,7 +37,6 @@ const create = async (req, res) => {
       });
       await primerHistorial.save();
     } catch (errorHistorial) {
-      // para evitar dejar datos huerfanos en caso de que falle el historial, eliminamos la orden creada
       await OrdenReparacion.findByIdAndDelete(ordenGuardada._id);
       throw new Error('Error al inicializar el historial de estados.');
     }
@@ -72,15 +69,11 @@ const list = async (req, res) => {
       })
       .sort({ nro_orden: -1 });
 
-    const ordenesNormalizadas = ordenes.map((orden) => {
-      orden.estado = normalizeEstado(orden.estado);
-      return orden;
-    });
-
+    // Ya no mapeamos, enviamos la data cruda y limpia
     return res.status(200).json({
       ok: true,
       status: "success", 
-      ordenes: ordenesNormalizadas
+      ordenes
     });
 
   } catch (error) {
@@ -110,17 +103,12 @@ const getPendingJobs = async (req, res) => {
           model: 'Equipo',
           populate: { path: 'cliente', model: 'Client' }
       })
-      .sort({ nro_orden: 1 }); // Orden de llegada
-
-      const ordenesNormalizadas = ordenes.map((orden) => {
-          orden.estado = normalizeEstado(orden.estado);
-          return orden;
-      });
+      .sort({ nro_orden: 1 });
 
       return res.status(200).json({ 
           ok: true,
           status: "success", 
-          ordenes: ordenesNormalizadas 
+          ordenes 
       });
   } catch (error) {
       console.error("Error al obtener trabajos pendientes:", error);
@@ -139,7 +127,6 @@ const update = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Agregamos "observaciones" para recibir la bitácora desde el ModificarEstado.jsx
     const { estado, diagnostico, presupuesto, observaciones } = req.body;
 
     const orden = await OrdenReparacion.findById(id);
@@ -170,7 +157,7 @@ const update = async (req, res) => {
       }
     }
 
-    if (estado === 'PRESUPUESTO ACEPTADO' && orden.estado === 'PRESUPUESTO RECHAZADO') {
+    if (estado === 'PRESUPUESTO ACEPTADO' && orden.estado === 'PRESUPUESTO RECHAZADO' ) {
       return res.status(400).json({ ok: false, msg: 'No se puede cambiar un presupuesto rechazado a aceptado.' });
     }
 
@@ -186,7 +173,6 @@ const update = async (req, res) => {
     if (estado) orden.estado = estado;
     if (diagnostico) orden.diagnostico = diagnostico;
     
-    // Verificamos undefined en lugar de true/false para permitir que se guarde un string vacío (borrar bitácora)
     if (observaciones !== undefined) orden.observaciones = observaciones; 
     
     if (presupuesto) {
@@ -229,8 +215,7 @@ const getById = async (req, res) => {
       return res.status(404).json({ ok: false, msg: 'Orden no encontrada' });
     }
 
-    orden.estado = normalizeEstado(orden.estado);
-
+    // Eliminada la mutación de estado individual
     return res.status(200).json({ ok: true, status: "success", orden });
   } catch (error) {
     console.error("Error al obtener orden por ID:", error);
@@ -255,12 +240,7 @@ const getActiveJobs = async (req, res) => {
       .populate({ path: 'id_equipo', model: 'Equipo', populate: { path: 'cliente', model: 'Client' } })
       .sort({ nro_orden: 1 });
 
-    const ordenesNormalizadas = ordenes.map((orden) => {
-      orden.estado = normalizeEstado(orden.estado);
-      return orden;
-    });
-
-    return res.status(200).json({ ok: true, status: 'success', ordenes: ordenesNormalizadas });
+    return res.status(200).json({ ok: true, status: 'success', ordenes });
   } catch (error) {
     console.error('Error al obtener trabajos activos:', error);
     return res.status(500).json({ ok: false, status: 'error', message: 'Error interno del servidor' });
@@ -275,25 +255,21 @@ const getHistoryJobs = async (req, res) => {
 
     const texto = req.query.buscar ? req.query.buscar.trim() : '';
 
-    const ordenes = await OrdenReparacion.find(filtro)
+    let ordenes = await OrdenReparacion.find(filtro)
       .populate({ path: 'id_equipo', model: 'Equipo', populate: { path: 'cliente', model: 'Client' } })
       .sort({ updatedAt: -1 });
 
-    let ordenesNormalizadas = ordenes.map((orden) => {
-      orden.estado = normalizeEstado(orden.estado);
-      return orden;
-    });
-
     if (texto) {
       const query = texto.toLowerCase();
-      ordenesNormalizadas = ordenesNormalizadas.filter((orden) => {
+      // Filtramos directamente sobre el array original sin mapearlo antes
+      ordenes = ordenes.filter((orden) => {
         const cliente = orden.id_equipo?.cliente || {};
         const nombre = `${cliente.name || ''} ${cliente.lastname || ''}`.toLowerCase();
         return nombre.includes(query) || String(orden.nro_orden).includes(query);
       });
     }
 
-    return res.status(200).json({ ok: true, status: 'success', ordenes: ordenesNormalizadas });
+    return res.status(200).json({ ok: true, status: 'success', ordenes });
   } catch (error) {
     console.error('Error al obtener historial:', error);
     return res.status(500).json({ ok: false, status: 'error', message: 'Error interno del servidor' });
@@ -302,8 +278,8 @@ const getHistoryJobs = async (req, res) => {
 
 const assignTechnician = async (req, res) => {
   try {
-    const { id } = req.params; // El ID de la Orden de Reparación
-    const id_tecnico = req.user.id; // El ID del técnico logueado (viene del JWT)
+    const { id } = req.params; 
+    const id_tecnico = req.user.id; 
 
     const orden = await OrdenReparacion.findById(id);
     

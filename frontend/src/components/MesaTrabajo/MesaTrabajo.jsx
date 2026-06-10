@@ -93,6 +93,13 @@ const MesaTrabajo = () => {
   if (loading) return <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: '#0b0f19', color: '#00a8e8' }}><Typography variant="h5">Cargando mesa de trabajo...</Typography></Box>;
   if (error) return <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: '#0b0f19', color: '#ef4444' }}><Typography variant="h5">Error: {error}</Typography></Box>;
 
+  const opcionesDropdown = listaPendientes.filter(o =>     
+    o.estado === 'ASIGNADO' || 
+    o.estado === 'DIAGNOSTICADO' ||
+    o.estado === 'PRESUPUESTADO' ||
+    (order && o._id === order._id) 
+  );
+
   return (
     <Box className="mesatrabajo-wrapper" style={{ paddingTop: '100px' }}>
       <Navbar />
@@ -131,8 +138,8 @@ const MesaTrabajo = () => {
           >
             <MenuItem value="" disabled>-- Seleccione una orden de la cola de pendientes --</MenuItem>
             
-            {listaPendientes.map(opcion => {
-              const miId = user?.id || user?._id; 
+            {opcionesDropdown.map(opcion => {
+              const miId = user?.id || user?._id;
               const esMiOrden = miId && opcion.tecnico_asignado && String(opcion.tecnico_asignado) === String(miId);
 
               return (
@@ -194,7 +201,7 @@ const MesaTrabajo = () => {
                   </Box>
                 </Box>
 
-                {/* 4. SECCIÓN PROGRESO TÉCNICO RENOVADA (Totalmente dinámica) */}
+                {/* 4. SECCIÓN DE PROGRESO DEL TÉCNICO */}
                 <Box className="mesatrabajo-panel" sx={{ borderLeft: `3px solid ${ordenContexto.getMetadatosUI().color}`, flexGrow: 1 }}>
                   <Typography sx={{ color: '#fff', fontWeight: 800, mb: 3, textTransform: 'uppercase', fontSize: '0.9rem' }}>
                     Estado del Servicio
@@ -203,9 +210,39 @@ const MesaTrabajo = () => {
                   {/* Mostramos el Estado Actual consumiendo los metadatos */}
                   <Box sx={{ mb: 4, p: 2, borderRadius: 1, bgcolor: `${ordenContexto.getMetadatosUI().color}15`, border: `1px solid ${ordenContexto.getMetadatosUI().color}50` }}>
                     <Typography sx={{ color: ordenContexto.getMetadatosUI().color, fontWeight: 900, mb: 0.5, fontSize: '0.75rem', letterSpacing: '1px' }}>ESTADO ACTUAL</Typography>
-                    <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.2rem', mb: 0.5 }}>{ordenContexto.getMetadatosUI().label}</Typography>
+                    <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.4rem', mb: 0.5 }}>{ordenContexto.getMetadatosUI().label}</Typography>
                     <Typography sx={{ color: '#8a8f98', fontSize: '0.8rem' }}>{ordenContexto.getMetadatosUI().descripcion}</Typography>
                   </Box>
+
+                  {order.estado === 'PRESUPUESTADO' && (
+                  <Box 
+                    sx={{ 
+                      mb: 3, 
+                      p: 2, 
+                      borderRadius: '4px', 
+                      bgcolor: 'rgba(0, 168, 232, 0.03)', 
+                      border: '1px dashed rgba(0, 168, 232, 0.3)',
+                      boxShadow: '0 0 15px rgba(0, 168, 232, 0.05)'
+                    }}
+                  >
+                    <Typography 
+                      sx={{ 
+                        color: '#00a8e8', 
+                        fontFamily: 'JetBrains Mono', 
+                        fontSize: '1.2rem', 
+                        fontWeight: 800, 
+                        letterSpacing: '1px', 
+                        mb: 1,
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      // FLUJO DE TRABAJO
+                    </Typography>
+                    <Typography sx={{ color: '#e2e8f0', fontSize: '0.8 rem', lineHeight: 1.5 }}>
+                      El presupuesto ya ha sido generado. Para modificar estados posteriores (Aceptado, Rechazado o Reparado), continúe el proceso desde la vista de <strong>Trabajos Activos</strong>.
+                    </Typography>
+                  </Box>
+                  )}
 
                   <Typography sx={{ color: '#64748b', fontWeight: 700, fontSize: '0.75rem', mb: 2, letterSpacing: '0.5px' }}>
                     El estado avanzará automáticamente cuando completes el diagnóstico y el presupuesto.

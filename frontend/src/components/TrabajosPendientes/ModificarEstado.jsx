@@ -36,7 +36,7 @@ export default function ModificarEstado() {
   
   const [alertConfig, setAlertConfig] = useState({ open: false, type: 'success', msg: '' });
   
-  // CONSUMO DE API: Traer datos de la orden
+  // Trae datos de la orden
   useEffect(() => {
     const fetchOrden = async () => {
       try {
@@ -59,13 +59,17 @@ export default function ModificarEstado() {
     fetchOrden();
   }, [id]);
 
-  // CONSUMO DE API: Guardar cambios
+  //  Guarda cambios
   const handleGuardar = async () => {
     try {
       const data = await actualizarEstadoTrabajo(id, nuevoEstadoSel, bitacora);
-      
+      setOrden(prevOrden => ({
+        ...prevOrden,
+        estado: nuevoEstadoSel,
+        observaciones: bitacora
+      }));
       setAlertConfig({ open: true, type: 'success', msg: 'Estado actualizado correctamente' });
-      setTimeout(() => navigate('/trabajospendientes'), 1500); 
+     
     } catch (error) {
       console.error(error);
       setAlertConfig({ open: true, type: 'error', msg: 'Error al actualizar el estado en el servidor' });
@@ -199,6 +203,15 @@ export default function ModificarEstado() {
 
               <Box sx={{ flexGrow: 1 }}>
                 {ESTADOS_REPARACION.map((paso) => {
+                  
+                  // 👇 REGLAS SIMPLES PARA OCULTAR (No dibujar) 👇
+                  // 1. Si vamos por buen camino (Aceptado/Reparado), ocultamos el "Rechazado"
+                  if (['PRESUPUESTO ACEPTADO', 'REPARADO'].includes(estadoGuardado) && paso.id === 'PRESUPUESTO RECHAZADO') return null;
+                  
+                  // 2. Si rechazó, ocultamos el "Aceptado" y "Reparado"
+                  if (estadoGuardado === 'PRESUPUESTO RECHAZADO' && ['PRESUPUESTO ACEPTADO', 'REPARADO'].includes(paso.id)) return null;
+                  // 👆 -------------------------------------- 👆
+
                   const isCompletado = paso.nivel < nivelDB;
                   const isActualSeleccionado = paso.id === nuevoEstadoSel;
                   const isDisponible = puedeSeleccionar(paso) && !estaBloqueadoPorExclusion(paso);

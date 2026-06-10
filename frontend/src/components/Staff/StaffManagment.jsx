@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FaUserPlus, FaEdit, FaTrashAlt, FaSearch, FaFilter, FaEnvelope 
 } from 'react-icons/fa';
-// Importamos los mismos iconos que usas en el Modal para mantener la estética
 import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { 
   Typography, IconButton, TextField, MenuItem, 
-  InputAdornment, CircularProgress, Box, Fade 
+  InputAdornment, CircularProgress, Box, Fade,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button
 } from '@mui/material';
 
 import Navbar from '../../components/Layout/Navbar';
@@ -19,7 +19,6 @@ import '../../styles/Staff.css';
 
 const StaffManagement = () => {
   const navigate = useNavigate();
-  // Extraemos también error y setError del hook para sincronizar con el backend
   const { usuarios, getUsers, deleteUser, loading, error, setError } = useUsuarios();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,14 +26,18 @@ const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("todos");
   
-  // Estado local para mensajes de éxito (igual que en el modal)
+  // Estado local para mensajes de éxito
   const [success, setSuccess] = useState(null);
+
+  // Estados para el Dialog de confirmación de eliminación
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
     getUsers();
   }, []);
 
-  // Limpiar mensajes después de unos segundos (opcional, mejora la UX)
+  // Limpiar mensajes después de unos segundos
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -64,23 +67,30 @@ const StaffManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    // 1. Limpiar estados previos
+  // 1. Abrir modal y setear el usuario a eliminar
+  const handleOpenDeleteDialog = (staff) => {
+    setUserToDelete(staff);
+    setDeleteDialogOpen(true);
+  };
+
+  // 2. Ejecutar eliminación al confirmar
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+
     if (setError) setError(null);
     setSuccess(null);
     
-    // 2. Confirmación simple (puedes usar el confirm nativo para no instalar librerías extra)
-    if (window.confirm("¿ESTÁ SEGURO DE DESACTIVAR ESTE ACCESO?")) {
-        try {
-            await deleteUser(id);
-            setSuccess('USUARIO_DESACTIVADO_CON_ÉXITO');
-            getUsers(); // Recargar la lista
-        } catch (err) {
-            // El error ya se setea automáticamente si el hook useUsers maneja el setError
-            // Pero lo aseguramos aquí por si acaso:
-            const msg = err.response?.data?.message || 'ERROR_AL_ELIMINAR, NO PUEDES ELIMINARTE A TI MISMO';
-            if (setError) setError(msg);
-        }
+    try {
+      await deleteUser(userToDelete._id);
+      setSuccess('USUARIO DESACTIVADO CON ÉXITO');
+      getUsers(); // Recargar la lista
+    } catch (err) {
+      const msg = err.response?.data?.message || 'ERROR AL ELIMINAR, NO PUEDES ELIMINARTE A TI MISMO';
+      if (setError) setError(msg);
+    } finally {
+      // Cerramos el modal limpiando los estados
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -100,11 +110,10 @@ const StaffManagement = () => {
             <h1 className="welcome-title-corp">GESTIÓN DE PERSONAL</h1>
           </div>
           <button className="btn-corp-add" onClick={handleOpenCreate}>
-              <FaUserPlus /> <span>NUEVO_USUARIO</span>
+              <FaUserPlus /> <span>NUEVO USUARIO</span>
           </button>
         </div>
 
-        {/* --- NUEVA ÁREA DE FEEDBACK (IGUAL AL MODAL) --- */}
         <Box className="feedback-container-management" sx={{ mb: 2, minHeight: '50px' }}>
             {success && (
                 <Fade in={!!success}>
@@ -200,7 +209,7 @@ const StaffManagement = () => {
                             <IconButton className="btn-staff-edit" sx={{ color: '#fff' }} onClick={() => handleEdit(staff)}>
                               <FaEdit />
                             </IconButton>
-                            <IconButton className="btn-staff-delete" sx={{ color: '#00a8e8' }} onClick={() => handleDelete(staff._id)}>
+                            <IconButton className="btn-staff-delete" sx={{ color: '#ef4444' }} onClick={() => handleOpenDeleteDialog(staff)}>
                               <FaTrashAlt />
                             </IconButton>
                           </div>
@@ -210,7 +219,7 @@ const StaffManagement = () => {
                   ) : (
                     <tr>
                       <td colSpan="5" className="no-data-msg-corp">
-                        NO_RECORDS_FOUND
+                        NO HAY REGISTROS QUE MOSTRAR
                       </td>
                     </tr>
                   )}
@@ -221,12 +230,39 @@ const StaffManagement = () => {
         </div>
       </div>
 
+      {/* MODAL PARA CREAR/EDITAR */}
       <StaffFormModal 
         open={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
         staffToEdit={selectedStaff}
         onSave={() => getUsers()} 
       />
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{ style: { backgroundColor: '#1a1d24', color: '#fff', border: '1px solid #2d3238' } }}
+      >
+        <DialogTitle sx={{ color: '#ef4444', fontWeight: 800 }}>Confirmar Desactivación</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: '#9ca3af' }}>
+            ¿Estás seguro de que deseas desactivar el acceso al sistema para 
+            <strong style={{ color: '#fff' }}> {userToDelete?.name?.toUpperCase()} {userToDelete?.lastname?.toUpperCase()} </strong> 
+            (@{userToDelete?.username})?
+            <br/><br/>
+            Al confirmar, este usuario perderá sus credenciales de acceso inmediatamente.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: '16px 24px' }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: '#9ca3af', fontWeight: 700 }}>
+            CANCELAR
+          </Button>
+          <Button  onClick={confirmDelete} variant="contained" sx={{ bgcolor: '#ef4444', color: '#fff', fontWeight: 800, '&:hover': { bgcolor: '#dc2626' } }}>
+            DESACTIVAR ACCESO
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

@@ -11,6 +11,8 @@ import autoTable from 'jspdf-autotable';
 
 import '../../styles/GenerarOrden.css'; 
 
+import { getOrdenes, updateEstadoOrden } from '../../services/comprobanteServicio';
+
 export default function GestionOrdenes() {
   const { user } = useAuth();
   const isRecepcionista = user?.rol?.toLowerCase()?.trim() === 'recepcionista';
@@ -29,12 +31,10 @@ export default function GestionOrdenes() {
   const cargarOrdenes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/ordenes', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
+      
+      // Llamamos directo al servicio modularizado
+      const data = await getOrdenes(); 
+      
       if (data.ok || data.status === 'success') {
         setOrdenes(data.ordenes);
       }
@@ -63,20 +63,14 @@ export default function GestionOrdenes() {
     setDialogOpen(true);
   };
 
+  // --- LÓGICA DE ENTREGA (RECEPCIONISTA) ---
   const confirmarEntrega = async () => {
     if (!ordenAEntregar) return;
+    
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/ordenes/${ordenAEntregar._id}/trabajo`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ estado: 'ENTREGADO' })
-      });
+      // Llamamos al servicio pasando el ID y el estado final
+      const data = await updateEstadoOrden(ordenAEntregar._id, 'ENTREGADO');
       
-      const data = await response.json();
       if (data.ok || data.status === 'success') {
         setAlertConfig({ open: true, severity: 'success', msg: 'Equipo marcado como ENTREGADO exitosamente.' });
         cargarOrdenes(); // Refrescamos la tabla
@@ -310,26 +304,28 @@ export default function GestionOrdenes() {
                             {o.estado}
                           </span>
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                     <td style={{ textAlign: 'right' }}>
                           <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end', alignItems: 'center' }}>
                             
-                            {/* BOTÓN IMPRIMIR (Siempre visible) */}
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              startIcon={<FiPrinter />}
-                              onClick={() => descargarPDF(o)}
-                              sx={{ 
-                                color: '#00a8e8', 
-                                borderColor: 'rgba(0, 168, 232, 0.3)', 
-                                fontWeight: 700, 
-                                '&:hover': { borderColor: '#00a8e8', bgcolor: 'rgba(0, 168, 232, 0.05)' } 
-                              }}
-                            >
-                              IMPRIMIR
-                            </Button>
+                            {/* 👇 BOTÓN IMPRIMIR (Ahora solo visible si ya está ENTREGADO) 👇 */}
+                            {yaEntregado && (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<FiPrinter />}
+                                onClick={() => descargarPDF(o)}
+                                sx={{ 
+                                  color: '#00a8e8', 
+                                  borderColor: 'rgba(0, 168, 232, 0.3)', 
+                                  fontWeight: 700, 
+                                  '&:hover': { borderColor: '#00a8e8', bgcolor: 'rgba(0, 168, 232, 0.05)' } 
+                                }}
+                              >
+                                IMPRIMIR
+                              </Button>
+                            )}
 
-                            {/* BOTÓN ENTREGAR (Solo visible para recepcionistas) */}
+                            {/* BOTÓN ENTREGAR (Solo visible para recepcionistas y si está listo para entregar) */}
                             {listoParaEntregar && isRecepcionista && (
                               <Button
                                 variant="contained"

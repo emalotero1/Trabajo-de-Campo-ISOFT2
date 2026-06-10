@@ -6,7 +6,8 @@ import {
 import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { 
   Typography, IconButton, Button, TextField, 
-  InputAdornment, CircularProgress, Box, Fade 
+  InputAdornment, CircularProgress, Box, Fade,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 
 import Navbar from '../../components/Layout/Navbar';
@@ -29,6 +30,10 @@ const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [success, setSuccess] = useState(null);
 
+  // Estados para el Dialog de confirmación de eliminación
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
+
   useEffect(() => {
     if (authToken) {
       getClients(authToken);
@@ -50,19 +55,30 @@ const ClientManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  // 1. Abrir modal y setear el cliente a eliminar
+  const handleOpenDeleteDialog = (client) => {
+    setClientToDelete(client);
+    setDeleteDialogOpen(true);
+  };
+
+  // 2. Ejecutar eliminación al confirmar
+  const confirmDelete = async () => {
+    if (!clientToDelete) return;
+
     if (setError) setError(null);
     setSuccess(null);
 
-    if (window.confirm("¿ESTÁ SEGURO DE DESACTIVAR A ESTE CLIENTE?")) {
-      try {
-        await deleteClient(id, authToken);
-        setSuccess('CLIENTE DESACTIVADO CON ÉXITO');
-        getClients(authToken);
-      } catch (err) {
-        const msg = err.response?.data?.message || 'NO SE PUDO ELIMINAR EL CLIENTE';
-        if (setError) setError(msg);
-      }
+    try {
+      await deleteClient(clientToDelete._id, authToken);
+      setSuccess('CLIENTE DESACTIVADO CON ÉXITO');
+      getClients(authToken);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'NO SE PUDO ELIMINAR EL CLIENTE';
+      if (setError) setError(msg);
+    } finally {
+      // Cerramos el modal limpiando los estados
+      setDeleteDialogOpen(false);
+      setClientToDelete(null);
     }
   };
 
@@ -204,7 +220,7 @@ const ClientManagement = () => {
                                 <IconButton sx={{ color: '#ffffff', '&:hover': { color: '#f59e0b' } }} onClick={() => handleEdit(client)}>
                                   <FaEdit size={16} />
                                 </IconButton>
-                                <IconButton sx={{ color: '#ef4444', '&:hover': { color: '#ff6b6b' } }} onClick={() => handleDelete(client._id)}>
+                                <IconButton sx={{ color: '#ef4444', '&:hover': { color: '#ff6b6b' } }} onClick={() => handleOpenDeleteDialog(client)}>
                                   <FaTrashAlt size={14} />
                                 </IconButton>
                               </Box>
@@ -232,6 +248,31 @@ const ClientManagement = () => {
           onSave={handleModalSave} 
         />
       </div>
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{ style: { backgroundColor: '#1a1d24', color: '#fff', border: '1px solid #2d3238' } }}
+      >
+        <DialogTitle sx={{ color: '#ef4444', fontWeight: 800 }}>Confirmar Desactivación</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: '#9ca3af' }}>
+            ¿Estás seguro de que deseas desactivar a este cliente: 
+            <strong style={{ color: '#fff' }}> {clientToDelete?.name?.toUpperCase()} {clientToDelete?.lastname?.toUpperCase()}</strong>?
+            <br/><br/>
+            Al confirmar, este cliente dejará de estar disponible para crear nuevos presupuestos y órdenes.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: '16px 24px' }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: '#9ca3af', fontWeight: 700 }}>
+            CANCELAR
+          </Button>
+          <Button onClick={confirmDelete} variant="contained" sx={{ bgcolor: '#ef4444', color: '#fff', fontWeight: 800, '&:hover': { bgcolor: '#dc2626' } }}>
+            DESACTIVAR CLIENTE
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </Box>
   );
