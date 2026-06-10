@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+// NUEVO: Importamos useNavigate
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, Typography, Button, TextField, Grid, 
-  List, ListItem, ListItemButton, ListItemText, ListItemIcon, Fade, Divider
+  List, ListItem, ListItemButton, ListItemText, ListItemIcon, Fade, Divider,
+  // NUEVO: Importamos los componentes del Dialog
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 import { 
   FiCpu, FiAlertCircle, FiUser, FiCheckCircle, 
@@ -10,15 +14,15 @@ import {
 import '../../styles/AltaEquipo.css'; 
 import Navbar from '../../components/Layout/Navbar';
 
-// Importamos la lógica extraída
 import { obtenerClientes, obtenerEquiposDisponibles, guardarEquipo } from '../../Services/equipoServicio';
 
 export default function AltaEquipo() {
-  // Estados para los datos lógicos
+  // NUEVO: Instanciamos navigate
+  const navigate = useNavigate();
+
   const [clientes, setClientes] = useState([]);
   const [equipos, setEquipos] = useState([]);
   
-  // Estado para el formulario (Alta/Edición)
   const [formData, setFormData] = useState({
     mother: '',
     cpu: '',
@@ -30,20 +34,22 @@ export default function AltaEquipo() {
     fallaReportada: ''
   });
   
-  // Estados de control y UI
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [selectedEquipoId, setSelectedEquipoId] = useState(null); 
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [busquedaEquipo, setBusquedaEquipo] = useState('');
   const [errorForm, setErrorForm] = useState(null);
-  const [tabIzq, setTabIzq] = useState(0); // Tab: 0 = Equipos, 1 = Clientes
+  const [tabIzq, setTabIzq] = useState(0); 
   const PAGE_SIZE = 5;
   const [pageEquipos, setPageEquipos] = useState(0);
   const [pageClientes, setPageClientes] = useState(0);
 
+  // NUEVO: Estados para controlar el Pop-up de éxito
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
+
   const token = localStorage.getItem('token');
 
-  // 1. CARGA INICIAL DE DATOS (Delegada al servicio)
   const cargarDatosBD = async () => {
     try {
       const [dataClientes, dataEquipos] = await Promise.all([
@@ -54,7 +60,7 @@ export default function AltaEquipo() {
       setClientes(dataClientes.clients || []);
       setEquipos(dataEquipos.equipos || []);
     } catch (err) {
-      console.error("❌ ERROR AL CARGAR DATOS DESDE EL BACKEND:", err);
+      console.error("❌ ERROR AL CARGAR DATOS:", err);
     }
   };
 
@@ -62,18 +68,10 @@ export default function AltaEquipo() {
     cargarDatosBD();
   }, []);
 
-  // 2. TEMPORIZADOR DE ERRORES
-  useEffect(() => {
-    if (!errorForm) return;
-    const timer = setTimeout(() => setErrorForm(null), 5000);
-    return () => clearTimeout(timer);
-  }, [errorForm]);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. SELECCIONAR UN EQUIPO PARA EDITAR
   const handleSeleccionarEquipo = (equipo) => {
     setSelectedEquipoId(equipo._id);
     setSelectedClientId(equipo.cliente?._id || null); 
@@ -90,7 +88,6 @@ export default function AltaEquipo() {
     setErrorForm(null);
   };
 
-  // 4. LIMPIAR FORMULARIO 
   const handleLimpiarFormulario = () => {
     setSelectedEquipoId(null);
     setSelectedClientId(null);
@@ -99,7 +96,6 @@ export default function AltaEquipo() {
     setErrorForm(null);
   };
 
-  // 5. PROCESAR ACCIÓN (Delegada al servicio)
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
@@ -115,7 +111,6 @@ export default function AltaEquipo() {
       fallaReportada: formData.fallaReportada.trim()
     };
 
-    // Validaciones de negocio
     if (!payload.clienteId) {
       return setErrorForm("DEBE VINCULAR UN CLIENTE AL EQUIPO OBLIGATORIAMENTE.");
     }
@@ -126,7 +121,13 @@ export default function AltaEquipo() {
     try {
       await guardarEquipo(payload, selectedEquipoId, token);
       
-      alert(selectedEquipoId ? "ÉXITO: Especificaciones del equipo actualizadas." : "ÉXITO: Equipo registrado e ingresado al taller.");
+      // NUEVO: Configuramos el mensaje y abrimos el dialog ANTES de limpiar el formulario
+      const mensajeExito = selectedEquipoId 
+        ? "Las especificaciones del equipo han sido actualizadas correctamente." 
+        : "El equipo ha sido registrado e ingresado al taller con éxito.";
+      
+      setDialogMessage(mensajeExito);
+      setOpenDialog(true);
       
       handleLimpiarFormulario();
       cargarDatosBD();
@@ -137,7 +138,6 @@ export default function AltaEquipo() {
     }
   };
 
-  // --- FILTROS EN TIEMPO REAL ---
   const clientesFiltrados = clientes.filter(c => {
     const nombreCompleto = `${c.name || ''} ${c.lastname || ''}`.toLowerCase();
     return nombreCompleto.includes(busquedaCliente.toLowerCase());
@@ -177,7 +177,7 @@ export default function AltaEquipo() {
               {selectedEquipoId ? "MODIFICACIÓN DE EQUIPO" : "ALTA DE EQUIPO"}
             </Typography>
             <Typography className="alta-equipo-subtitle">
-              {selectedEquipoId ? `EDITANDO REGISTRO INTERNO [ID: ${selectedEquipoId.slice(-6)}]` : "REGISTRO DE ESPECIFICACIONES Y VINCULACIÓN"}
+              {selectedEquipoId ? `EDITANDO REGISTRO INTERNO` : "REGISTRO DE ESPECIFICACIONES Y VINCULACIÓN"}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -282,7 +282,7 @@ export default function AltaEquipo() {
                         ))}
                         {equiposFiltrados.length === 0 && (
                           <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
-                            NO SE ENCONTRARON EQUIPOS registrados
+                            NO SE ENCONTRARON EQUIPOS REGISTRADOS
                           </Typography>
                         )}
                         {equiposFiltrados.length > 0 && equiposPaginados.length === 0 && (
@@ -351,7 +351,7 @@ export default function AltaEquipo() {
                         ))}
                         {clientesFiltrados.length === 0 && (
                           <Typography className="no-data-msg-corp" sx={{ p: 3, textAlign: 'center' }}>
-                            NO SE ENCONTRARON DUEÑOS registrados
+                            NO SE ENCONTRARON DUEÑOS REGISTRADOS
                           </Typography>
                         )}
                         {clientesFiltrados.length > 0 && clientesPaginados.length === 0 && (
@@ -454,6 +454,34 @@ export default function AltaEquipo() {
 
         </Box>
       </Box>
+
+      {/* NUEVO: POP-UP (DIALOG) DE ÉXITO */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#161c22',
+            border: '1px solid #3e484f',
+            color: '#bdc8d1',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: '#8ed5ff', display: 'flex', alignItems: 'center', gap: 1.5, fontWeight: 'bold' }}>
+          <FiCheckCircle size={24} color="#10b981" />
+          ¡Operación Exitosa!
+        </DialogTitle>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button 
+            onClick={() => setOpenDialog(false)} 
+            sx={{ color: '#87929a', '&:hover': { color: '#fff' } }}
+          >
+            ACEPTAR
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }

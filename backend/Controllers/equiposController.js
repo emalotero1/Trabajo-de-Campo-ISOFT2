@@ -83,9 +83,6 @@ const update = async (req, res) => {
     }
 
     try {
-        const equipoToEdit = await Equipo.findById(equipoId);
-        if (!equipoToEdit) return res.status(404).json({ status: "error", message: "EQUIPO NO ENCONTRADO" });
-
         const equipoUpdated = await Equipo.findByIdAndUpdate(
             equipoId, 
             { $set: dataToUpdate }, 

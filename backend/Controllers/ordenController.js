@@ -9,11 +9,6 @@ const Client = require('../Models/Client');
 const create = async (req, res) => {
   try {
     const { id_equipo, estado, observaciones } = req.body;
-
-    if (!id_equipo) {
-      return res.status(400).json({ ok: false, msg: 'Debe seleccionar un equipo válido.' });
-    }
-
     const id_usuario_recepcionista = req.user.id;
     const ultimaOrden = await OrdenReparacion.findOne().sort({ nro_orden: -1 });
     const nro_orden = ultimaOrden ? ultimaOrden.nro_orden + 1 : 1000;
@@ -54,7 +49,7 @@ const create = async (req, res) => {
 };
 
 // =========================================================================
-// 2. GET - List Orders
+// 2. GET - LISTAR ORDENES DE REPARACIÓN
 // =========================================================================
 const list = async (req, res) => {
   try {
@@ -83,7 +78,7 @@ const list = async (req, res) => {
 };
 
 // =========================================================================
-// 3. GET - Get Pending Jobs (Para el Técnico)
+// 3. GET - OBTENER TRABAJOS PENDIENTES (Para el Técnico)
 // =========================================================================
 const getPendingJobs = async (req, res) => {
   try {
@@ -121,7 +116,7 @@ const getPendingJobs = async (req, res) => {
 };
 
 // =========================================================================
-// 4. PUT - Update Job (Diagnóstico, Presupuesto, Estado y Bitácora)
+// 4. PUT - ACTUALIZAR TRABAJO (Diagnóstico, Presupuesto, Estado y Bitácora)
 // =========================================================================
 const update = async (req, res) => {
   try {
@@ -198,7 +193,7 @@ const update = async (req, res) => {
 };
 
 // =========================================================================
-// 5. GET - Get Order By ID (Para cargar la Mesa de Trabajo y Timeline)
+// 5. GET - OBTENER ORDEN POR ID (Para cargar la Mesa de Trabajo y Timeline)
 // =========================================================================
 const getById = async (req, res) => {
   try {
@@ -224,8 +219,9 @@ const getById = async (req, res) => {
 };
 
 // =========================================================================
-// 6. PUT - ASIGNAR TECNICO (Caso de Uso: Asignarse Orden)
+// 6. GET - OBTENER TRABAJOS ACTIVOS (Para el Técnico)
 // =========================================================================
+
 const getActiveJobs = async (req, res) => {
   try {
     const filtro = {
@@ -246,6 +242,10 @@ const getActiveJobs = async (req, res) => {
     return res.status(500).json({ ok: false, status: 'error', message: 'Error interno del servidor' });
   }
 };
+
+// =========================================================================
+// 7. GET - OBTENER HISTORIAL DE TRABAJOS (Para el Técnico)
+// =========================================================================
 
 const getHistoryJobs = async (req, res) => {
   try {
@@ -276,21 +276,16 @@ const getHistoryJobs = async (req, res) => {
   }
 };
 
+
+// =========================================================================
+// 8. PUT - ASIGNAR TECNICO (Caso de Uso: Asignarse Orden)
+// =========================================================================
 const assignTechnician = async (req, res) => {
   try {
     const { id } = req.params; 
     const id_tecnico = req.user.id; 
 
     const orden = await OrdenReparacion.findById(id);
-    
-    if (!orden) {
-      return res.status(404).json({ ok: false, msg: 'Orden no encontrada.' });
-    }
-
-    if (orden.tecnico_asignado && orden.tecnico_asignado.toString() !== id_tecnico) {
-      return res.status(400).json({ ok: false, msg: 'Esta orden ya fue tomada por otro técnico.' });
-    }
-
     orden.tecnico_asignado = id_tecnico;
     
     const estadosAvanzados = ['ASIGNADO', 'DIAGNOSTICADO', 'PRESUPUESTADO', 'PRESUPUESTO ACEPTADO', 'PRESUPUESTO RECHAZADO', 'REPARADO', 'ENTREGADO'];

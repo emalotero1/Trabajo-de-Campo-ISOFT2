@@ -7,8 +7,6 @@ const { validationResult } = require('express-validator');
 const register = async (req, res) => {
     const { name, lastname, email, domicilio, cel } = req.body;
 
-    // ELIMINAMOS el bloque de if(!name || !lastname...) para permitir datos opcionales
-
     try {
         let emailLower = undefined; // Usamos undefined para que Mongoose no intente guardar un string vacío como unique
 
