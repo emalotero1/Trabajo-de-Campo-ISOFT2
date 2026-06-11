@@ -14,7 +14,7 @@ export const useUsuarios = () => {
       const data = await userService.obtenerUsuarios();
       setUsuarios(Array.isArray(data) ? data : data.users || []);
     } catch (err) {
-      setError(err.response?.data?.message || "ERROR_AL_OBTENER_USUARIOS");
+      setError(err.response?.data?.message || "ERROR AL OBTENER USUARIOS");
     } finally {
       setLoading(false);
     }
@@ -26,7 +26,7 @@ export const useUsuarios = () => {
     try {
       return await userService.crearUsuario(userData);
     } catch (err) {
-      const msg = err.response?.data?.message || "ERROR_AL_CREAR_USUARIO";
+      const msg = err.response?.data?.message || "ERROR AL CREAR USUARIO";
       setError(msg);
       throw new Error(msg);
     } finally {
@@ -40,7 +40,7 @@ export const useUsuarios = () => {
     try {
       return await userService.actualizarUsuario(id, userData);
     } catch (err) {
-      const msg = err.response?.data?.message || "ERROR_AL_ACTUALIZAR";
+      const msg = err.response?.data?.message || "ERROR AL ACTUALIZAR";
       setError(msg);
       throw new Error(msg);
     } finally {
@@ -54,7 +54,7 @@ export const useUsuarios = () => {
     try {
       return await userService.eliminarUsuario(id);
     } catch (err) {
-      const msg = err.response?.data?.message || "ERROR_AL_ELIMINAR";
+      const msg = err.response?.data?.message || "ERROR AL ELIMINAR";
       setError(msg);
       throw new Error(msg);
     } finally {

@@ -14,7 +14,7 @@ export const useClients = () => {
             const data = await clienteService.obtenerClientes(); 
             setClients(data.clients || []);
         } catch (err) {
-            setError(err.response?.data?.message || 'ERROR_CONEXIÓN_SERVIDOR');
+            setError(err.response?.data?.message || 'ERROR AL OBTENER CLIENTES');
         } finally {
             setLoading(false);
         }
@@ -26,7 +26,7 @@ export const useClients = () => {
         try {
             return await clienteService.crearCliente(clientData);
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'ERROR_AL_CREAR_CLIENTE';
+            const errorMsg = err.response?.data?.message || 'ERROR AL CREAR CLIENTE';
             setError(errorMsg);
             throw new Error(errorMsg); 
         } finally {
@@ -42,7 +42,7 @@ export const useClients = () => {
             setClients(prev => prev.map(c => c._id === id ? data.client : c));
             return data;
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'ERROR_AL_ACTUALIZAR_CLIENTE';
+            const errorMsg = err.response?.data?.message || 'ERROR AL ACTUALIZAR CLIENTE';
             setError(errorMsg);
             throw new Error(errorMsg);
         } finally {
@@ -58,7 +58,7 @@ export const useClients = () => {
             setClients(prev => prev.filter(c => c._id !== id));
             return data;
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'ERROR_AL_ELIMINAR_CLIENTE';
+            const errorMsg = err.response?.data?.message || 'ERROR AL ELIMINAR CLIENTE';
             setError(errorMsg);
             throw new Error(errorMsg);
         } finally {

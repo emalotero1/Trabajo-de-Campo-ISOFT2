@@ -40,7 +40,7 @@ const register = async (req, res) => {
             fuente: fuente.trim(),
             gabinete: gabinete.trim(),
             discos: discos.trim(),
-            fallaReportada: fallaReportada ? fallaReportada.trim() : "", // fallaReportada puede quedar opcional o podés agregarlo al if de arriba si es obligatorio
+            fallaReportada: fallaReportada ? fallaReportada.trim() : "", 
             createdBy: userLogueado
         });
 
@@ -62,7 +62,7 @@ const list = async (req, res) => {
         // Traemos directamente los equipos que NO estén marcados como asignados.
         // Usamos $ne: true para mantener compatibilidad con los documentos viejos.
         const equipos = await Equipo.find({
-            asignadoAOrden: { $ne: true }
+            asignadoAOrden: true
         })
         .populate('cliente', 'name lastname email dni cel') 
         .select("-__v") 

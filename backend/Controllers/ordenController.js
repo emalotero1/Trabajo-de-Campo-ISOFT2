@@ -31,7 +31,7 @@ const create = async (req, res) => {
       nro_orden,
       id_equipo,
       id_usuario: id_usuario_recepcionista,
-      estado: 'PENDIENTE', // Estandarizado según contrato
+      estado: 'PENDIENTE DE REVISION', 
       observaciones
     });
 
@@ -44,7 +44,7 @@ const create = async (req, res) => {
     // 6. Registro de historial inicial
     const primerHistorial = new EstadoHistorial({
       id_orden: ordenGuardada._id,
-      estado: 'PENDIENTE',
+      estado: 'PENDIENTE DE REVISION', 
       id_usuario: id_usuario_recepcionista
     });
     await primerHistorial.save();

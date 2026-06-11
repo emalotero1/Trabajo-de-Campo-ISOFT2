@@ -43,7 +43,7 @@ const UserDropdown = ({ user, handleLogout }) => {
               <PersonIcon fontSize="large" />
             </Avatar>
           </Box>
-          <div className="user-name">{user.name} {user.lastname}</div>
+          <div className="user-name">{user.nombre} {user.apellido}</div>
           <div className="user-username">{user.username}</div>
           <div className="user-rol">{user.rol}</div>      
           <Divider className="divider" />

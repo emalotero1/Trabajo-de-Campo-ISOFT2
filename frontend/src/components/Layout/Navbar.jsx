@@ -99,17 +99,13 @@ const Navbar = () => {
                 <Divider sx={{ my: 1, borderColor: 'rgba(0,168,232,0.1)' }} />
                 
                 <MenuItem className="nav-menu-item-corp" onClick={() => { setAnchorElUser(null); navigate('/mis-datos'); }}>
-                  <FiUser className="menu-icon-corp" /> PERFIL_USUARIO
+                  <FiUser className="menu-icon-corp" /> PERFIL USUARIO
                 </MenuItem>
-                
-                <MenuItem className="nav-menu-item-corp" onClick={() => { setAnchorElUser(null); navigate('/configuracion'); }}>
-                  <FiSettings className="menu-icon-corp" /> AJUSTES_SISTEMA
-                </MenuItem>
-                
+            
                 <Divider sx={{ my: 1, borderColor: 'rgba(0,168,232,0.1)' }} />
                 
                 <MenuItem className="nav-menu-item-corp logout-item" onClick={handleLogout}>
-                  <FiLogOut className="menu-icon-corp" /> FINALIZAR_SESIÓN
+                  <FiLogOut className="menu-icon-corp" /> FINALIZAR SESIÓN
                 </MenuItem>
               </Menu>
             </>
