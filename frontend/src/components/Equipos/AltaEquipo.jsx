@@ -114,6 +114,11 @@ export default function AltaEquipo() {
     if (!payload.clienteId) {
       return setErrorForm("DEBE VINCULAR UN CLIENTE AL EQUIPO OBLIGATORIAMENTE.");
     }
+
+    if (!payload.mother || !payload.cpu || !payload.ram || !payload.gpu || !payload.fuente || !payload.gabinete || !payload.discos) {
+      return setErrorForm("TODOS LOS COMPONENTES SON OBLIGATORIOS.");
+    }
+
     if (!payload.fallaReportada || payload.fallaReportada.length < 15) {
       return setErrorForm("EL REPORTE DE SERVICIO DEBE DETALLAR AL MENOS 15 CARACTERES.");
     }

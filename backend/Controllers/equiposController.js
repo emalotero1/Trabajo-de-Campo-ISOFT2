@@ -9,17 +9,17 @@ const register = async (req, res) => {
 
     // Validación estricta: No se puede registrar un equipo sin un cliente asociado
     if (!clienteId) {
-        return res.status(400).json({ status: "error", message: "ERROR: DEBE VINCULAR UN CLIENTE AL EQUIPO OBLIGATORIAMENTE." });
+        return res.status(400).json({ status: "error", message: "DEBE VINCULAR UN CLIENTE AL EQUIPO OBLIGATORIAMENTE." });
     }
 
     // Validación estricta: Todos los componentes de hardware son obligatorios
     if (!mother || !cpu || !ram || !gpu || !fuente || !gabinete || !discos) {
-        return res.status(400).json({ status: "error", message: "ERROR: TODOS LOS COMPONENTES SON OBLIGATORIOS." });
+        return res.status(400).json({ status: "error", message: "TODOS LOS COMPONENTES SON OBLIGATORIOS." });
     }
 
     // Validación estricta: La falla reportada debe tener al menos 15 caracteres para asegurar una descripción mínima del problema
     if (!fallaReportada || fallaReportada.trim().length < 15) {
-        return res.status(400).json({ status: "error", message: "ERROR: EL REPORTE DE SERVICIO DEBE DETALLAR AL MENOS 15 CARACTERES." });
+        return res.status(400).json({ status: "error", message: "EL REPORTE DE SERVICIO DEBE DETALLAR AL MENOS 15 CARACTERES." });
     }
     try {
         // Verificamos que el cliente realmente exista en la base de datos
