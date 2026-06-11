@@ -60,9 +60,9 @@ const register = async (req, res) => {
 const list = async (req, res) => {
     try {
         // Traemos directamente los equipos que NO estén marcados como asignados.
-        // Usamos $ne: true para mantener compatibilidad con los documentos viejos.
+      
         const equipos = await Equipo.find({
-            asignadoAOrden: true
+            asignadoAOrden: false // Solo traemos los equipos que no están asignados a ninguna orden de reparación
         })
         .populate('cliente', 'name lastname email dni cel') 
         .select("-__v") 
