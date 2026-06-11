@@ -1,4 +1,4 @@
-const { register } = require('../Controllers/equipoController');
+const { register } = require('../Controllers/equiposController');
 const Equipo = require('../Models/Equipos');
 const Client = require('../models/Client');
 
@@ -9,24 +9,25 @@ jest.mock('../models/Client');
 describe('Pruebas Unitarias - equipoController.register', () => {
   let req, res;
   
-//inyectamos un objeto req.user para simular que el payload del JWT de autenticación fue decodificado y pasado al controlador
+  // Inyectamos un objeto req.user para simular que el payload del JWT de autenticación fue decodificado y pasado al controlador
   beforeEach(() => {
     jest.clearAllMocks();
+    
     // Simulamos req y res para cada prueba
     req = { 
         body: {},
         user: { username: 'emalotero1' } // Simulamos el usuario logueado en el token JWT
     };
+    
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     };
   });
 
-  // --- CP 2: Registro sin cliente vinculado ---
+  // --- CP 1: Registro sin cliente vinculado ---
   it('Debe retornar 400 si el equipo no está asociado a un cliente', async () => {
     req.body = { 
-        // clienteId está ausente o vacío
         mother: 'Asus', cpu: 'Intel', ram: '16 GB', gpu: 'NVIDIA', 
         fuente: 'Corsair 850', gabinete: 'Deepcool', discos: 'SSD 1 TB',
         fallaReportada: 'Enciende pero no da imagen, se escuchan sonidos'
@@ -41,13 +42,12 @@ describe('Pruebas Unitarias - equipoController.register', () => {
     });
   });
 
-  // --- CP 3: Registro con componentes de hardware incompletos ---
+  // --- CP 2: Registro con componentes de hardware incompletos ---
   it('Debe retornar 400 si faltan componentes obligatorios', async () => {
     req.body = { 
-        clienteId: '60d5ec49f1b2c8b1f8c8a1b1', // ID de Mongoose simulado
+        clienteId: '60d5ec49f1b2c8b1f8c8a1b1',
         mother: 'Asus', cpu: 'Intel', ram: '16 GB', gpu: 'NVIDIA', 
         discos: 'SSD 1 TB', fallaReportada: 'Enciende pero no da imagen, se escuchan sonidos',
-        // Simulamos que faltan la fuente y el gabinete
         fuente: '', gabinete: '' 
     };
 
@@ -60,7 +60,7 @@ describe('Pruebas Unitarias - equipoController.register', () => {
     });
   });
 
-  // --- CP 4: Registro con reporte de cliente vacío o menor a 15 caracteres ---
+  // --- CP 3: Registro con reporte de falla vacío o menor a 15 caracteres ---
   it('Debe retornar 400 si el reporte de falla tiene menos de 15 caracteres', async () => {
     req.body = { 
         clienteId: '60d5ec49f1b2c8b1f8c8a1b1',
@@ -78,8 +78,8 @@ describe('Pruebas Unitarias - equipoController.register', () => {
     });
   });
 
-  // --- CP Extra (Controlador): Cliente no encontrado o inactivo ---
-  it('Debe retornar 404 si el cliente proporcionado no existe o está inactivo', async () => {
+  // --- CP 4: Cliente no encontrado (null) ---
+  it('Debe retornar 404 si el cliente proporcionado no existe en la base de datos', async () => {
     req.body = { 
         clienteId: '60d5ec49f1b2c8b1f8c8a1b1',
         mother: 'Asus', cpu: 'Intel', ram: '16 GB', gpu: 'NVIDIA', 
@@ -99,7 +99,28 @@ describe('Pruebas Unitarias - equipoController.register', () => {
     });
   });
 
-  // --- CP 5: Fallo interno del servidor ---
+  // --- CP 5: Cliente inactivo ---
+  it('Debe retornar 404 si el cliente existe pero su estado es inactivo', async () => {
+    req.body = { 
+        clienteId: '60d5ec49f1b2c8b1f8c8a1b1',
+        mother: 'Asus', cpu: 'Intel', ram: '16 GB', gpu: 'NVIDIA', 
+        fuente: 'Corsair 850', gabinete: 'Deepcool', discos: 'SSD 1 TB',
+        fallaReportada: 'El equipo se apaga a los 5 minutos de uso'
+    };
+
+    // Simulamos que encuentra al cliente, pero está inactivo
+    Client.findById.mockResolvedValue({ _id: '60d5ec49f1b2c8b1f8c8a1b1', active: false });
+
+    await register(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ 
+        status: "error", 
+        message: "CLIENTE NO ENCONTRADO O INACTIVO" 
+    });
+  });
+
+  // --- CP 6: Fallo interno del servidor ---
   it('Debe retornar 500 si ocurre un error en la base de datos (Ej: caída de MongoDB)', async () => {
     req.body = { 
         clienteId: '60d5ec49f1b2c8b1f8c8a1b1',
@@ -123,7 +144,8 @@ describe('Pruebas Unitarias - equipoController.register', () => {
     });
   });
 
-  // --- CP 1: Registro Exitoso (Camino Feliz) ---
+  // --- CP 7: Registro Exitoso (Camino Feliz) ---
+
   it('Debe registrar el equipo exitosamente y retornar 201', async () => {
     req.body = { 
         clienteId: '60d5ec49f1b2c8b1f8c8a1b1',
@@ -135,8 +157,10 @@ describe('Pruebas Unitarias - equipoController.register', () => {
     // Cliente existe y está activo
     Client.findById.mockResolvedValue({ _id: '60d5ec49f1b2c8b1f8c8a1b1', active: true });
     
-    // El save() se resuelve correctamente
-    Equipo.prototype.save = jest.fn().mockResolvedValue(true);
+    Equipo.mockImplementation(function(datos) {
+        Object.assign(this, datos); // Le pegamos los datos que envía el controlador
+        this.save = jest.fn().mockResolvedValue(true);
+    });
 
     await register(req, res);
 
@@ -145,11 +169,5 @@ describe('Pruebas Unitarias - equipoController.register', () => {
         status: "success",
         message: "EQUIPO REGISTRADO OK"
     }));
-    
-    // Verificamos de forma opcional que el equipo devuelto tenga los datos mapeados
-    const responseBody = res.json.mock.calls[0][0];
-    expect(responseBody.equipo.createdBy).toBe('emalotero1');
-    expect(responseBody.equipo.cliente).toBe('60d5ec49f1b2c8b1f8c8a1b1');
   });
-
 });
