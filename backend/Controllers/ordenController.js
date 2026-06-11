@@ -2,6 +2,7 @@ const OrdenReparacion = require('../Models/OrdenReparacion');
 const EstadoHistorial = require('../Models/EstadoHistorial');
 const Equipo = require('../Models/Equipos'); 
 const Client = require('../Models/Client'); 
+const OrdenReparacionContexto = require('../domain/OrdenReparacionContexto');
 
 // =========================================================================
 // 1. POST - CREAR ORDEN DE REPARACIÓN
@@ -135,14 +136,25 @@ const getPendingJobs = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req.params;
-    
     const { estado, diagnostico, presupuesto, observaciones } = req.body;
 
     const orden = await OrdenReparacion.findById(id);
     if (!orden) return res.status(404).json({ ok: false, msg: 'Orden no encontrada' });
 
-    // --- REGISTRO DE HISTORIAL ---
+    // 1. EVALUAR TRANSICIÓN DE ESTADO (Patrón State)
     if (estado && orden.estado !== estado) {
+      const contexto = new OrdenReparacionContexto(orden);
+      
+      try {
+        // Esto validará si la ruta es correcta (ej: Rechazado -> Aceptado fallará) 
+        // y si los datos son correctos (ej: Diagnostico < 15 chars fallará)
+        contexto.avanzarA(estado, req.body); 
+      } catch (stateError) {
+        // Capturamos los errores de negocio del patrón state y respondemos 400
+        return res.status(400).json({ ok: false, msg: stateError.message });
+      }
+
+      // Si no hubo error, registramos el historial
       const nuevoHistorial = new EstadoHistorial({
         id_orden: orden._id,
         estado: estado, 
@@ -151,53 +163,24 @@ const update = async (req, res) => {
       await nuevoHistorial.save();
     }
 
-    // --- VALIDACIONES DE ESTADO EN LA MESA DE TRABAJO ---
-    if (estado === 'DIAGNOSTICADO') {
-      if (!diagnostico?.informe || diagnostico.informe.trim().length < 15) {
-        return res.status(400).json({ ok: false, msg: 'Para avanzar a DIAGNOSTICADO debes completar el detalle de la falla con al menos 15 caracteres.' });
-      }
-    }
-
-    if (estado === 'PRESUPUESTADO') {
-      const hayRepuestos = presupuesto?.repuestos?.length > 0;
-      const hayManoObra = Number(presupuesto?.manoDeObra?.precio) > 0;
-      if (!hayRepuestos && !hayManoObra) {
-        return res.status(400).json({ ok: false, msg: 'Para avanzar a PRESUPUESTADO debes cargar repuestos o mano de obra.' });
-      }
-    }
-
-    if (estado === 'PRESUPUESTO ACEPTADO' && orden.estado === 'PRESUPUESTO RECHAZADO' ) {
-      return res.status(400).json({ ok: false, msg: 'No se puede cambiar un presupuesto rechazado a aceptado.' });
-    }
-
-    if (estado === 'PRESUPUESTO RECHAZADO' && orden.estado === 'PRESUPUESTO ACEPTADO') {
-      return res.status(400).json({ ok: false, msg: 'No se puede cambiar un presupuesto aceptado a rechazado.' });
-    }
-
-    if (estado === 'REPARADO' && orden.estado === 'PRESUPUESTO RECHAZADO') {
-      return res.status(400).json({ ok: false, msg: 'No se puede avanzar a REPARADO cuando el presupuesto fue rechazado.' });
-    }
-
-    // --- ACTUALIZACIÓN DE DATOS DINÁMICA ---
-    if (estado) orden.estado = estado;
+    // 2. ACTUALIZACIÓN DE DATOS DINÁMICA
     if (diagnostico) orden.diagnostico = diagnostico;
-    
     if (observaciones !== undefined) orden.observaciones = observaciones; 
     
     if (presupuesto) {
       let totalRepuestos = 0;
-      if (presupuesto.repuestos && presupuesto.repuestos.length > 0) {
+      if (presupuesto.repuestos?.length > 0) {
         totalRepuestos = presupuesto.repuestos.reduce(
           (sum, item) => sum + (item.cantidad * item.precioUnitario), 0
         );
       }
       const totalManoObra = Number(presupuesto.manoDeObra?.precio) || 0;
       presupuesto.total = totalRepuestos + totalManoObra;
-
       orden.presupuesto = presupuesto;
     }
 
-    await orden.save();
+    // 3. GUARDAR EN MONGOOSE
+    await orden.save(); // 'orden.estado' ya fue actualizado por el contexto si todo salió bien
 
     return res.status(200).json({ ok: true, msg: 'Trabajo actualizado correctamente', orden });
   } catch (error) {
@@ -205,7 +188,6 @@ const update = async (req, res) => {
     return res.status(500).json({ ok: false, msg: 'Error interno del servidor' });
   }
 };
-
 // =========================================================================
 // 5. GET - OBTENER ORDEN POR ID (Para cargar la Mesa de Trabajo y Timeline)
 // =========================================================================
